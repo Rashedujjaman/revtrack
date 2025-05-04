@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:revtrack/screens/dashboard_screen.dart';
+import 'package:revtrack/screens/main_navigation_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,10 +31,10 @@ class MyApp extends StatelessWidget {
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 97, 210, 227)),
+            seedColor: const Color.fromARGB(255, 100, 230, 240)),
         useMaterial3: true,
       ),
-      home: const DashboardScreen(),
+      home: const MainNavigationScreen(),
     );
   }
 }

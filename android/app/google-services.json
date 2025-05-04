@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1090084332684",
+    "project_id": "revtrack-8ed1f",
+    "storage_bucket": "revtrack-8ed1f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1090084332684:android:a3c5569086dda01274c7a9",
+        "android_client_info": {
+          "package_name": "com.example.revtrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBY_r2-JiokXJXWnWNcvHsL6j5BQ3-3p6Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
