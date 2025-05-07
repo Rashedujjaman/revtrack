@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:revtrack/screens/login_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:revtrack/services/firebase_service.dart';
+import 'package:revtrack/services/auth_service.dart';
+import 'package:revtrack/services/snackbar_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
-
   @override
-  _RegistrationScreenState createState() => _RegistrationScreenState();
+  State<RegisterScreen> createState() => _RegistrationScreenState();
 }
 
 class _RegistrationScreenState extends State<RegisterScreen> {
@@ -16,12 +16,10 @@ class _RegistrationScreenState extends State<RegisterScreen> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   bool _isLoading = false;
 
   bool isValidPhoneNumber(String value) {
@@ -43,58 +41,30 @@ class _RegistrationScreenState extends State<RegisterScreen> {
     final String password = _passwordController.text;
 
     setState(() => _isLoading = true);
+
     if (_formKey.currentState!.validate()) {
       try {
-        UserCredential userCredential =
-            await _auth.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+        String uid = await AuthService.createUser(email, password);
 
-        await _firestore
-            .collection('ApplicationUsers')
-            .doc(userCredential.user!.uid)
-            .set({
-              'firstName': firstName,
-              'lastName': lastName,
-              'phoneNumber': phoneNumber,
-              'email': email,
-              'imageUrl': '',
-              'password': password,
-              'uid': userCredential.user!.uid,
-            })
-            .then((value) => print('User data added successfully'))
-            .catchError((error) => print('Error adding user data: $error'));
+        await FirebaseService.registerEntry(
+          firstName,
+          lastName,
+          email,
+          phoneNumber,
+          uid,
+        );
 
         if (mounted) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
-        }
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'weak-password') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('The password provided is too weak.')),
-          );
-        } else if (e.code == 'email-already-in-use') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('The account already exists for that email.')),
-          );
-        } else {
-          print('Error: $e');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to register: $e')),
-          );
+          SnackbarService.successMessage(context, 'Registration Successful!');
         }
       } catch (e) {
-        print('Error: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to register: $e'),
-          ),
-        );
+        if (mounted) {
+          SnackbarService.errorMessage(context, e.toString());
+        }
       }
     }
     setState(() => _isLoading = false);
@@ -289,9 +259,9 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 50.0),
                         ElevatedButton(
                           onPressed: () {
-                            // if (_formKey.currentState!.validate()) {
-                            //   _register();
-                            // }
+                            if (_formKey.currentState!.validate()) {
+                              _register();
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber,

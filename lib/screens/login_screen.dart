@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:revtrack/screens/main_navigation_screen.dart';
 import 'package:revtrack/screens/register_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:game_sphere_bd/screens/home_screen.dart';
-// import 'package:game_sphere_bd/screens/register_screen.dart';
-// import 'package:game_sphere_bd/screens/reset_password_screen.dart';
+import 'package:revtrack/services/auth_service.dart';
+import 'package:revtrack/services/snackbar_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   bool _isLoading = false;
 
@@ -36,49 +33,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (_formKey.currentState!.validate()) {
       try {
-        // 1. Firebase Authentication
-        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-        print(userCredential);
-        // Handle successful login
+        await AuthService.signIn(email, password);
         if (mounted) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
                 builder: (context) => const MainNavigationScreen()),
           );
-        }
-      } on FirebaseAuthException catch (e) {
-        // Handle Firebase authentication errors
-        if (e.code == 'user-not-found') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No user found for that email.')),
-          );
-        } else if (e.code == 'wrong-password') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Wrong password provided for that user.')),
-          );
-        } else {
-          print('Error: $e');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to log in: $e')),
-          );
+          SnackbarService.successMessage(context, 'Login successful!');
         }
       } catch (e) {
-        // Handle other errors (e.g., network issues)
-        // print('Error: $e'); // Add this line to print the error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Colors.red,
-            content: Text(
-              'Something went wrong',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        );
+        if (mounted) {
+          SnackbarService.errorMessage(context, e.toString());
+        }
       }
     }
     setState(() => _isLoading = false);
@@ -159,9 +126,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   .infinity, // Button width spans full width
                               child: ElevatedButton(
                                 onPressed: () {
-                                  // if (_formKey.currentState!.validate()) {
-                                  //   _login();
-                                  // }
+                                  if (_formKey.currentState!.validate()) {
+                                    _login();
+                                  }
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.amber,
