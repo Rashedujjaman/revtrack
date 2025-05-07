@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:revtrack/theme/gradient_provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -6,42 +7,100 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      // backgroundColor: Colors.transparent,
       body: Container(
-        padding: const EdgeInsets.all(16.0),
-        // decoration: const BoxDecoration(
-        //   gradient: LinearGradient(
-        //     colors: [
-        //       Color(0xFF64E6F0),
-        //       Colors.white,
-        //     ],
-        //     begin: Alignment.topLeft,
-        //     end: Alignment.bottomRight,
-        //   ),
-        // ),
+        padding: const EdgeInsets.all(10.0),
+        decoration: gradientBackground(context),
         child: Center(
             child: Column(
           children: <Widget>[
             Container(
-              height: 200,
-              margin: EdgeInsets.only(bottom: 40),
+              padding: const EdgeInsets.all(20),
+              // height: 160,
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(30),
                 ),
-                color: Colors.white.withOpacity(0.8),
+                color: Theme.of(context).colorScheme.secondary,
               ),
-              // child: Center(
-              // child: Text(
-              //   'Dashboard',
-              //   style: TextStyle(
-              //     fontSize: 40,
-              //     fontWeight: FontWeight.bold,
-              //     color: Color.fromARGB(255, 100, 230, 240),
-              //   ),
-              // ),
-              // ),
+              child: Center(
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        height: 120,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(30),
+                          ),
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ),
+                        child: Center(
+                          child: const CircleAvatar(
+                            radius: 40,
+                            backgroundColor:
+                                Color(0xFF62BDBD), // Avatar background color
+                            child: CircleAvatar(
+                              // Inner circle for the Icon
+                              radius:
+                                  39, // Slightly smaller to create the border
+                              backgroundImage: NetworkImage(
+                                  'https://avatars.githubusercontent.com/u/68024439?v=4'),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        height: 120,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(30),
+                          ),
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ),
+                        child: Center(
+                          child: const CircleAvatar(
+                            radius: 40,
+                            backgroundColor:
+                                Color(0xFF62BDBD), // Avatar background color
+                            child: CircleAvatar(
+                              // Inner circle for the Icon
+                              radius:
+                                  39, // Slightly smaller to create the border
+                              backgroundImage: NetworkImage(
+                                  'https://avatars.githubusercontent.com/u/68024439?v=4'),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 20),
+              height: 120,
+              // width: 120,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(30),
+                ),
+                color: Theme.of(context).colorScheme.tertiary,
+              ),
+              child: Center(
+                child: const CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Color(0xFF62BDBD), // Avatar background color
+                  child: CircleAvatar(
+                    // Inner circle for the Icon
+                    radius: 49, // Slightly smaller to create the border
+                    backgroundImage: NetworkImage(
+                        'https://avatars.githubusercontent.com/u/68024439?v=4'),
+                  ),
+                ),
+              ),
             ),
           ],
         )),

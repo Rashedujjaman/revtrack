@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       title: 'RevTrack',
       debugShowCheckedModeBanner: false,
       theme: Provider.of<ThemeProvider>(context).themeData,
-      darkTheme: ThemeData.dark(),
+      // darkTheme: darkMode,
 
       // theme: ThemeData(
       //   colorScheme: ColorScheme.fromSeed(

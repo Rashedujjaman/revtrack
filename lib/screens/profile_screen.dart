@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
+import 'package:revtrack/screens/login_screen.dart';
 import 'package:revtrack/theme/theme_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -13,7 +14,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      // backgroundColor: Colors.transparent,
       body: ListView(
         padding: EdgeInsets.zero,
 
@@ -93,7 +94,7 @@ class ProfileScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.dark_mode),
             trailing: Switch(
-              value: false,
+              value: Theme.of(context).brightness == Brightness.dark,
               onChanged: (bool value) {
                 Provider.of<ThemeProvider>(context, listen: false)
                     .toggleTheme();
@@ -113,11 +114,10 @@ class ProfileScreen extends StatelessWidget {
             ),
             onTap: () {
               // Handle tapping the About us menu item
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //       builder: (context) => AboutUsScreen()),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
             },
           ),
         ],

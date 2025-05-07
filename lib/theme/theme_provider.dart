@@ -1,8 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:revtrack/theme/theme.dart';
 
 class ThemeProvider with ChangeNotifier {
-  ThemeData _themeData = lightMode;
+  //Check device brightness and set theme accordingly
+  ThemeData _themeData =
+      PlatformDispatcher.instance.platformBrightness == Brightness.dark
+          ? darkMode
+          : lightMode;
 
   ThemeData get themeData => _themeData;
 
