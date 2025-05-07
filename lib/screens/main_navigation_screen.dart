@@ -26,11 +26,29 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: SafeArea(
+        child: _screens[_selectedIndex],
+      ),
+      // Container(
+      //     decoration: const BoxDecoration(
+      //         // color: Theme.of(context).colorScheme.background,
+      //         // gradient: LinearGradient(
+      //         //   colors: [
+      //         //     Color(0xFF64E6F0),
+      //         //     Colors.white,
+      //         //   ],
+      //         //   begin: Alignment.topRight,
+      //         //   end: Alignment.bottomLeft,
+      //         // ),
+      //         ),
+      //     child: SafeArea(
+      //       child: _screens[_selectedIndex],
+      //     )),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        unselectedItemColor: Colors.white,
-        selectedItemColor: Colors.black,
+        unselectedItemColor: Theme.of(context).colorScheme.primary,
+        selectedItemColor: Theme.of(context).colorScheme.background,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
