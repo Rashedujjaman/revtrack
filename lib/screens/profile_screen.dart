@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:revtrack/screens/login_screen.dart';
+import 'package:revtrack/services/snackbar_service.dart';
+// import 'package:revtrack/services/firebase_service.dart';
 import 'package:revtrack/theme/theme_provider.dart';
+import 'package:revtrack/services/authentication_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -11,6 +14,25 @@ class ProfileScreen extends StatelessWidget {
     'Email': 'rashedujjaman.reza@gmail.com',
     'Phone': '01789456123',
   };
+
+  void _logOut(BuildContext context) async {
+    try {
+      bool result = await AuthenticationService().signOut();
+      if (result && context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+        SnackbarService.successMessage(context, 'Logged out successfully!');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        // Handle error
+        SnackbarService.errorMessage(context, e.toString());
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,11 +135,8 @@ class ProfileScreen extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             onTap: () {
-              // Handle tapping the About us menu item
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
+              // Handle tapping the Log Out menu item
+              _logOut(context);
             },
           ),
         ],

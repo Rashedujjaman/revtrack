@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:revtrack/screens/main_navigation_screen.dart';
 import 'package:revtrack/screens/register_screen.dart';
-import 'package:revtrack/services/auth_service.dart';
+import 'package:revtrack/services/authentication_service.dart';
 import 'package:revtrack/services/snackbar_service.dart';
+import 'package:revtrack/theme/gradient_provider.dart';
+import 'package:revtrack/widgets/custom_text_form_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,6 +20,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   bool _isLoading = false;
 
+  bool isValidEmail(String value) {
+    final RegExp regex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    return regex.hasMatch(value);
+  }
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -25,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() async {
+  void login() async {
     final email = _emailController.text;
     final password = _passwordController.text;
 
@@ -33,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (_formKey.currentState!.validate()) {
       try {
-        await AuthService.signIn(email, password);
+        await AuthenticationService().signIn(email, password);
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -58,13 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           Container(
               height: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF62BDBD), Color(0xFF005555)],
-                ),
-              ),
+              decoration: gradientBackground(context),
               child: SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   // Center the form contents
@@ -78,57 +80,48 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             //Logo of the app
                             const SizedBox(height: 50.0),
-                            // Image.asset(
-                            //   'assets/images/logo.png',
-                            //   width: 400,
-                            //   height: 100,
-                            // ),
-                            const SizedBox(height: 50.0),
-                            TextFormField(
+                            Image.asset(
+                              'assets/images/logo.jpg',
+                              width: 400,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                            const SizedBox(height: 100.0),
+                            CustomTextFormField(
+                              label: 'Email',
                               controller: _emailController,
-                              decoration: const InputDecoration(
-                                labelText: 'Email',
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Enter a valid email address';
+                                  return 'Please enter your Email';
+                                }
+                                if (!isValidEmail(value)) {
+                                  return 'Please enter a valid Email';
                                 }
                                 return null;
                               },
                             ),
                             const SizedBox(height: 16.0),
-                            TextFormField(
+                            CustomTextFormField(
+                              label: 'Password',
                               controller: _passwordController,
-                              decoration: const InputDecoration(
-                                labelText: 'Password',
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-                              ),
                               obscureText: true,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter a password';
+                                  return 'Please enter your Password';
                                 }
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 50.0),
+                            const SizedBox(height: 100.0),
                             SizedBox(
                               width: double
                                   .infinity, // Button width spans full width
                               child: ElevatedButton(
                                 onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    _login();
-                                  }
+                                  _formKey.currentState!.validate() == true &&
+                                          !_isLoading
+                                      ? login()
+                                      : null;
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.amber,
@@ -138,11 +131,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                 ),
-                                child: const Text(
-                                  'Sign In',
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.white),
-                                ),
+                                child: _isLoading
+                                    ? const CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                      )
+                                    : const Text(
+                                        'Sign In',
+                                        style: TextStyle(
+                                            fontSize: 16, color: Colors.white),
+                                      ),
                               ),
                             ),
                             const SizedBox(height: 10.0),
@@ -188,14 +187,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),
-                            const SizedBox(height: 8.0),
-                            if (_isLoading)
-                              const Center(
-                                child: CircularProgressIndicator(
-                                  color:
-                                      Colors.white, //change the indicator color
-                                ),
-                              ),
                           ],
                         ),
                       ),

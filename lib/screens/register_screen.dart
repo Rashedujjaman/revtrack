@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:revtrack/screens/login_screen.dart';
 import 'package:revtrack/services/firebase_service.dart';
-import 'package:revtrack/services/auth_service.dart';
+import 'package:revtrack/services/authentication_service.dart';
 import 'package:revtrack/services/snackbar_service.dart';
+import 'package:revtrack/theme/gradient_provider.dart';
+import 'package:revtrack/widgets/custom_text_form_field.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -33,7 +35,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
     return regex.hasMatch(value);
   }
 
-  Future<void> _register() async {
+  Future<void> register() async {
     final String firstName = _firstNameController.text;
     final String lastName = _lastNameController.text;
     final String phoneNumber = _phoneNumberController.text;
@@ -44,7 +46,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
 
     if (_formKey.currentState!.validate()) {
       try {
-        String uid = await AuthService.createUser(email, password);
+        String uid = await AuthenticationService().createUser(email, password);
 
         await FirebaseService.registerEntry(
           firstName,
@@ -74,16 +76,10 @@ class _RegistrationScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
-        children: [
+        children: <Widget>[
           Container(
             height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF62BDBD), Color(0xFF005555)],
-              ),
-            ),
+            decoration: gradientBackground(context),
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Center(
@@ -95,7 +91,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 70.0),
+                        const SizedBox(height: 50.0),
                         const Center(
                           child: Text(
                             'Register Account',
@@ -105,119 +101,56 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
-                        const SizedBox(height: 70.0),
-                        TextFormField(
-                          controller: _firstNameController,
-                          decoration: const InputDecoration(
-                            labelText: 'First Name',
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(),
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 10),
-                            floatingLabelBehavior: FloatingLabelBehavior.never,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your First Name';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12.0),
-                        TextFormField(
-                          controller: _lastNameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Last Name',
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(),
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 10),
-                            floatingLabelBehavior: FloatingLabelBehavior.never,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your Last Name';
-                            }
-                            return null;
-                          },
-                        ),
+                        const SizedBox(height: 50.0),
+                        CustomTextFormField(
+                            label: 'First Name',
+                            controller: _firstNameController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your First Name';
+                              }
+                              return null;
+                            }),
                         const SizedBox(height: 16.0),
-                        TextFormField(
-                          controller: _phoneNumberController,
-                          decoration: const InputDecoration(
-                            labelText: 'Mobile No',
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(),
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 10),
-                            floatingLabelBehavior: FloatingLabelBehavior.never,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your Mobile No';
-                            }
-                            if (!isValidPhoneNumber(value)) {
-                              return 'Please enter a valid Mobile No';
-                            }
-                            return null;
-                          },
-                        ),
+                        CustomTextFormField(
+                            label: 'Last Name',
+                            controller: _lastNameController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your Last Name';
+                              }
+                              return null;
+                            }),
                         const SizedBox(height: 16.0),
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(),
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 10),
-                            floatingLabelBehavior: FloatingLabelBehavior.never,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your Email';
-                            }
-                            if (!isValidEmail(value)) {
-                              return 'Please enter a valid Email';
-                            }
-                            return null;
-                          },
-                        ),
-                        // const SizedBox(height: 16.0),
-                        // TextFormField(
-                        //   controller: _addressController,
-                        //   decoration: const InputDecoration(
-                        //     labelText: 'Address',
-                        //     filled: true,
-                        //     fillColor: Colors.white,
-                        //     border: OutlineInputBorder(),
-                        //     contentPadding:
-                        //         EdgeInsets.symmetric(horizontal: 10),
-                        //     floatingLabelBehavior: FloatingLabelBehavior.never,
-                        //   ),
-                        //   validator: (value) {
-                        //     if (value == null || value.isEmpty) {
-                        //       return 'Please enter your Address';
-                        //     }
-                        //     return null;
-                        //   },
-                        // ),
+                        CustomTextFormField(
+                            label: 'Phone Number',
+                            controller: _phoneNumberController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your Phone Number';
+                              }
+                              if (!isValidPhoneNumber(value)) {
+                                return 'Please enter a valid Phone Number';
+                              }
+                              return null;
+                            }),
                         const SizedBox(height: 16.0),
-                        TextFormField(
+                        CustomTextFormField(
+                            label: 'Email',
+                            controller: _emailController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your Email';
+                              }
+                              if (!isValidEmail(value)) {
+                                return 'Please enter a valid Email';
+                              }
+                              return null;
+                            }),
+                        const SizedBox(height: 16.0),
+                        CustomTextFormField(
+                          label: 'Password',
                           controller: _passwordController,
-                          decoration: const InputDecoration(
-                            labelText: 'Password',
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(),
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 10),
-                            floatingLabelBehavior: FloatingLabelBehavior.never,
-                          ),
                           obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -234,21 +167,16 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                           },
                         ),
                         const SizedBox(height: 16.0),
-                        TextFormField(
+                        CustomTextFormField(
+                          label: 'Confirm Password',
                           controller: _confirmPasswordController,
-                          decoration: const InputDecoration(
-                            labelText: 'Confirm Password',
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(),
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 10),
-                            floatingLabelBehavior: FloatingLabelBehavior.never,
-                          ),
                           obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please confirm your Password';
+                            }
+                            if (value != _passwordController.text) {
+                              return 'Passwords do not match';
                             }
                             if (value != _passwordController.text) {
                               return 'Passwords do not match';
@@ -259,9 +187,10 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 50.0),
                         ElevatedButton(
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              _register();
-                            }
+                            !_isLoading &&
+                                    _formKey.currentState?.validate() == true
+                                ? register()
+                                : null;
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber,
@@ -270,10 +199,16 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                               borderRadius: BorderRadius.circular(8.0),
                             ),
                           ),
-                          child: const Text(
-                            'Submit',
-                            style: TextStyle(fontSize: 16, color: Colors.white),
-                          ),
+                          child: _isLoading
+                              ? const CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                )
+                              : const Text(
+                                  'Submit',
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.white),
+                                ),
                         ),
                         const SizedBox(height: 16.0),
                         TextButton(
@@ -289,17 +224,6 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
-                        const SizedBox(height: 16.0),
-                        if (_isLoading)
-                          Container(
-                            // Loading indicator overlay
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                color:
-                                    Colors.white, //change the indicator color
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),

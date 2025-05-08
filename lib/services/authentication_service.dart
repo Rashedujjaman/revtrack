@@ -1,43 +1,61 @@
 import 'package:revtrack/services/firebase_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class AuthService {
-  static createUser(String userEmail, String userPassword) async {
+class AuthenticationService {
+  Future<String> createUser(String userEmail, String userPassword) async {
     try {
       UserCredential userCredential = await FirebaseService.auth
           .createUserWithEmailAndPassword(
               email: userEmail, password: userPassword);
       return userCredential.user!.uid;
     } on FirebaseAuthException catch (e) {
-      throw handleAuthError(e);
+      throw _handleAuthError(e);
     } catch (e) {
       throw 'An error occurred while creating the user. Please try again later.';
     }
   }
 
-  static signIn(String userEmail, String userPassword) async {
+  Future<String> signIn(String userEmail, String userPassword) async {
     try {
       UserCredential userCredential = await FirebaseService.auth
           .signInWithEmailAndPassword(email: userEmail, password: userPassword);
       return userCredential.user!.uid;
     } on FirebaseAuthException catch (e) {
-      throw handleAuthError(e);
+      throw _handleAuthError(e);
     } catch (e) {
       return 'An error occurred while signing in. Please try again later.';
     }
   }
 
-  static signOut() async {
+  // signOut() async {
+  //   try {
+  //     await FirebaseService.auth.signOut();
+  //     return true;
+  //   } on FirebaseAuthException catch (e) {
+  //     throw handleAuthError(e);
+  //   } catch (e) {
+  //     throw 'An error occurred while signing out. Please try again later.';
+  //   }
+  // }
+
+  // Sign out user
+  Future<bool> signOut() async {
     try {
       await FirebaseService.auth.signOut();
+      return true;
     } on FirebaseAuthException catch (e) {
-      throw handleAuthError(e);
+      throw _handleAuthError(e);
     } catch (e) {
       throw 'An error occurred while signing out. Please try again later.';
     }
   }
 
-  static String handleAuthError(FirebaseAuthException e) {
+  // Check if user is signed in
+  Future<bool> isUserSignedIn() async {
+    return FirebaseService.auth.currentUser != null;
+  }
+
+  static String _handleAuthError(FirebaseAuthException e) {
     switch (e.code) {
       case 'invalid-credential':
         return 'The provided credential is invalid.';
