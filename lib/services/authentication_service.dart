@@ -4,7 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 class AuthenticationService {
   Future<String> createUser(String userEmail, String userPassword) async {
     try {
-      UserCredential userCredential = await FirebaseService.auth
+      UserCredential userCredential = await FirebaseService()
+          .auth
           .createUserWithEmailAndPassword(
               email: userEmail, password: userPassword);
       return userCredential.user!.uid;
@@ -17,7 +18,8 @@ class AuthenticationService {
 
   Future<String> signIn(String userEmail, String userPassword) async {
     try {
-      UserCredential userCredential = await FirebaseService.auth
+      UserCredential userCredential = await FirebaseService()
+          .auth
           .signInWithEmailAndPassword(email: userEmail, password: userPassword);
       return userCredential.user!.uid;
     } on FirebaseAuthException catch (e) {
@@ -41,7 +43,7 @@ class AuthenticationService {
   // Sign out user
   Future<bool> signOut() async {
     try {
-      await FirebaseService.auth.signOut();
+      await FirebaseService().auth.signOut();
       return true;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthError(e);
@@ -51,8 +53,9 @@ class AuthenticationService {
   }
 
   // Check if user is signed in
-  Future<bool> isUserSignedIn() async {
-    return FirebaseService.auth.currentUser != null;
+  Future<String?> isUserSignedIn() async {
+    User? currentUser = FirebaseService().auth.currentUser;
+    return currentUser!.uid;
   }
 
   static String _handleAuthError(FirebaseAuthException e) {

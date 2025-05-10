@@ -48,7 +48,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
       try {
         String uid = await AuthenticationService().createUser(email, password);
 
-        await FirebaseService.registerEntry(
+        await FirebaseService().registerEntry(
           firstName,
           lastName,
           email,

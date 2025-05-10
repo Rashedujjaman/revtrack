@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:revtrack/screens/main_navigation_screen.dart';
 import 'package:revtrack/screens/register_screen.dart';
 import 'package:revtrack/services/authentication_service.dart';
 import 'package:revtrack/services/snackbar_service.dart';
+import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/theme/gradient_provider.dart';
 import 'package:revtrack/widgets/custom_text_form_field.dart';
 
@@ -41,8 +43,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (_formKey.currentState!.validate()) {
       try {
-        await AuthenticationService().signIn(email, password);
+        String uid = await AuthenticationService().signIn(email, password);
+
         if (mounted) {
+          // Set the user ID in the provider
+          Provider.of<UserProvider>(context, listen: false).setUserId(uid);
+
+          // Navigate to the main screen
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

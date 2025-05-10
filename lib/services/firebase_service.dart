@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class FirebaseService {
-  static FirebaseAuth get auth => FirebaseAuth.instance;
-  static FirebaseFirestore get firestore => FirebaseFirestore.instance;
+  FirebaseAuth get auth => FirebaseAuth.instance;
+  FirebaseFirestore get firestore => FirebaseFirestore.instance;
 
-  static registerEntry(String firstName, String lastName, String email,
+  Future<void> registerEntry(String firstName, String lastName, String email,
       String phoneNumber, uid) async {
     try {
       await firestore.collection('ApplicationUsers').doc(uid).set({

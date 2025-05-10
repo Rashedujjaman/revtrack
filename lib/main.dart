@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:revtrack/services/authentication_service.dart';
+import 'package:revtrack/services/user_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,15 +34,37 @@ void main() async {
     // systemNavigationBarIconBrightness: Brightness.dark,
   ));
 
-  runApp(ChangeNotifierProvider(
-      create: (context) => ThemeProvider(), child: const MyApp()));
+  // runApp(ChangeNotifierProvider(
+  //     create: (context) => ThemeProvider(), child: const MyApp(),
+  //     ChangeNotifierProvider(create: (_) => UserProvider()),));
+
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ChangeNotifierProvider(create: (_) => UserProvider()),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  Future<bool> _isLoggedIn() async {
-    return await AuthenticationService().isUserSignedIn();
+  Future<bool> _isLoggedIn(BuildContext context) async {
+    try {
+      String? uid = await AuthenticationService().isUserSignedIn();
+
+      if (uid != null && uid.isNotEmpty) {
+        if (context.mounted) {
+          Provider.of<UserProvider>(context, listen: false).setUserId(uid);
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Error checking login status: $e');
+      return false;
+    }
   }
 
   // This widget is the root of the application.
@@ -59,7 +82,7 @@ class MyApp extends StatelessWidget {
       //   useMaterial3: true,
       // ),
       home: FutureBuilder<bool>(
-        future: _isLoggedIn(),
+        future: _isLoggedIn(context),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

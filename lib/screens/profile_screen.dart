@@ -6,6 +6,7 @@ import 'package:revtrack/services/snackbar_service.dart';
 // import 'package:revtrack/services/firebase_service.dart';
 import 'package:revtrack/theme/theme_provider.dart';
 import 'package:revtrack/services/authentication_service.dart';
+import 'package:revtrack/services/user_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -19,6 +20,8 @@ class ProfileScreen extends StatelessWidget {
     try {
       bool result = await AuthenticationService().signOut();
       if (result && context.mounted) {
+        // Clear user ID from provider
+        Provider.of<UserProvider>(context, listen: false).clearUserId();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginScreen()),
