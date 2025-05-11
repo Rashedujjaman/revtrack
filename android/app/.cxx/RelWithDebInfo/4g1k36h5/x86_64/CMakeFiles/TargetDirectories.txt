@@ -1,0 +1,2 @@
+C:/Users/HP/source/repos/revtrack/android/app/.cxx/RelWithDebInfo/4g1k36h5/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/HP/source/repos/revtrack/android/app/.cxx/RelWithDebInfo/4g1k36h5/x86_64/CMakeFiles/rebuild_cache.dir
