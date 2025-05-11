@@ -112,14 +112,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   height: 120,
                   // width: 120,
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(50),
-                      bottomLeft: Radius.circular(50),
-                    ),
-                    color: Theme.of(context).colorScheme.secondary.withValues(
-                          alpha: .8,
-                        ),
-                  ),
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(50),
+                        bottomLeft: Radius.circular(50),
+                      ),
+                      color: Theme.of(context).colorScheme.secondary),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

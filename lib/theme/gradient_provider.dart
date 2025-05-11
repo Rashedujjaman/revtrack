@@ -12,6 +12,7 @@ BoxDecoration gradientBackground(BuildContext context) {
             ]
           : [
               Colors.transparent,
+              Colors.grey[800]!,
               Colors.transparent,
             ],
       begin: Alignment.topCenter,

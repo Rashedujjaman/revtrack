@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/business_service.dart';
 import 'package:revtrack/services/user_provider.dart';
+import 'package:revtrack/screens/business_overview_screen.dart';
 import 'package:provider/provider.dart';
-// import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class BusinessScreen extends StatelessWidget {
   const BusinessScreen({super.key});
@@ -57,25 +59,41 @@ class BusinessScreen extends StatelessWidget {
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 16.0, horizontal: 8.0),
                   itemCount: businesses.length,
                   itemBuilder: (context, index) {
                     final business = businesses[index];
                     return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .inversePrimary
+                          .withValues(alpha: .5),
+                      // margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: ListTile(
                         leading: business['logoUrl'] != null
-                            ? Image.network(
-                                business['logoUrl'],
+                            ? CachedNetworkImage(
+                                imageUrl: business['logoUrl'],
                                 width: 50,
                                 height: 50,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
+                                errorWidget: (context, url, error) {
                                   return const Icon(Icons.image_not_supported);
                                 },
                               )
                             : const Icon(Icons.business),
                         title: Text(business['name']),
+                        trailing: const Icon(Icons.arrow_forward_ios),
+                        onTap: () {
+                          Business businessObject = Business.fromJson(business);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  BusinessOverviewScreen(businessObject),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },
@@ -83,7 +101,7 @@ class BusinessScreen extends StatelessWidget {
               },
             ),
       floatingActionButton: FloatingActionButton(
-        tooltip: 'Add', // used by assistive technologies
+        tooltip: 'Add',
         onPressed: () {
           _showAddBusinessDialog(context, userId
               // userId ?? 'defaultUserId',
@@ -102,6 +120,8 @@ class BusinessScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shadowColor: Theme.of(context).colorScheme.inversePrimary,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
           title: const Text('Add New Business'),
           content: Column(
             mainAxisSize: MainAxisSize.min,

@@ -78,6 +78,7 @@ class BusinessService {
         .collection('Business')
         .where('userId', isEqualTo: userId)
         .where('isDeleted', isEqualTo: false)
+        .orderBy('name')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
   }
