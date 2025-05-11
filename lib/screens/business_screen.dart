@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 // import 'package:cached_network_image/cached_network_image.dart';
 
 class BusinessScreen extends StatelessWidget {
+  const BusinessScreen({super.key});
+
   // const BusinessScreen({super.key});
 
   // final List<Map<String, String>> businesses = [
@@ -26,7 +28,7 @@ class BusinessScreen extends StatelessWidget {
       await BusinessService().addBusiness(userId, name, logoUrl);
     } catch (e) {
       // Handle any errors that occur during the process
-      print('Error adding business: $e');
+      // print('Error adding business: $e');
     }
   }
 
@@ -127,11 +129,16 @@ class BusinessScreen extends StatelessWidget {
                 if (name.isNotEmpty && userId != null) {
                   try {
                     await BusinessService().addBusiness(userId, name, logoUrl);
-                    Navigator.pop(context);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error adding business: $e')),
-                    );
+                    if (context.mounted) {
+                      // Show an error message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error adding business: $e')),
+                      );
+                    }
                   }
                 }
               },

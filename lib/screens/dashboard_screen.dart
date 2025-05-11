@@ -52,8 +52,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           color: Theme.of(context).colorScheme.tertiary,
                         ),
-                        child: Center(
-                          child: const CircleAvatar(
+                        child: const Center(
+                          child: CircleAvatar(
                             radius: 40,
                             backgroundColor:
                                 Color(0xFF62BDBD), // Avatar background color
@@ -76,8 +76,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           color: Theme.of(context).colorScheme.tertiary,
                         ),
-                        child: Center(
-                          child: const CircleAvatar(
+                        child: const Center(
+                          child: CircleAvatar(
                             radius: 40,
                             backgroundColor:
                                 Color(0xFF62BDBD), // Avatar background color
@@ -104,8 +104,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 color: Theme.of(context).colorScheme.tertiary,
               ),
-              child: Center(
-                child: const CircleAvatar(
+              child: const Center(
+                child: CircleAvatar(
                   radius: 50,
                   backgroundColor: Color(0xFF62BDBD), // Avatar background color
                   child: CircleAvatar(
@@ -119,11 +119,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             //Initialize the chart widget
             SfCartesianChart(
-              primaryXAxis: CategoryAxis(),
+              primaryXAxis: const CategoryAxis(),
               // Chart title
-              title: ChartTitle(text: 'Half yearly sales analysis'),
+              title: const ChartTitle(text: 'Half yearly sales analysis'),
               // Enable legend
-              legend: Legend(isVisible: true),
+              legend: const Legend(isVisible: true),
               // Enable tooltip
               tooltipBehavior: TooltipBehavior(enable: true),
               series: <CartesianSeries<_SalesData, String>>[
@@ -133,7 +133,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   yValueMapper: (_SalesData sales, _) => sales.sales,
                   name: 'Sales',
                   // Enable data label
-                  dataLabelSettings: DataLabelSettings(isVisible: true),
+                  dataLabelSettings: const DataLabelSettings(isVisible: true),
                 ),
               ],
             ),
@@ -143,11 +143,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 //Initialize the spark charts widget
                 child: SfSparkLineChart.custom(
                   //Enable the trackball
-                  trackball: SparkChartTrackball(
+                  trackball: const SparkChartTrackball(
                     activationMode: SparkChartActivationMode.tap,
                   ),
                   //Enable marker
-                  marker: SparkChartMarker(
+                  marker: const SparkChartMarker(
                     displayMode: SparkChartMarkerDisplayMode.all,
                   ),
                   //Enable data label

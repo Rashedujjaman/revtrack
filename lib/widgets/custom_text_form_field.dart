@@ -37,7 +37,9 @@ class CustomTextFormField extends StatelessWidget {
         filled: filled,
         fillColor: Theme.of(context).colorScheme.brightness == Brightness.light
             ? Colors.white
-            : Theme.of(context).colorScheme.secondary.withOpacity(.5),
+            : Theme.of(context).colorScheme.secondary.withValues(
+                  alpha: 200,
+                ),
         border: const OutlineInputBorder(),
         floatingLabelBehavior: floatingLabelBehavior,
         floatingLabelAlignment: FloatingLabelAlignment.start,

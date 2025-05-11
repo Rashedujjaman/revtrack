@@ -16,10 +16,12 @@ void main() async {
   try {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
-  } on FirebaseException catch (e) {
-    print('Firebase initialization error: ${e.code} - ${e.message}');
-  } catch (e) {
-    print('General initialization error: $e');
+  }
+  // on FirebaseException catch (e) {
+  //   // print('Firebase initialization error: ${e.code} - ${e.message}');
+  // }
+  catch (e) {
+    // print('General initialization error: $e');
   }
 
   FirebaseFirestore.instance.settings = const Settings(
@@ -62,7 +64,6 @@ class MyApp extends StatelessWidget {
       }
       return false;
     } catch (e) {
-      print('Error checking login status: $e');
       return false;
     }
   }

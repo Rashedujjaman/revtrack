@@ -14,9 +14,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    DashboardScreen(),
-    BusinessScreen(),
-    ProfileScreen(),
+    const DashboardScreen(),
+    const BusinessScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -26,7 +26,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: _screens[_selectedIndex],
       ),
@@ -48,7 +48,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         unselectedItemColor: Theme.of(context).colorScheme.primary,
-        selectedItemColor: Theme.of(context).colorScheme.background,
+        selectedItemColor: Theme.of(context).colorScheme.surface,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
