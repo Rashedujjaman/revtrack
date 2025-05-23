@@ -1,40 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:revtrack/models/transaction_model.dart';
+import 'package:revtrack/services/snackbar_service.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-// import 'package:revtrack/services/business_service.dart';
 import 'package:revtrack/models/business_model.dart';
+import 'package:revtrack/services/transaction_service.dart';
+import 'package:intl/intl.dart';
 // import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
-class BusinessOverviewScreen extends StatelessWidget {
+// Convert to StatefulWidget to use initState and manage state
+class BusinessOverviewScreen extends StatefulWidget {
   final Business _business;
 
-  BusinessOverviewScreen(this._business, {super.key});
+  const BusinessOverviewScreen(this._business, {super.key});
 
-  final List<Map<String, dynamic>> transactions = [
-    {
-      'type': 'Income',
-      'amount': 100000.00,
-      'category': 'Sales',
-      'date': '2023-10-01',
-    },
-    {
-      'type': 'Expense',
-      'amount': 5000.00,
-      'category': 'Marketing',
-      'date': '2023-10-02',
-    },
-    {
-      'type': 'Income',
-      'amount': 500000.00,
-      'category': 'Sales',
-      'date': '2023-10-03',
-    },
-    {
-      'type': 'Expense',
-      'amount': 300000.00,
-      'category': 'Employee Salaries',
-      'date': '2023-10-04',
-    },
-  ];
+  @override
+  State<BusinessOverviewScreen> createState() => _BusinessOverviewScreenState();
+}
+
+class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
+  List<Transaction1> _transactions = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTransactions();
+  }
+
+  Future<void> fetchTransactions() async {
+    final transactions = await TransactionService()
+        .getTransactionsByBusiness(widget._business.id);
+
+    setState(() {
+      _transactions = transactions;
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +52,12 @@ class BusinessOverviewScreen extends StatelessWidget {
               // Business Logo
               CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage(_business.logoUrl),
+                backgroundImage: NetworkImage(widget._business.logoUrl),
               ),
               const SizedBox(height: 10),
               // Business Description
               Text(
-                _business.name,
+                widget._business.name,
                 textAlign: TextAlign.center,
                 style:
                     const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -65,9 +66,9 @@ class BusinessOverviewScreen extends StatelessWidget {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: transactions.length,
+                itemCount: _transactions.length,
                 itemBuilder: (context, index) {
-                  final transaction = transactions[index];
+                  final transaction = _transactions[index];
                   return Card(
                     color: Theme.of(context)
                         .colorScheme
@@ -76,18 +77,18 @@ class BusinessOverviewScreen extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
                       leading: Icon(
-                        transaction['type'] == 'Income'
+                        transaction.type == 'Income'
                             ? Icons.arrow_downward
                             : Icons.arrow_upward,
-                        color: transaction['type'] == 'Income'
+                        color: transaction.type == 'Income'
                             ? Colors.green
                             : Colors.red,
                       ),
                       title: Text(
-                        transaction['type'],
+                        transaction.type,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: transaction['type'] == 'Income'
+                          color: transaction.type == 'Income'
                               ? Colors.green
                               : Colors.red,
                         ),
@@ -96,17 +97,17 @@ class BusinessOverviewScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Date: ${transaction['date']}',
+                            'Date: ${DateFormat('dd/MM/yyyy').format(transaction.dateCreated.toDate())}',
                             style: const TextStyle(fontSize: 12),
                           ),
                           Text(
-                            '${transaction['category']}',
+                            transaction.category,
                             style: const TextStyle(fontSize: 12),
                           ),
                         ],
                       ),
                       trailing: Text(
-                        '৳${transaction['amount'].toStringAsFixed(2)}',
+                        '৳ ${transaction.amount.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -238,6 +239,7 @@ class BusinessOverviewScreen extends StatelessWidget {
         tooltip: 'Add',
         onPressed: () {
           // Add Logic
+          _addTransactionDialog(context, widget._business.id);
         },
         child: const Icon(Icons.add),
       ),
@@ -263,6 +265,101 @@ class BusinessOverviewScreen extends StatelessWidget {
       //     ),
       //   ],
       // ),
+    );
+  }
+
+  _addTransactionDialog(BuildContext context, String businessId) {
+    final TextEditingController typeController = TextEditingController();
+    final TextEditingController amountController = TextEditingController();
+    final TextEditingController categoryController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shadowColor: Theme.of(context).colorScheme.inversePrimary,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+          title: const Text('Add New Transaction'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                value: null,
+                decoration: const InputDecoration(labelText: 'Type'),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'Income',
+                    child: Text('Income'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Expense',
+                    child: Text('Expense'),
+                  ),
+                ],
+                onChanged: (value) {
+                  typeController.text = value ?? '';
+                },
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please select a type'
+                    : null,
+              ),
+              TextField(
+                controller: amountController,
+                decoration: const InputDecoration(labelText: 'Amount'),
+              ),
+              TextField(
+                controller: categoryController,
+                decoration: const InputDecoration(labelText: 'Category'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final String businessId = widget._business.id;
+                final String type = typeController.text.trim();
+                final double amount = amountController.text.trim().isEmpty
+                    ? 0
+                    : double.parse(amountController.text.trim());
+                final String category = categoryController.text.trim();
+
+                if (businessId.isNotEmpty &&
+                    type.isNotEmpty &&
+                    amount > 0 &&
+                    category.isNotEmpty) {
+                  try {
+                    await TransactionService().addTransaction(
+                      businessId,
+                      type,
+                      category,
+                      amount,
+                    );
+                    if (context.mounted) {
+                      SnackbarService.successMessage(
+                        context,
+                        'Transaction added successfully',
+                      );
+                      Navigator.pop(context);
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      SnackbarService.errorMessage(
+                        context,
+                        'Error adding transaction: $e',
+                      );
+                    }
+                  }
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

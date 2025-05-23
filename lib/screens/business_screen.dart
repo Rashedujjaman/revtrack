@@ -103,9 +103,7 @@ class BusinessScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add',
         onPressed: () {
-          _showAddBusinessDialog(context, userId
-              // userId ?? 'defaultUserId',
-              );
+          _showAddBusinessDialog(context, userId);
         },
         child: const Icon(Icons.add),
       ),

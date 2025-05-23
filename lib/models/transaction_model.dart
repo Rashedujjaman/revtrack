@@ -1,33 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Record {
-  final String id;
+class Transaction1 {
+  final String? id;
   final String businessId;
   final String type;
   final double amount;
   final String category;
   final Timestamp dateCreated;
-  final bool isDeleted;
+  final Timestamp? dateModified;
+  final bool? isDeleted;
 
-  Record({
-    required this.id,
+  Transaction1({
+    this.id,
     required this.businessId,
     required this.type,
     required this.amount,
     required this.category,
     required this.dateCreated,
-    required this.isDeleted,
+    this.dateModified,
+    this.isDeleted,
   });
 
   // Factory method to create a Record object from JSON
-  factory Record.fromJson(Map<String, dynamic> json) {
-    return Record(
+  factory Transaction1.fromJson(Map<String, dynamic> json) {
+    return Transaction1(
       id: json['id'],
       businessId: json['businessId'],
       type: json['type'],
       amount: json['amount'],
       category: json['category'],
       dateCreated: json['dateCreated'],
+      dateModified: json['dateModified'],
       isDeleted: json['isDeleted'] ?? false,
     );
   }
@@ -41,7 +44,24 @@ class Record {
       'amount': amount,
       'category': category,
       'dateCreated': dateCreated,
+      'dateModified': dateModified,
       'isDeleted': isDeleted,
     };
+  }
+
+  factory Transaction1.fromDocumentSnapshot(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Transaction1(
+      id: doc.id,
+      businessId: data['businessId'],
+      type: data['type'],
+      amount: data['amount'] is int
+          ? (data['amount'] as int).toDouble()
+          : data['amount'],
+      category: data['category'],
+      dateCreated: data['dateCreated'],
+      dateModified: data['dateModified'],
+      isDeleted: data['isDeleted'] ?? false,
+    );
   }
 }
