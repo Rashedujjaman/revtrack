@@ -9,21 +9,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 class BusinessScreen extends StatelessWidget {
   const BusinessScreen({super.key});
 
-  // const BusinessScreen({super.key});
-
-  // final List<Map<String, String>> businesses = [
-  //   {
-  //     'name': 'Tech Solutions',
-  //     'logo':
-  //         'https://media.licdn.com/dms/image/v2/C4E0BAQFNjO3GokqjtA/company-logo_200_200/company-logo_200_200/0/1644920246364/rf_infinite_sdn_bhd_logo?e=2147483647&v=beta&t=YNIGs77QB31CnUUFvvEjY0MexNQBwIPGpqrSBRVn1eE'
-  //   },
-  //   {
-  //     'name': 'Green Grocers',
-  //     'logo':
-  //         'https://img.freepik.com/premium-vector/beautiful-unique-logo-design-ecommerce-retail-company_1287271-14561.jpg'
-  //   },
-  // ];
-
   Future<void> addBusiness(String userId, String name, String logoUrl) async {
     try {
       // Call the addBusiness method from BusinessService

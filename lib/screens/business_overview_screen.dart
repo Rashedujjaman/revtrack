@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:revtrack/models/transaction_model.dart';
+import 'package:revtrack/screens/add_edit_transaction_screen.dart';
 import 'package:revtrack/services/snackbar_service.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:revtrack/models/business_model.dart';
@@ -117,24 +118,6 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                   );
                 },
               ),
-              // Buttons
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //   children: [
-              //     ElevatedButton(
-              //       onPressed: () {
-              //         // Add Expense Logic
-              //       },
-              //       child: const Text('Add Expense'),
-              //     ),
-              //     ElevatedButton(
-              //       onPressed: () {
-              //         // Add Income Logic
-              //       },
-              //       child: const Text('Add Income'),
-              //     ),
-              //   ],
-              // ),
 
               const SizedBox(height: 24),
               // Graphs Section
@@ -236,10 +219,19 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        // label: const Text('Add Transaction'),
         tooltip: 'Add',
         onPressed: () {
-          // Add Logic
-          _addTransactionDialog(context, widget._business.id);
+          // Navigate to Add/Edit Transaction Screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddEditTransactionScreen(
+                widget._business.id,
+                widget._business.name,
+              ),
+            ),
+          );
         },
         child: const Icon(Icons.add),
       ),
@@ -265,101 +257,6 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
       //     ),
       //   ],
       // ),
-    );
-  }
-
-  _addTransactionDialog(BuildContext context, String businessId) {
-    final TextEditingController typeController = TextEditingController();
-    final TextEditingController amountController = TextEditingController();
-    final TextEditingController categoryController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shadowColor: Theme.of(context).colorScheme.inversePrimary,
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          title: const Text('Add New Transaction'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<String>(
-                value: null,
-                decoration: const InputDecoration(labelText: 'Type'),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'Income',
-                    child: Text('Income'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Expense',
-                    child: Text('Expense'),
-                  ),
-                ],
-                onChanged: (value) {
-                  typeController.text = value ?? '';
-                },
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select a type'
-                    : null,
-              ),
-              TextField(
-                controller: amountController,
-                decoration: const InputDecoration(labelText: 'Amount'),
-              ),
-              TextField(
-                controller: categoryController,
-                decoration: const InputDecoration(labelText: 'Category'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final String businessId = widget._business.id;
-                final String type = typeController.text.trim();
-                final double amount = amountController.text.trim().isEmpty
-                    ? 0
-                    : double.parse(amountController.text.trim());
-                final String category = categoryController.text.trim();
-
-                if (businessId.isNotEmpty &&
-                    type.isNotEmpty &&
-                    amount > 0 &&
-                    category.isNotEmpty) {
-                  try {
-                    await TransactionService().addTransaction(
-                      businessId,
-                      type,
-                      category,
-                      amount,
-                    );
-                    if (context.mounted) {
-                      SnackbarService.successMessage(
-                        context,
-                        'Transaction added successfully',
-                      );
-                      Navigator.pop(context);
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      SnackbarService.errorMessage(
-                        context,
-                        'Error adding transaction: $e',
-                      );
-                    }
-                  }
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
