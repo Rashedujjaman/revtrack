@@ -116,7 +116,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         topRight: Radius.circular(50),
                         bottomLeft: Radius.circular(50),
                       ),
-                      color: Theme.of(context).colorScheme.secondary),
+                      color: Theme.of(context).colorScheme.surfaceDim),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -125,12 +125,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            const Text(
+                            Text(
                               'Monthly Revenue : ',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                             Text(
@@ -147,12 +147,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            const Text(
+                            Text(
                               'Yearly Revenue : ',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                             Text(

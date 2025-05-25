@@ -183,9 +183,9 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                         const SizedBox(height: 8),
                         _categories.isNotEmpty
                             ? Wrap(
-                                spacing: 8.0,
-                                runSpacing: 8.0,
-                                alignment: WrapAlignment.spaceEvenly,
+                                spacing: 5.0,
+                                runSpacing: 5.0,
+                                alignment: WrapAlignment.spaceBetween,
                                 runAlignment: WrapAlignment.start,
                                 direction: Axis.horizontal,
                                 children: List<Widget>.generate(
