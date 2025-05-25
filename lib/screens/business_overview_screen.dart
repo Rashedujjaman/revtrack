@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:revtrack/models/transaction_model.dart';
 import 'package:revtrack/screens/add_edit_transaction_screen.dart';
-import 'package:revtrack/services/snackbar_service.dart';
+// import 'package:revtrack/services/snackbar_service.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/transaction_service.dart';
 import 'package:intl/intl.dart';
 // import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:revtrack/services/snackbar_service.dart';
 
 // Convert to StatefulWidget to use initState and manage state
 class BusinessOverviewScreen extends StatefulWidget {
@@ -20,10 +21,13 @@ class BusinessOverviewScreen extends StatefulWidget {
 
 class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
   List<Transaction1> _transactions = [];
-  bool _isLoading = true;
+  bool isLoading = true;
+
+  bool expanded = false;
 
   @override
   void initState() {
+    isLoading = true;
     super.initState();
     fetchTransactions();
   }
@@ -34,7 +38,13 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
 
     setState(() {
       _transactions = transactions;
-      _isLoading = false;
+      isLoading = false;
+    });
+  }
+
+  void toggleExpanded() {
+    setState(() {
+      expanded = !expanded;
     });
   }
 
@@ -43,13 +53,15 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Business Overview'),
+        backgroundColor: Theme.of(context).colorScheme.surfaceDim,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const SizedBox(height: 16),
               // Business Logo
               CircleAvatar(
                 radius: 50,
@@ -63,63 +75,89 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 style:
                     const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 24),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _transactions.length,
-                itemBuilder: (context, index) {
-                  final transaction = _transactions[index];
-                  return Card(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .inversePrimary
-                        .withValues(alpha: .5),
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ListTile(
-                      leading: Icon(
-                        transaction.type == 'Income'
-                            ? Icons.arrow_downward
-                            : Icons.arrow_upward,
-                        color: transaction.type == 'Income'
-                            ? Colors.green
-                            : Colors.red,
-                      ),
-                      title: Text(
-                        transaction.type,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: transaction.type == 'Income'
-                              ? Colors.green
-                              : Colors.red,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Date: ${DateFormat('dd/MM/yyyy').format(transaction.dateCreated.toDate())}',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          Text(
-                            transaction.category,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      trailing: Text(
-                        '৳ ${transaction.amount.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+              const SizedBox(height: 16),
+              // Show only 5 transactions, expandable if wanted
+              _transactions.isEmpty
+                  ? const Text('No transactions found.')
+                  : StatefulBuilder(
+                      builder: (context, setState) {
+                        int visibleCount = 5;
 
-              const SizedBox(height: 24),
+                        final showAll =
+                            expanded || _transactions.length <= visibleCount;
+                        final displayedTransactions = showAll
+                            ? _transactions
+                            : _transactions.take(visibleCount).toList();
+
+                        return Column(
+                          children: [
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: displayedTransactions.length,
+                              itemBuilder: (context, index) {
+                                final transaction =
+                                    displayedTransactions[index];
+                                return Card(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .inversePrimary
+                                      .withValues(alpha: .5),
+                                  child: ListTile(
+                                    leading: Icon(
+                                      transaction.type == 'Income'
+                                          ? Icons.arrow_downward
+                                          : Icons.arrow_upward,
+                                      color: transaction.type == 'Income'
+                                          ? Colors.green
+                                          : Colors.red,
+                                    ),
+                                    title: Text(
+                                      transaction.type,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: transaction.type == 'Income'
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Date: ${DateFormat('dd/MM/yyyy').format(transaction.dateCreated.toDate())}',
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                        Text(
+                                          transaction.category,
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                    trailing: Text(
+                                      '৳ ${transaction.amount.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            if (_transactions.length > visibleCount)
+                              TextButton(
+                                onPressed: toggleExpanded,
+                                child: Text(
+                                  expanded ? 'Show Less' : 'Show More',
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+
               // Graphs Section
               const Text(
                 'Revenue Overview',
@@ -218,45 +256,59 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        // label: const Text('Add Transaction'),
-        tooltip: 'Add',
-        onPressed: () {
-          // Navigate to Add/Edit Transaction Screen
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddEditTransactionScreen(
-                widget._business.id,
-                widget._business.name,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          spacing: 8.0,
+          children: [
+            //  Add Income Button
+            FloatingActionButton(
+              heroTag: 'add_income',
+              tooltip: 'Add Income',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddEditTransactionScreen(
+                      widget._business.id,
+                      widget._business.name,
+                      'Income',
+                      false,
+                    ),
+                  ),
+                ).then((_) => fetchTransactions());
+              },
+              backgroundColor: Colors.green.withValues(alpha: .7),
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
+            // Add expense Button
+            FloatingActionButton(
+              heroTag: 'add_expense',
+              tooltip: 'Add Expense',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddEditTransactionScreen(
+                      widget._business.id,
+                      widget._business.name,
+                      'Expense',
+                      false,
+                    ),
+                  ),
+                ).then((_) => fetchTransactions());
+              },
+              backgroundColor: Colors.red.withValues(alpha: .7),
+              child: const Icon(
+                Icons.remove,
+                color: Colors.white,
               ),
             ),
-          );
-        },
-        child: const Icon(Icons.add),
+          ],
+        ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-
-      // floatingActionButton: ExpandableFab(
-      //   distance: 80.0,
-      //   type: ExpandableFabType.up,
-      //   children: [
-      //     FloatingActionButton(
-      //       tooltip: 'Add Inward Record',
-      //       onPressed: () {
-      //         debugPrint("Add Inward Record");
-      //       },
-      //       child: const Icon(Icons.arrow_downward),
-      //     ),
-      //     FloatingActionButton(
-      //       tooltip: 'Add Outward Record',
-      //       onPressed: () {
-      //         debugPrint("Add Outward Record");
-      //       },
-      //       child: const Icon(Icons.arrow_upward),
-      //     ),
-      //   ],
-      // ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/transaction_service.dart';
-import 'package:revtrack/services/snackbar_service.dart';
+// import 'package:revtrack/services/snackbar_service.dart';
 // import 'package:revtrack/services/user_provider.dart';
 // import 'package:revtrack/services/business_service.dart';
 // import 'package:provider/provider.dart';
@@ -9,8 +9,11 @@ import 'package:revtrack/services/snackbar_service.dart';
 class AddEditTransactionScreen extends StatefulWidget {
   final String _businessId;
   final String _businessName;
+  final String _type;
+  final bool _isEdit;
 
-  const AddEditTransactionScreen(this._businessId, this._businessName,
+  const AddEditTransactionScreen(
+      this._businessId, this._businessName, this._type, this._isEdit,
       {super.key});
 
   @override
@@ -19,14 +22,17 @@ class AddEditTransactionScreen extends StatefulWidget {
 }
 
 class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
-  final TextEditingController typeController = TextEditingController();
+  // final TextEditingController typeController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
-  final TextEditingController categoryController = TextEditingController();
+
   final TextEditingController dateController = TextEditingController();
+  final TextEditingController noteController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  String type = '';
   DateTime selectedDate = DateTime.now();
+  String selectedCategory = '';
 
   bool _isLoading = false;
 
@@ -38,6 +44,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
       _isLoading = true;
     });
     super.initState();
+    type = widget._type;
     dateController.text = DateTime.now().toLocal().toString().split(' ')[0];
     fetchCategories();
     _isLoading = false;
@@ -50,15 +57,44 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
     });
   }
 
+  Future<bool> saveTransaction() async {
+    final String businessId = widget._businessId;
+    final double amount = amountController.text.trim().isEmpty
+        ? 0
+        : double.parse(amountController.text.trim());
+    final String category = selectedCategory.trim();
+    final String note = noteController.text.trim();
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      await TransactionService().addTransaction(
+        businessId,
+        type,
+        category,
+        amount,
+        selectedDate,
+        note,
+      );
+      return true;
+    } catch (e) {
+      return false;
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Transaction for ${widget._businessName}'),
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
+        title: const Text('Transaction', textAlign: TextAlign.center),
+        backgroundColor: Theme.of(context).colorScheme.surfaceDim,
       ),
       body: Container(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: SingleChildScrollView(
             child: ConstrainedBox(
                 constraints: BoxConstraints(
@@ -68,6 +104,12 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        const SizedBox(height: 16.0),
+                        Text(
+                          '${widget._isEdit ? (type == 'Income' ? 'Edit Income for ' : 'Edit Expense for ') : (type == 'Income' ? 'Add Income for ' : 'Add Expense for ')}${widget._businessName}',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 16.0),
                         StatefulBuilder(
                           builder: (context, setState) {
                             return Column(
@@ -105,30 +147,12 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                             );
                           },
                         ),
-                        DropdownButtonFormField(
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'Income',
-                              child: Text('Income'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Expense',
-                              child: Text('Expense'),
-                            ),
-                          ],
-                          decoration: const InputDecoration(labelText: 'Type'),
-                          value: null,
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Please select a type'
-                              : null,
-                          onChanged: (value) {
-                            typeController.text = value ?? '';
-                          },
-                        ),
+                        const SizedBox(height: 24.0),
                         TextFormField(
                           controller: amountController,
-                          decoration:
-                              const InputDecoration(labelText: 'Amount'),
+                          decoration: const InputDecoration(
+                              labelText: 'Amount',
+                              border: OutlineInputBorder()),
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
                           validator: (value) {
@@ -142,53 +166,38 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                             return null;
                           },
                         ),
-                        // DropdownButtonFormField(
-                        //   items: _categories.map((category) {
-                        //     return DropdownMenuItem(
-                        //       value: category,
-                        //       child: Text(category),
-                        //     );
-                        //   }).toList(),
-                        //   decoration:
-                        //       const InputDecoration(labelText: 'Category'),
-                        //   value: null,
-                        //   validator: (value) => value == null || value.isEmpty
-                        //       ? 'Please select a category'
-                        //       : null,
-                        //   onChanged: (value) {
-                        //     categoryController.text = value ?? '';
-                        //   },
-                        // ),
-                        const SizedBox(height: 16.0),
-                        const Text('Select Transaction Category'),
-
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Wrap(
-                            spacing: 8.0,
-                            direction: Axis.horizontal,
-                            // alignment: WrapAlignment.spaceEvenly,
-                            children: _categories.map((category) {
-                              final isSelected =
-                                  categoryController.text == category;
-                              return ChoiceChip(
-                                label: Text(category),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  setState(() {
-                                    categoryController.text =
-                                        selected ? category : '';
-                                  });
-                                },
-                                selectedColor: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withValues(alpha: 0.2),
-                              );
-                            }).toList(),
+                        const SizedBox(height: 24.0),
+                        TextFormField(
+                          controller: noteController,
+                          decoration: const InputDecoration(
+                            labelText: 'Note (Optional)',
+                            hintText: 'Add a note about this transaction',
+                            border: OutlineInputBorder(),
                           ),
-                        )
+                        ),
+                        const SizedBox(height: 30.0),
+                        Text('Select Transaction Category',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8.0,
+                          direction: Axis.horizontal,
+                          children: List<Widget>.generate(_categories.length,
+                              (int index) {
+                            final String category = _categories[index];
+                            return ChoiceChip(
+                              label: Text(category),
+                              selected: category == selectedCategory,
+                              onSelected: (selected) {
+                                setState(() {
+                                  selectedCategory = selected ? category : '';
+                                });
+                              },
+                              selectedColor:
+                                  Theme.of(context).colorScheme.inversePrimary,
+                            );
+                          }).toList(),
+                        ),
                       ],
                     ),
                   ),
@@ -199,52 +208,40 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
         child: SizedBox(
           width: 50,
           child: ElevatedButton(
-            onPressed: () async {
-              final String businessId = widget._businessId;
-              final String type = typeController.text.trim();
-              final double amount = amountController.text.trim().isEmpty
-                  ? 0
-                  : double.parse(amountController.text.trim());
-              final String category = categoryController.text.trim();
-
-              if (_formKey.currentState!.validate() && category.isNotEmpty) {
-                try {
-                  setState(() {
-                    _isLoading = true;
-                  });
-                  await TransactionService().addTransaction(
-                    businessId,
-                    type,
-                    category,
-                    amount,
-                    selectedDate,
-                  );
-                  if (context.mounted) {
-                    SnackbarService.successMessage(
-                      context,
-                      'Transaction added successfully',
-                    );
-
-                    Navigator.pop(context);
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    SnackbarService.errorMessage(
-                      context,
-                      'Error adding transaction: $e',
-                    );
-                  }
-                } finally {
-                  setState(() {
-                    _isLoading = false;
-                  });
-                }
-              }
-            },
-            child: _isLoading
-                ? const CircularProgressIndicator()
-                : const Text('Save Transaction'),
-          ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              onPressed: _isLoading == true ||
+                      selectedCategory.trim().isEmpty ||
+                      type.trim().isEmpty ||
+                      amountController.text.trim().isEmpty
+                  ? null
+                  : () async {
+                      final success = await saveTransaction();
+                      if (context.mounted) {
+                        if (success) {
+                          // SnackbarService.successMessage(
+                          //     context, 'Transaction added successfully');
+                          Navigator.pop(context);
+                        } else {
+                          // SnackbarService.errorMessage(
+                          //     context, 'Failed to save transaction');
+                        }
+                      }
+                    },
+              child: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text(
+                      'Save Transaction',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )),
         ),
       ),
     );

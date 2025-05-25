@@ -6,7 +6,7 @@ class TransactionService {
 
   // Add transaction
   Future<void> addTransaction(String businessId, String type, String category,
-      double amount, DateTime? selectedDate) async {
+      double amount, DateTime? selectedDate, String? note) async {
     try {
       await firestore.collection('Transaction').doc().set({
         'businessId': businessId,
@@ -16,6 +16,7 @@ class TransactionService {
         'dateCreated': selectedDate ?? DateTime.now(),
         'dateModified': DateTime.now(),
         'isDeleted': false,
+        'note': note ?? '',
       });
     } catch (e) {
       rethrow;
