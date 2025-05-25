@@ -71,9 +71,10 @@ class TransactionService {
   }
 
   //Fetch categories
-  Future<List<String>> fetchCategories() async {
+  Future<List<String>> fetchIncomeCategories() async {
     try {
-      final snapshot = await firestore.collection('Category').get();
+      final snapshot =
+          await firestore.collection('IncomeCategory').orderBy('name').get();
 
       return snapshot.docs
           .map((doc) => doc.data()['name'].toString())
@@ -83,4 +84,83 @@ class TransactionService {
       rethrow;
     }
   }
+
+  Future<List<String>> fetchExpenseCategories() async {
+    try {
+      final snapshot =
+          await firestore.collection('ExpenseCategory').orderBy('name').get();
+
+      return snapshot.docs
+          .map((doc) => doc.data()['name'].toString())
+          .toSet()
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Future<void> createIncomeAndExpenseCategories() async {
+  //   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  //   // Suggested categories
+  //   final List<String> incomeCategories = [
+  //     'Sales',
+  //     'Service',
+  //     'Consulting',
+  //     'Investment',
+  //     'Interest',
+  //     'Rental',
+  //     'Grants',
+  //     'Commission',
+  //     'Refunds',
+  //     'Donations',
+  //   ];
+
+  //   final List<String> expenseCategories = [
+  //     'Rent',
+  //     'Utilities',
+  //     'Salaries',
+  //     'Marketing',
+  //     'Travel',
+  //     'Meals',
+  //     'Entertainment',
+  //     'Supplies',
+  //     'Software',
+  //     'Internet',
+  //     'Phone',
+  //     'Insurance',
+  //     'Taxes',
+  //     'Maintenance',
+  //     'Bank Fees',
+  //     'Loan',
+  //     'Training',
+  //     'Charity',
+  //     'Licenses',
+  //     'Medical',
+  //     'Transportation',
+  //     'Fuel',
+  //     'Education',
+  //   ];
+
+  //   try {
+  //     // Batch write for efficiency
+  //     WriteBatch batch = firestore.batch();
+
+  //     for (String category in incomeCategories) {
+  //       final docRef = firestore.collection('IncomeCategory').doc();
+  //       batch.set(docRef, {'name': category});
+  //     }
+
+  //     for (String category in expenseCategories) {
+  //       final docRef = firestore.collection('ExpenseCategory').doc();
+  //       batch.set(docRef, {'name': category});
+  //     }
+
+  //     await batch.commit();
+  //     print('Income and Expense categories created successfully.');
+  //   } catch (e) {
+  //     print('Error creating categories: $e');
+  //     rethrow;
+  //   }
+  // }
 }

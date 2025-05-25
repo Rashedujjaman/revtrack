@@ -47,11 +47,13 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
     type = widget._type;
     dateController.text = DateTime.now().toLocal().toString().split(' ')[0];
     fetchCategories();
-    _isLoading = false;
+    // TransactionService().createIncomeAndExpenseCategories();
   }
 
   Future<void> fetchCategories() async {
-    _categories = await TransactionService().fetchCategories();
+    _categories = type == 'Income'
+        ? await TransactionService().fetchIncomeCategories()
+        : await TransactionService().fetchExpenseCategories();
     setState(() {
       _isLoading = false;
     });
@@ -179,25 +181,33 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                         Text('Select Transaction Category',
                             style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8.0,
-                          direction: Axis.horizontal,
-                          children: List<Widget>.generate(_categories.length,
-                              (int index) {
-                            final String category = _categories[index];
-                            return ChoiceChip(
-                              label: Text(category),
-                              selected: category == selectedCategory,
-                              onSelected: (selected) {
-                                setState(() {
-                                  selectedCategory = selected ? category : '';
-                                });
-                              },
-                              selectedColor:
-                                  Theme.of(context).colorScheme.inversePrimary,
-                            );
-                          }).toList(),
-                        ),
+                        _categories.isNotEmpty
+                            ? Wrap(
+                                spacing: 8.0,
+                                runSpacing: 8.0,
+                                alignment: WrapAlignment.spaceEvenly,
+                                runAlignment: WrapAlignment.start,
+                                direction: Axis.horizontal,
+                                children: List<Widget>.generate(
+                                    _categories.length, (int index) {
+                                  final String category = _categories[index];
+                                  return ChoiceChip(
+                                    label: Text(category),
+                                    selected: category == selectedCategory,
+                                    onSelected: (selected) {
+                                      setState(() {
+                                        selectedCategory =
+                                            selected ? category : '';
+                                      });
+                                    },
+                                    selectedColor: Theme.of(context)
+                                        .colorScheme
+                                        .inversePrimary,
+                                  );
+                                }).toList(),
+                              )
+                            : Text('No categories available',
+                                style: Theme.of(context).textTheme.bodyMedium),
                       ],
                     ),
                   ),
