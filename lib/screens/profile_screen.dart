@@ -144,11 +144,11 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: const FloatingActionButton(
-        tooltip: 'Add', // used by assistive technologies
-        onPressed: null,
-        child: Icon(Icons.add),
-      ),
+      // floatingActionButton: const FloatingActionButton(
+      //   tooltip: 'Add', // used by assistive technologies
+      //   onPressed: null,
+      //   child: Icon(Icons.add),
+      // ),
     );
   }
 }

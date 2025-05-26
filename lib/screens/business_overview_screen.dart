@@ -5,9 +5,11 @@ import 'package:revtrack/screens/add_edit_transaction_screen.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/transaction_service.dart';
+import 'package:revtrack/widgets/skeleton.dart';
 import 'package:intl/intl.dart';
 // import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:revtrack/services/snackbar_service.dart';
+// import 'package:revtrack/services/snackbar_service.dart';
+import 'package:shimmer/shimmer.dart';
 
 // Convert to StatefulWidget to use initState and manage state
 class BusinessOverviewScreen extends StatefulWidget {
@@ -20,8 +22,8 @@ class BusinessOverviewScreen extends StatefulWidget {
 }
 
 class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
-  List<Transaction1> _transactions = [];
-  bool isLoading = true;
+  List<Transaction1> transactions = [];
+  bool isLoading = false;
 
   bool expanded = false;
 
@@ -33,11 +35,11 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
   }
 
   Future<void> fetchTransactions() async {
-    final transactions = await TransactionService()
+    final result = await TransactionService()
         .getTransactionsByBusiness(widget._business.id);
 
     setState(() {
-      _transactions = transactions;
+      transactions = result;
       isLoading = false;
     });
   }
@@ -69,84 +71,108 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
               ),
               const SizedBox(height: 10),
               // Business Description
-              Text(
-                widget._business.name,
-                textAlign: TextAlign.center,
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
+
+              SizedBox(
+                  width: 200,
+                  // height: 100,
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.red,
+                    highlightColor: Colors.yellow,
+                    child: Text(
+                      widget._business.name,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  )),
               const SizedBox(height: 16),
-              // Show only 5 transactions, expandable if wanted
-              _transactions.isEmpty
+
+              transactions.isEmpty
                   ? const Text('No transactions found.')
                   : StatefulBuilder(
                       builder: (context, setState) {
                         int visibleCount = 5;
 
                         final showAll =
-                            expanded || _transactions.length <= visibleCount;
+                            expanded || transactions.length <= visibleCount;
                         final displayedTransactions = showAll
-                            ? _transactions
-                            : _transactions.take(visibleCount).toList();
+                            ? transactions
+                            : transactions.take(visibleCount).toList();
 
                         return Column(
                           children: [
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: displayedTransactions.length,
-                              itemBuilder: (context, index) {
-                                final transaction =
-                                    displayedTransactions[index];
-                                return Card(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .inversePrimary
-                                      .withValues(alpha: .5),
-                                  child: ListTile(
-                                    leading: Icon(
-                                      transaction.type == 'Income'
-                                          ? Icons.arrow_downward
-                                          : Icons.arrow_upward,
-                                      color: transaction.type == 'Income'
-                                          ? Colors.green
-                                          : Colors.red,
-                                    ),
-                                    title: Text(
-                                      transaction.type,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: transaction.type == 'Income'
-                                            ? Colors.green
-                                            : Colors.red,
-                                      ),
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Date: ${DateFormat('dd/MM/yyyy').format(transaction.dateCreated.toDate())}',
-                                          style: const TextStyle(fontSize: 12),
+                            isLoading == true
+                                ? ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16.0, horizontal: 8.0),
+                                    itemCount: 5,
+                                    itemBuilder: (context, index) {
+                                      return const TransactionCardSkeleton();
+                                    })
+                                : ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: displayedTransactions.length,
+                                    itemBuilder: (context, index) {
+                                      final transaction =
+                                          displayedTransactions[index];
+                                      return Card(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .inversePrimary
+                                            .withValues(alpha: .5),
+                                        child: ListTile(
+                                          leading: Icon(
+                                            transaction.type == 'Income'
+                                                ? Icons.arrow_downward
+                                                : Icons.arrow_upward,
+                                            color: transaction.type == 'Income'
+                                                ? Colors.green
+                                                : Colors.red,
+                                          ),
+                                          title: Text(
+                                            transaction.type,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color:
+                                                  transaction.type == 'Income'
+                                                      ? Colors.green
+                                                      : Colors.red,
+                                            ),
+                                          ),
+                                          subtitle: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Date: ${DateFormat('dd/MM/yyyy').format(transaction.dateCreated.toDate())}',
+                                                style: const TextStyle(
+                                                    fontSize: 12),
+                                              ),
+                                              Text(
+                                                transaction.category,
+                                                style: const TextStyle(
+                                                    fontSize: 12),
+                                              ),
+                                            ],
+                                          ),
+                                          trailing: Text(
+                                            '৳ ${transaction.amount.toStringAsFixed(2)}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
                                         ),
-                                        Text(
-                                          transaction.category,
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                    trailing: Text(
-                                      '৳ ${transaction.amount.toStringAsFixed(2)}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
-                            if (_transactions.length > visibleCount)
+                            if (transactions.length > visibleCount &&
+                                !isLoading)
                               TextButton(
                                 onPressed: toggleExpanded,
                                 child: Text(

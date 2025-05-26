@@ -3,6 +3,7 @@ import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/business_service.dart';
 import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/screens/business_overview_screen.dart';
+import 'package:revtrack/widgets/skeleton.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -24,67 +25,91 @@ class BusinessScreen extends StatelessWidget {
     final userId = Provider.of<UserProvider>(context).userId;
     return Scaffold(
       // backgroundColor: Colors.transparent,
-      body: userId == null
-          ? const Text("User is not loged in")
-          : StreamBuilder<List<Map<String, dynamic>>>(
-              stream: BusinessService().getBusinessesByUser(userId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+      body: Column(
+        children: [
+          const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: Text(
+                  'All Your Businesses',
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                ),
+              )),
+          Expanded(
+            child: userId == null
+                ? const Text("User is not loged in")
+                : StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: BusinessService().getBusinessesByUser(userId),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        // return const Center(child: CircularProgressIndicator());
+                        return ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16.0, horizontal: 8.0),
+                            itemCount: 6,
+                            itemBuilder: (context, index) {
+                              return const BusinessCardSkeleton();
+                            });
+                      }
 
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
 
-                final businesses = snapshot.data ?? [];
+                      final businesses = snapshot.data ?? [];
 
-                if (businesses.isEmpty) {
-                  return const Center(child: Text('No businesses found.'));
-                }
+                      if (businesses.isEmpty) {
+                        return const Center(
+                            child: Text('No businesses found.'));
+                      }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16.0, horizontal: 8.0),
-                  itemCount: businesses.length,
-                  itemBuilder: (context, index) {
-                    final business = businesses[index];
-                    return Card(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .inversePrimary
-                          .withValues(alpha: .5),
-                      // margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: ListTile(
-                        leading: business['logoUrl'] != null
-                            ? CachedNetworkImage(
-                                imageUrl: business['logoUrl'],
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.cover,
-                                errorWidget: (context, url, error) {
-                                  return const Icon(Icons.image_not_supported);
-                                },
-                              )
-                            : const Icon(Icons.business),
-                        title: Text(business['name']),
-                        trailing: const Icon(Icons.arrow_forward_ios),
-                        onTap: () {
-                          Business businessObject = Business.fromJson(business);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  BusinessOverviewScreen(businessObject),
+                      return ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16.0, horizontal: 8.0),
+                        itemCount: businesses.length,
+                        itemBuilder: (context, index) {
+                          final business = businesses[index];
+                          return Card(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .inversePrimary
+                                .withValues(alpha: .5),
+                            // margin: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: ListTile(
+                              leading: business['logoUrl'] != null
+                                  ? CachedNetworkImage(
+                                      imageUrl: business['logoUrl'],
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (context, url, error) {
+                                        return const Icon(
+                                            Icons.image_not_supported);
+                                      },
+                                    )
+                                  : const Icon(Icons.business),
+                              title: Text(business['name']),
+                              trailing: const Icon(Icons.arrow_forward_ios),
+                              onTap: () {
+                                Business businessObject =
+                                    Business.fromJson(business);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        BusinessOverviewScreen(businessObject),
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+                      );
+                    },
+                  ),
+          )
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add',
         onPressed: () {
