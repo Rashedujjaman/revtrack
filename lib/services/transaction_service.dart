@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:revtrack/models/transaction_model.dart';
+import 'package:flutter/material.dart';
 
 class TransactionService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -59,10 +60,14 @@ class TransactionService {
 
   // Get transactions by business ID
   Future<List<Transaction1>> getTransactionsByBusiness(
-      String businessId) async {
+      String businessId, DateTimeRange dateRange) async {
     final snapshot = await firestore
         .collection('Transaction')
         .where('businessId', isEqualTo: businessId)
+        .where('isDeleted', isEqualTo: false)
+        .where('dateCreated', isGreaterThanOrEqualTo: dateRange.start)
+        .where('dateCreated', isLessThanOrEqualTo: dateRange.end)
+        .orderBy('dateCreated', descending: true)
         .get();
 
     return snapshot.docs

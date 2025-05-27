@@ -3,6 +3,7 @@ import 'package:revtrack/theme/gradient_provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 import 'package:revtrack/widgets/pie_chart.dart';
+import 'package:animated_number/src/animated_number_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -133,14 +134,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
-                            Text(
-                              "2,41,325",
+                            // const AnimatedNumber(
+                            //   startValue: 0,
+                            //   endValue: 2000,
+                            //   duration: Duration(seconds: 2),
+                            //   isFloatingPoint: false,
+                            //   style: TextStyle(
+                            //     color: Colors.orange,
+                            //     fontSize: 24,
+                            //   ),
+                            // ),
+                            const AnimatedNumber(
+                              startValue: 0,
+                              endValue: 5500.38273626732,
+                              duration: Duration(seconds: 2),
+                              isFloatingPoint: true,
+                              decimalPoint: 2,
                               style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.tertiary,
+                                color: Colors.lightBlue,
+                                fontSize: 42,
                               ),
                             ),
+                            // Text(
+                            //   "2,41,325",
+                            //   style: TextStyle(
+                            //     fontSize: 24,
+                            //     fontWeight: FontWeight.bold,
+                            //     color: Theme.of(context).colorScheme.tertiary,
+                            //   ),
+                            // ),
                           ],
                         ),
                         Row(

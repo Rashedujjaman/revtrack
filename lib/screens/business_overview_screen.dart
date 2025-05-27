@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:revtrack/models/transaction_model.dart';
 import 'package:revtrack/screens/add_edit_transaction_screen.dart';
-// import 'package:revtrack/services/snackbar_service.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/transaction_service.dart';
 import 'package:revtrack/widgets/skeleton.dart';
 import 'package:intl/intl.dart';
-// import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 // import 'package:revtrack/services/snackbar_service.dart';
 import 'package:shimmer/shimmer.dart';
 
-// Convert to StatefulWidget to use initState and manage state
 class BusinessOverviewScreen extends StatefulWidget {
   final Business _business;
 
@@ -23,9 +20,18 @@ class BusinessOverviewScreen extends StatefulWidget {
 
 class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
   List<Transaction1> transactions = [];
-  bool isLoading = false;
+  bool isLoading = true;
 
   bool expanded = false;
+  DateTimeRange _selectedDateRange = DateTimeRange(
+    start: DateTime(DateTime.now().year, 1, 1),
+    end:
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
+  );
+
+  double totalIncome = 0.0;
+  double totalExpense = 0.0;
+  double revenue = 0.0;
 
   @override
   void initState() {
@@ -35,12 +41,17 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
   }
 
   Future<void> fetchTransactions() async {
+    setState(() {
+      isLoading = true;
+      transactions.clear();
+    });
+
     final result = await TransactionService()
-        .getTransactionsByBusiness(widget._business.id);
+        .getTransactionsByBusiness(widget._business.id, _selectedDateRange);
 
     setState(() {
       transactions = result;
-      isLoading = false;
+      // isLoading = false;
     });
   }
 
@@ -64,28 +75,103 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 16),
-              // Business Logo
-              CircleAvatar(
-                radius: 50,
-                backgroundImage: NetworkImage(widget._business.logoUrl),
-              ),
-              const SizedBox(height: 10),
-              // Business Description
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Business Description
+                      SizedBox(
+                          width: 200,
+                          child: Shimmer.fromColors(
+                            baseColor: Colors.red,
+                            highlightColor: Colors.yellow,
+                            child: Text(
+                              widget._business.name,
+                              // textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          )),
+                      Text(
+                        'Income: ৳ ${totalExpense.toStringAsFixed(2)}',
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.green),
+                      ),
+                      Text('Expenses: ৳ ${totalIncome.toStringAsFixed(2)}',
+                          style:
+                              const TextStyle(fontSize: 16, color: Colors.red)),
+                      Text('Revenue: ৳ ${revenue.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.blue)),
+                    ],
+                  ),
 
-              SizedBox(
-                  width: 200,
-                  // height: 100,
-                  child: Shimmer.fromColors(
-                    baseColor: Colors.red,
-                    highlightColor: Colors.yellow,
-                    child: Text(
-                      widget._business.name,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  )),
+                  // Business Logo
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: NetworkImage(widget._business.logoUrl),
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  isLoading
+                      ? Shimmer.fromColors(
+                          baseColor: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.5),
+                          highlightColor:
+                              Theme.of(context).colorScheme.secondary,
+                          child: Container(
+                            width: 300,
+                            height: 20,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              // shape: BoxShape.circle,
+                            ),
+                          ),
+                        )
+                      : TextButton.icon(
+                          icon: const Icon(Icons.date_range),
+                          label: Text(
+                            '${DateFormat('dd/MM/yyyy').format(_selectedDateRange.start)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateRange!.end)}',
+                          ),
+                          onPressed: () async {
+                            final picked = await showDateRangePicker(
+                              context: context,
+                              firstDate: DateTime.now()
+                                  .subtract(const Duration(days: 365 * 5)),
+                              lastDate: DateTime.now(),
+                              initialDateRange: _selectedDateRange,
+                            );
+                            if (picked != null &&
+                                picked != _selectedDateRange) {
+                              setState(() {
+                                _selectedDateRange = picked;
+                              });
+                              await fetchTransactions();
+                            }
+                          },
+                        ),
+                  // if (_selectedDateRange != null)
+                  //   IconButton(
+                  //     icon: const Icon(Icons.clear),
+                  //     onPressed: () async {
+                  //       setState(() {
+                  //         _selectedDateRange = null;
+                  //         isLoading = true;
+                  //       });
+                  //       await fetchTransactions();
+                  //     },
+                  //   ),
+                ],
+              ),
 
               transactions.isEmpty
                   ? const Text('No transactions found.')
@@ -106,8 +192,6 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                                     shrinkWrap: true,
                                     physics:
                                         const NeverScrollableScrollPhysics(),
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16.0, horizontal: 8.0),
                                     itemCount: 5,
                                     itemBuilder: (context, index) {
                                       return const TransactionCardSkeleton();
@@ -116,6 +200,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                                     shrinkWrap: true,
                                     physics:
                                         const NeverScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16.0, horizontal: 0.0),
                                     itemCount: displayedTransactions.length,
                                     itemBuilder: (context, index) {
                                       final transaction =
@@ -183,14 +269,14 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                         );
                       },
                     ),
-
+              const SizedBox(height: 16),
               // Graphs Section
               const Text(
                 'Revenue Overview',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
 
-              const SizedBox(height: 24),
+              // const SizedBox(height: 16),
               // Line Chart
               SizedBox(
                 height: 200,
