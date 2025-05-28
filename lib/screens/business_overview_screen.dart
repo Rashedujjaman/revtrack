@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:revtrack/models/transaction_model.dart';
 import 'package:revtrack/screens/add_edit_transaction_screen.dart';
@@ -8,6 +9,8 @@ import 'package:revtrack/widgets/skeleton.dart';
 import 'package:intl/intl.dart';
 // import 'package:revtrack/services/snackbar_service.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:animated_number/src/animated_number_widget.dart';
+import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 class BusinessOverviewScreen extends StatefulWidget {
   final Business _business;
@@ -20,18 +23,18 @@ class BusinessOverviewScreen extends StatefulWidget {
 
 class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
   List<Transaction1> transactions = [];
-  bool isLoading = true;
+  bool isLoading = false;
 
   bool expanded = false;
   DateTimeRange _selectedDateRange = DateTimeRange(
     start: DateTime(DateTime.now().year, 1, 1),
-    end:
-        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
+    end: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day,
+        23, 59, 59),
   );
 
-  double totalIncome = 0.0;
-  double totalExpense = 0.0;
-  double revenue = 0.0;
+  double totalIncome = 0.00;
+  double totalExpense = 0.00;
+  double revenue = 0.00;
 
   @override
   void initState() {
@@ -45,13 +48,20 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
       isLoading = true;
       transactions.clear();
     });
-
+    // Fetch transactions for the selected business and date range
     final result = await TransactionService()
         .getTransactionsByBusiness(widget._business.id, _selectedDateRange);
 
     setState(() {
       transactions = result;
-      // isLoading = false;
+
+      //After fetching transactions, calculate totals
+      totalIncome = calculateTotalIncome();
+      totalExpense = calculateTotalExpense();
+      revenue = calculateRevenue();
+
+      //Set loading state to false
+      isLoading = false;
     });
   }
 
@@ -59,6 +69,39 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
     setState(() {
       expanded = !expanded;
     });
+  }
+
+  double calculateTotalIncome() {
+    return transactions
+        .where((transaction) => transaction.type == 'Income')
+        .fold(0.00, (sum, transaction) => sum + transaction.amount);
+  }
+
+  double calculateTotalExpense() {
+    return transactions
+        .where((transaction) => transaction.type == 'Expense')
+        .fold(0.00, (sum, transaction) => sum + transaction.amount);
+  }
+
+  double calculateRevenue() {
+    return calculateTotalIncome() - calculateTotalExpense();
+  }
+
+  List<_ChartData> getCategoryBreakdownData(String type) {
+    final filtered = transactions.where((t) => t.type == type);
+    final Map<String, double> dataMap = {};
+
+    for (var transaction in filtered) {
+      dataMap.update(
+        transaction.category,
+        (value) => value + transaction.amount,
+        ifAbsent: () => transaction.amount,
+      );
+    }
+
+    return dataMap.entries
+        .map((entry) => _ChartData(entry.key, entry.value))
+        .toList();
   }
 
   @override
@@ -75,48 +118,192 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Business Description
-                      SizedBox(
-                          width: 200,
-                          child: Shimmer.fromColors(
-                            baseColor: Colors.red,
-                            highlightColor: Colors.yellow,
-                            child: Text(
-                              widget._business.name,
-                              // textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
-                            ),
-                          )),
-                      Text(
-                        'Income: ৳ ${totalExpense.toStringAsFixed(2)}',
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.green),
-                      ),
-                      Text('Expenses: ৳ ${totalIncome.toStringAsFixed(2)}',
-                          style:
-                              const TextStyle(fontSize: 16, color: Colors.red)),
-                      Text('Revenue: ৳ ${revenue.toStringAsFixed(2)}',
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .secondary
+                      .withValues(alpha: .5),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.tertiary,
+                    width: .5,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 200,
+                      height: 50,
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.red,
+                        highlightColor: Colors.yellow,
+                        child: Text(
+                          widget._business.name,
+                          // textAlign: TextAlign.center,
                           style: const TextStyle(
-                              fontSize: 16, color: Colors.blue)),
-                    ],
-                  ),
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              spacing: 16,
+                              children: [
+                                const Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 4,
+                                  children: [
+                                    Text(
+                                      'T. Income:',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text('T. Expenses:',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.bold)),
+                                    Text('Revenue:',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.blue,
+                                            fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
 
-                  // Business Logo
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage(widget._business.logoUrl),
-                  ),
-                ],
+                                // Total Income, Expense, and Revenue
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  spacing: isLoading ? 8 : 4,
+                                  children: [
+                                    !isLoading
+                                        ? AnimatedNumber(
+                                            prefixText: '৳ ',
+                                            startValue: 0.00,
+                                            endValue: totalIncome > 0
+                                                ? totalIncome
+                                                : 0.0,
+                                            duration:
+                                                const Duration(seconds: 2),
+                                            isFloatingPoint: true,
+                                            decimalPoint: 2,
+                                            style: const TextStyle(
+                                              color: Colors.green,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                        : Shimmer.fromColors(
+                                            baseColor: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withValues(alpha: 0.3),
+                                            highlightColor: Theme.of(context)
+                                                .colorScheme
+                                                .secondary,
+                                            child: Container(
+                                              width: 70,
+                                              height: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                    !isLoading
+                                        ? AnimatedNumber(
+                                            prefixText: '৳ ',
+                                            startValue: 0,
+                                            endValue: totalExpense > 0
+                                                ? totalExpense
+                                                : 0.0,
+                                            duration:
+                                                const Duration(seconds: 2),
+                                            isFloatingPoint: true,
+                                            decimalPoint: 2,
+                                            style: const TextStyle(
+                                              color: Colors.red,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                        : Shimmer.fromColors(
+                                            baseColor: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withValues(alpha: 0.3),
+                                            highlightColor: Theme.of(context)
+                                                .colorScheme
+                                                .secondary,
+                                            child: Container(
+                                              width: 70,
+                                              height: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                    !isLoading
+                                        ? AnimatedNumber(
+                                            prefixText: '৳ ',
+                                            startValue: 0,
+                                            endValue: revenue,
+                                            duration:
+                                                const Duration(seconds: 2),
+                                            isFloatingPoint: true,
+                                            decimalPoint: 2,
+                                            style: const TextStyle(
+                                              color: Colors.blue,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                        : Shimmer.fromColors(
+                                            baseColor: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withValues(alpha: 0.3),
+                                            highlightColor: Theme.of(context)
+                                                .colorScheme
+                                                .secondary,
+                                            child: Container(
+                                              width: 70,
+                                              height: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        // Business Logo
+                        ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: widget._business.logoUrl,
+                            width: 70,
+                            height: 70,
+                            fit: BoxFit.cover,
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.business, size: 50),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
+
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -129,18 +316,17 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                           highlightColor:
                               Theme.of(context).colorScheme.secondary,
                           child: Container(
-                            width: 300,
+                            width: 320,
                             height: 20,
                             decoration: const BoxDecoration(
                               color: Colors.white,
-                              // shape: BoxShape.circle,
                             ),
                           ),
                         )
                       : TextButton.icon(
                           icon: const Icon(Icons.date_range),
                           label: Text(
-                            '${DateFormat('dd/MM/yyyy').format(_selectedDateRange.start)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateRange!.end)}',
+                            '${DateFormat('dd/MM/yyyy').format(_selectedDateRange.start)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateRange.end)}',
                           ),
                           onPressed: () async {
                             final picked = await showDateRangePicker(
@@ -153,7 +339,11 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                             if (picked != null &&
                                 picked != _selectedDateRange) {
                               setState(() {
-                                _selectedDateRange = picked;
+                                _selectedDateRange = DateTimeRange(
+                                  start: picked.start,
+                                  end: picked.end.add(const Duration(
+                                      hours: 23, minutes: 59, seconds: 59)),
+                                );
                               });
                               await fetchTransactions();
                             }
@@ -189,28 +379,40 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                           children: [
                             isLoading == true
                                 ? ListView.builder(
-                                    shrinkWrap: true,
+                                    // shrinkWrap: true,
                                     physics:
                                         const NeverScrollableScrollPhysics(),
                                     itemCount: 5,
                                     itemBuilder: (context, index) {
-                                      return const TransactionCardSkeleton();
+                                      return const TransactionCardSkeleton(); //Show skeleton for loading state
                                     })
                                 : ListView.builder(
                                     shrinkWrap: true,
                                     physics:
                                         const NeverScrollableScrollPhysics(),
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16.0, horizontal: 0.0),
+                                    // padding: const EdgeInsets.symmetric(
+                                    //     vertical: 16.0, horizontal: 0.0),
                                     itemCount: displayedTransactions.length,
                                     itemBuilder: (context, index) {
                                       final transaction =
                                           displayedTransactions[index];
-                                      return Card(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .inversePrimary
-                                            .withValues(alpha: .5),
+                                      return Card.outlined(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 0.0, vertical: 4.0),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          side: BorderSide(
+                                            color: transaction.type == 'Income'
+                                                ? Colors.green
+                                                : Colors.red,
+                                            width: 1,
+                                          ),
+                                        ),
+                                        // color: Theme.of(context)
+                                        //     .colorScheme
+                                        //     .secondary
+                                        //     .withValues(alpha: .5),
                                         child: ListTile(
                                           leading: Icon(
                                             transaction.type == 'Income'
@@ -248,9 +450,13 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                                           ),
                                           trailing: Text(
                                             '৳ ${transaction.amount.toStringAsFixed(2)}',
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 16,
+                                              color:
+                                                  transaction.type == 'Income'
+                                                      ? Colors.green
+                                                      : Colors.red,
                                             ),
                                           ),
                                         ),
@@ -275,9 +481,20 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 'Revenue Overview',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-
-              // const SizedBox(height: 16),
               // Line Chart
+
+              SfCircularChart(
+                title: ChartTitle(text: 'Expense Breakdown'),
+                series: <CircularSeries>[
+                  PieSeries<_ChartData, String>(
+                    dataSource: getCategoryBreakdownData('Expense'),
+                    xValueMapper: (_ChartData data, _) => data.category,
+                    yValueMapper: (_ChartData data, _) => data.value,
+                    dataLabelSettings: const DataLabelSettings(isVisible: true),
+                  ),
+                ],
+              ),
+
               SizedBox(
                 height: 200,
                 child: SfCartesianChart(
@@ -345,6 +562,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+
+              //Action Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [

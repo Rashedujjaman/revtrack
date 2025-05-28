@@ -61,9 +61,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
 
   Future<bool> saveTransaction() async {
     final String businessId = widget._businessId;
-    final double amount = amountController.text.trim().isEmpty
-        ? 0
-        : double.parse(amountController.text.trim());
+    final double amount = double.parse(amountController.text.trim());
     final String category = selectedCategory.trim();
     final String note = noteController.text.trim();
     try {
@@ -236,8 +234,34 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                         if (success) {
                           // SnackbarService.successMessage(
                           //     context, 'Transaction added successfully');
+                          AlertDialog(
+                            title: const Text('Success'),
+                            content:
+                                const Text('Transaction added successfully!'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
                           Navigator.pop(context);
                         } else {
+                          AlertDialog(
+                            title: const Text('Error'),
+                            content: const Text(
+                                'Failed to save transaction. Please try again.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
                           // SnackbarService.errorMessage(
                           //     context, 'Failed to save transaction');
                         }
