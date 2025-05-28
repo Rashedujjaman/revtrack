@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 
 class BusinessService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -19,16 +21,26 @@ class BusinessService {
   }
 
   //Update business
+  // Future<void> updateBusiness(
+  //     String uid, String businessName, String businessLogo) async {
+  //   try {
+  //     await firestore.collection('Business').doc(uid).update({
+  //       'businessName': businessName,
+  //       'businessLogo': businessLogo,
+  //     });
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  // }
+
   Future<void> updateBusiness(
-      String uid, String businessName, String businessLogo) async {
-    try {
-      await firestore.collection('Business').doc(uid).update({
-        'businessName': businessName,
-        'businessLogo': businessLogo,
-      });
-    } catch (e) {
-      rethrow;
-    }
+      String businessId, String name, String logoUrl) async {
+    final docRef =
+        FirebaseFirestore.instance.collection('businesses').doc(businessId);
+    await docRef.update({
+      'name': name,
+      'logoUrl': logoUrl,
+    });
   }
 
   //Delete business
@@ -81,5 +93,15 @@ class BusinessService {
         .orderBy('name')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+  }
+
+  //Upload image to Firebase Storage
+  Future<String> uploadImageToFirebase(
+      File imageFile, String businessId) async {
+    final storageRef = FirebaseStorage.instance.ref().child(
+        'business_logos/$businessId/${DateTime.now().millisecondsSinceEpoch}.jpg');
+    final uploadTask = await storageRef.putFile(imageFile);
+    final downloadUrl = await uploadTask.ref.getDownloadURL();
+    return downloadUrl;
   }
 }

@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:flutter/material.dart';
 import 'package:revtrack/models/transaction_model.dart';
 import 'package:revtrack/screens/add_edit_transaction_screen.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:revtrack/services/business_service.dart';
+
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/transaction_service.dart';
 import 'package:revtrack/widgets/skeleton.dart';
@@ -10,7 +13,8 @@ import 'package:intl/intl.dart';
 // import 'package:revtrack/services/snackbar_service.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:animated_number/src/animated_number_widget.dart';
-import 'package:animated_flip_counter/animated_flip_counter.dart';
+// import 'package:animated_flip_counter/animated_flip_counter.dart';
+import 'package:image_picker/image_picker.dart';
 
 class BusinessOverviewScreen extends StatefulWidget {
   final Business _business;
@@ -24,12 +28,13 @@ class BusinessOverviewScreen extends StatefulWidget {
 class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
   List<Transaction1> transactions = [];
   bool isLoading = false;
+  File? _imageFile;
 
   bool expanded = false;
   DateTimeRange _selectedDateRange = DateTimeRange(
     start: DateTime(DateTime.now().year, 1, 1),
     end: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day,
-        23, 59, 59),
+        23, 59, 59, 999, 999),
   );
 
   double totalIncome = 0.00;
@@ -104,6 +109,66 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
         .toList();
   }
 
+  List<_ChartData> getMonthlyTotals(String type) {
+    final Map<String, double> monthlyMap = {};
+
+    for (var transaction in transactions.where((t) => t.type == type)) {
+      final key =
+          DateFormat('MMM yyyy').format(transaction.dateCreated.toDate());
+      monthlyMap.update(key, (val) => val + transaction.amount,
+          ifAbsent: () => transaction.amount);
+    }
+
+    return monthlyMap.entries.map((e) => _ChartData(e.key, e.value)).toList();
+  }
+
+  //   List<_ChartData> getDailyTotals(String type) {
+  //   final Map<String, double> dailyMap = {};
+
+  //   for (var transaction in transactions.where((t) => t.type == type)) {
+  //     final key = DateFormat('MMM dd').format(transaction.dateCreated.toDate());
+  //     dailyMap.update(key, (val) => val + transaction.amount,
+  //         ifAbsent: () => transaction.amount);
+  //   }
+
+  //   return dailyMap.entries.map((e) => _ChartData(e.key, e.value)).toList();
+  // }
+
+  List<_ChartData> getRevenueTrendData() {
+    final Map<String, double> monthlyMap = {};
+
+    for (var transaction in transactions) {
+      final key =
+          DateFormat('MMM yyyy').format(transaction.dateCreated.toDate());
+      monthlyMap.update(
+        key,
+        (val) => transaction.type == 'Income'
+            ? val + transaction.amount
+            : val - transaction.amount,
+        ifAbsent: () => transaction.type == 'Income'
+            ? transaction.amount
+            : -transaction.amount,
+      );
+    }
+
+    return monthlyMap.entries.map((e) => _ChartData(e.key, e.value)).toList();
+  }
+
+  // Function to pick an image from the gallery or camera
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,6 +181,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 4,
             children: [
               const SizedBox(height: 16),
               Container(
@@ -316,7 +382,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                           highlightColor:
                               Theme.of(context).colorScheme.secondary,
                           child: Container(
-                            width: 320,
+                            width: 280,
                             height: 20,
                             decoration: const BoxDecoration(
                               color: Colors.white,
@@ -328,38 +394,55 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                           label: Text(
                             '${DateFormat('dd/MM/yyyy').format(_selectedDateRange.start)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateRange.end)}',
                           ),
-                          onPressed: () async {
-                            final picked = await showDateRangePicker(
-                              context: context,
-                              firstDate: DateTime.now()
-                                  .subtract(const Duration(days: 365 * 5)),
-                              lastDate: DateTime.now(),
-                              initialDateRange: _selectedDateRange,
-                            );
-                            if (picked != null &&
-                                picked != _selectedDateRange) {
-                              setState(() {
-                                _selectedDateRange = DateTimeRange(
-                                  start: picked.start,
-                                  end: picked.end.add(const Duration(
-                                      hours: 23, minutes: 59, seconds: 59)),
-                                );
-                              });
-                              await fetchTransactions();
-                            }
-                          },
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  final picked = await showDateRangePicker(
+                                    context: context,
+                                    firstDate: DateTime.now().subtract(
+                                        const Duration(days: 365 * 5)),
+                                    lastDate: DateTime.now(),
+                                    initialDateRange: _selectedDateRange,
+                                  );
+                                  if (picked != null &&
+                                      picked != _selectedDateRange) {
+                                    setState(() {
+                                      _selectedDateRange = DateTimeRange(
+                                        start: picked.start,
+                                        end: picked.end.add(const Duration(
+                                            hours: 23,
+                                            minutes: 59,
+                                            seconds: 59)),
+                                      );
+                                    });
+                                    await fetchTransactions();
+                                  }
+                                },
                         ),
-                  // if (_selectedDateRange != null)
-                  //   IconButton(
-                  //     icon: const Icon(Icons.clear),
-                  //     onPressed: () async {
-                  //       setState(() {
-                  //         _selectedDateRange = null;
-                  //         isLoading = true;
-                  //       });
-                  //       await fetchTransactions();
-                  //     },
-                  //   ),
+                  IconButton(
+                    icon: const Icon(Icons.restore),
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            setState(() {
+                              _selectedDateRange = DateTimeRange(
+                                start: DateTime(DateTime.now().year, 1, 1),
+                                end: DateTime(
+                                    DateTime.now().year,
+                                    DateTime.now().month,
+                                    DateTime.now().day,
+                                    23,
+                                    59,
+                                    59,
+                                    999,
+                                    999),
+                              );
+
+                              isLoading = true;
+                            });
+                            await fetchTransactions();
+                          },
+                  ),
                 ],
               ),
 
@@ -475,16 +558,15 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                         );
                       },
                     ),
-              const SizedBox(height: 16),
+              // const SizedBox(height: 16),
               // Graphs Section
-              const Text(
-                'Revenue Overview',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
               // Line Chart
-
+              //Expense breakdown through pie chart
               SfCircularChart(
-                title: ChartTitle(text: 'Expense Breakdown'),
+                borderWidth: 1,
+                borderColor: Colors.red,
+                legend: const Legend(isVisible: true),
+                title: const ChartTitle(text: 'Expense Breakdown'),
                 series: <CircularSeries>[
                   PieSeries<_ChartData, String>(
                     dataSource: getCategoryBreakdownData('Expense'),
@@ -494,72 +576,70 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                   ),
                 ],
               ),
-
-              SizedBox(
-                height: 200,
-                child: SfCartesianChart(
-                  primaryXAxis: const NumericAxis(),
-                  series: <CartesianSeries>[
-                    LineSeries<_ChartData, double>(
-                      dataSource: [
-                        _ChartData('0', 1),
-                        _ChartData('1', 3),
-                        _ChartData('2', 2),
-                        _ChartData('3', 1.5),
-                        _ChartData('4', 2.5),
-                      ],
-                      xValueMapper: (_ChartData data, _) =>
-                          double.parse(data.category),
-                      yValueMapper: (_ChartData data, _) => data.value,
-                      color: Colors.blue,
-                    ),
-                  ],
-                ),
+              //Income breakdown through pie chart
+              SfCircularChart(
+                borderWidth: 1,
+                borderColor: Colors.green,
+                legend: const Legend(isVisible: true),
+                title: const ChartTitle(text: 'Income Breakdown'),
+                series: <CircularSeries>[
+                  PieSeries<_ChartData, String>(
+                    dataSource: getCategoryBreakdownData('Income'),
+                    xValueMapper: (_ChartData data, _) => data.category,
+                    yValueMapper: (_ChartData data, _) => data.value,
+                    dataLabelSettings: const DataLabelSettings(isVisible: true),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
-
-              // Pie Chart
-              SizedBox(
-                height: 200,
-                child: SfCircularChart(
-                  backgroundColor: Theme.of(context)
-                      .colorScheme
-                      .inversePrimary
-                      .withValues(alpha: .5),
-                  series: <CircularSeries>[
-                    PieSeries<_ChartData, String>(
-                      dataSource: [
-                        _ChartData('Category A', 40),
-                        _ChartData('Category B', 30),
-                        _ChartData('Category C', 30),
-                      ],
-                      xValueMapper: (_ChartData data, _) => data.category,
-                      yValueMapper: (_ChartData data, _) => data.value,
-                      dataLabelSettings:
-                          const DataLabelSettings(isVisible: true),
+              //Monthly Income vs Expense Column Chart
+              SfCartesianChart(
+                title: const ChartTitle(text: 'Monthly Income vs Expense'),
+                primaryXAxis: const CategoryAxis(),
+                series: <CartesianSeries<_ChartData, String>>[
+                  ColumnSeries<_ChartData, String>(
+                    dataSource: getMonthlyTotals('Income'),
+                    xValueMapper: (_ChartData data, _) => data.category,
+                    yValueMapper: (_ChartData data, _) => data.value,
+                    name: 'Income',
+                    color: Colors.green,
+                    dataLabelSettings: const DataLabelSettings(
+                      isVisible: true,
+                      labelAlignment: ChartDataLabelAlignment.auto,
+                      angle: -45,
                     ),
-                  ],
-                ),
+                  ),
+                  ColumnSeries<_ChartData, String>(
+                    dataSource: getMonthlyTotals('Expense'),
+                    xValueMapper: (_ChartData data, _) => data.category,
+                    yValueMapper: (_ChartData data, _) => data.value,
+                    name: 'Expense',
+                    color: Colors.red,
+                    dataLabelSettings: const DataLabelSettings(
+                      isVisible: true,
+                      labelAlignment: ChartDataLabelAlignment.auto,
+                      angle: -45,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              // Bar Chart
-              SizedBox(
-                height: 200,
-                child: SfCartesianChart(
-                  primaryXAxis: const CategoryAxis(),
-                  series: <CartesianSeries>[
-                    ColumnSeries<_ChartData, String>(
-                      dataSource: [
-                        _ChartData('A', 5),
-                        _ChartData('B', 3),
-                        _ChartData('C', 4),
-                      ],
-                      xValueMapper: (_ChartData data, _) => data.category,
-                      yValueMapper: (_ChartData data, _) => data.value,
-                      color: Colors.blue,
+              // Revenue Trend Line Chart
+              SfCartesianChart(
+                title: const ChartTitle(text: 'Revenue Trend'),
+                legend: const Legend(isVisible: true),
+                tooltipBehavior: TooltipBehavior(enable: true),
+                primaryXAxis: const CategoryAxis(),
+                series: <CartesianSeries<_ChartData, String>>[
+                  LineSeries<_ChartData, String>(
+                    dataSource: getRevenueTrendData(),
+                    xValueMapper: (_ChartData data, _) => data.category,
+                    yValueMapper: (_ChartData data, _) => data.value,
+                    name: 'Revenue',
+                    dataLabelSettings: const DataLabelSettings(
+                      isVisible: true,
+                      labelAlignment: ChartDataLabelAlignment.top,
                     ),
-                  ],
-                ),
+                  )
+                ],
               ),
               const SizedBox(height: 24),
 
@@ -570,6 +650,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                   ElevatedButton(
                     onPressed: () {
                       // Edit Company Logic
+                      _showEditBusinessBottomSheet(context, widget._business);
                     },
                     child: const Text('Edit'),
                   ),
@@ -640,6 +721,129 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
         ),
       ),
       // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  void _showEditBusinessBottomSheet(BuildContext context, Business business) {
+    final TextEditingController nameController =
+        TextEditingController(text: business.name);
+    String imageUrl = business.logoUrl;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 16,
+              right: 16,
+              top: 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Edit Business',
+                    style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 16),
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                      backgroundImage: _imageFile != null
+                          ? FileImage(_imageFile!)
+                          : (imageUrl.isNotEmpty
+                              ? NetworkImage(imageUrl) as ImageProvider
+                              : null),
+                      child: _imageFile == null && imageUrl.isEmpty
+                          ? const Icon(Icons.business,
+                              size: 50, color: Colors.grey)
+                          : null,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () async {
+                          // _pickImage();
+                          // setModalState(() {});
+                          final pickedFile = await ImagePicker()
+                              .pickImage(source: ImageSource.gallery);
+                          if (pickedFile != null) {
+                            setState(() {
+                              _imageFile = File(pickedFile.path);
+                            });
+                            setModalState(() {}); // Update modal bottom sheet
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF62BDBD),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.camera_alt,
+                              color: Colors.white, size: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Business Name'),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () async {
+                    final updatedName = nameController.text.trim();
+
+                    if (updatedName.isNotEmpty) {
+                      try {
+                        String finalLogoUrl = imageUrl;
+                        if (_imageFile != null) {
+                          finalLogoUrl = await BusinessService()
+                              .uploadImageToFirebase(_imageFile!, business.id);
+                        }
+
+                        await BusinessService().updateBusiness(
+                          business.id,
+                          updatedName,
+                          finalLogoUrl,
+                        );
+
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Business updated successfully')),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Error updating business: $e')),
+                          );
+                        }
+                      }
+                    }
+                  },
+                  child: const Text('Save Changes'),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          );
+        });
+      },
     );
   }
 }
