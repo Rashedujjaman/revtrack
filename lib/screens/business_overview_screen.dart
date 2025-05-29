@@ -1,20 +1,16 @@
-import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:revtrack/widgets/edit_business_bottom_sheet.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:flutter/material.dart';
 import 'package:revtrack/models/transaction_model.dart';
 import 'package:revtrack/screens/add_edit_transaction_screen.dart';
-import 'package:revtrack/services/business_service.dart';
 
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/transaction_service.dart';
 import 'package:revtrack/widgets/skeleton.dart';
 import 'package:intl/intl.dart';
-// import 'package:revtrack/services/snackbar_service.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:animated_number/src/animated_number_widget.dart';
-// import 'package:animated_flip_counter/animated_flip_counter.dart';
-import 'package:image_picker/image_picker.dart';
 
 class BusinessOverviewScreen extends StatefulWidget {
   final Business _business;
@@ -28,7 +24,8 @@ class BusinessOverviewScreen extends StatefulWidget {
 class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
   List<Transaction1> transactions = [];
   bool isLoading = false;
-  File? _imageFile;
+  String businessLogo = '';
+  String businessName = '';
 
   bool expanded = false;
   DateTimeRange _selectedDateRange = DateTimeRange(
@@ -44,6 +41,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
   @override
   void initState() {
     isLoading = true;
+    businessLogo = widget._business.logoUrl;
+    businessName = widget._business.name;
     super.initState();
     fetchTransactions();
   }
@@ -154,21 +153,6 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
     return monthlyMap.entries.map((e) => _ChartData(e.key, e.value)).toList();
   }
 
-  // Function to pick an image from the gallery or camera
-  Future<void> _pickImage() async {
-    try {
-      final pickedFile =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        setState(() {
-          _imageFile = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      print('Error picking image: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -208,7 +192,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                         baseColor: Colors.red,
                         highlightColor: Colors.yellow,
                         child: Text(
-                          widget._business.name,
+                          businessName,
                           // textAlign: TextAlign.center,
                           style: const TextStyle(
                               fontSize: 24, fontWeight: FontWeight.bold),
@@ -355,7 +339,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                         // Business Logo
                         ClipOval(
                           child: CachedNetworkImage(
-                            imageUrl: widget._business.logoUrl,
+                            imageUrl: businessLogo,
                             width: 70,
                             height: 70,
                             fit: BoxFit.cover,
@@ -650,7 +634,31 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                   ElevatedButton(
                     onPressed: () {
                       // Edit Company Logic
-                      _showEditBusinessBottomSheet(context, widget._business);
+                      final updatedData = showModalBottomSheet(
+                        barrierColor:
+                            Theme.of(context).colorScheme.primary.withValues(
+                                  alpha: .3,
+                                ),
+                        elevation: 5,
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          return EditBusinessBottomSheet(
+                            business: widget._business,
+                          );
+                        },
+                      );
+                      updatedData.then(
+                        (value) {
+                          if (value != null && context.mounted) {
+                            setState(() {
+                              businessName = value['name'];
+                              businessLogo = value['logoUrl'];
+                            });
+                          }
+                          fetchTransactions();
+                        },
+                      );
                     },
                     child: const Text('Edit'),
                   ),
@@ -721,129 +729,6 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
         ),
       ),
       // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    );
-  }
-
-  void _showEditBusinessBottomSheet(BuildContext context, Business business) {
-    final TextEditingController nameController =
-        TextEditingController(text: business.name);
-    String imageUrl = business.logoUrl;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(builder: (context, setModalState) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 16,
-              right: 16,
-              top: 24,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Edit Business',
-                    style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 16),
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.blue.withValues(alpha: 0.1),
-                      backgroundImage: _imageFile != null
-                          ? FileImage(_imageFile!)
-                          : (imageUrl.isNotEmpty
-                              ? NetworkImage(imageUrl) as ImageProvider
-                              : null),
-                      child: _imageFile == null && imageUrl.isEmpty
-                          ? const Icon(Icons.business,
-                              size: 50, color: Colors.grey)
-                          : null,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () async {
-                          // _pickImage();
-                          // setModalState(() {});
-                          final pickedFile = await ImagePicker()
-                              .pickImage(source: ImageSource.gallery);
-                          if (pickedFile != null) {
-                            setState(() {
-                              _imageFile = File(pickedFile.path);
-                            });
-                            setModalState(() {}); // Update modal bottom sheet
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF62BDBD),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.camera_alt,
-                              color: Colors.white, size: 16),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Business Name'),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () async {
-                    final updatedName = nameController.text.trim();
-
-                    if (updatedName.isNotEmpty) {
-                      try {
-                        String finalLogoUrl = imageUrl;
-                        if (_imageFile != null) {
-                          finalLogoUrl = await BusinessService()
-                              .uploadImageToFirebase(_imageFile!, business.id);
-                        }
-
-                        await BusinessService().updateBusiness(
-                          business.id,
-                          updatedName,
-                          finalLogoUrl,
-                        );
-
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Business updated successfully')),
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text('Error updating business: $e')),
-                          );
-                        }
-                      }
-                    }
-                  },
-                  child: const Text('Save Changes'),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          );
-        });
-      },
     );
   }
 }

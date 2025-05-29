@@ -35,12 +35,16 @@ class BusinessService {
 
   Future<void> updateBusiness(
       String businessId, String name, String logoUrl) async {
-    final docRef =
-        FirebaseFirestore.instance.collection('businesses').doc(businessId);
-    await docRef.update({
-      'name': name,
-      'logoUrl': logoUrl,
-    });
+    try {
+      final docRef =
+          FirebaseFirestore.instance.collection('Business').doc(businessId);
+      await docRef.update({
+        'name': name,
+        'logoUrl': logoUrl,
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
 
   //Delete business
