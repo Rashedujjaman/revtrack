@@ -55,11 +55,11 @@ class _LoginScreenState extends State<LoginScreen> {
             MaterialPageRoute(
                 builder: (context) => const MainNavigationScreen()),
           );
-          SnackbarService.successMessage(context, 'Login successful!');
+          SnackbarService().successMessage(context, 'Login successful!');
         }
       } catch (e) {
         if (mounted) {
-          SnackbarService.errorMessage(context, e.toString());
+          SnackbarService().errorMessage(context, e.toString());
         }
       }
     }
@@ -72,127 +72,126 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         children: [
           Container(
-              height: double.infinity,
-              decoration: gradientBackground(context),
-              child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  // Center the form contents
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            //Logo of the app
-                            const SizedBox(height: 50.0),
-                            Image.asset(
-                              'assets/images/logo.jpg',
-                              width: 400,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                            const SizedBox(height: 100.0),
-                            CustomTextFormField(
-                              label: 'Email',
-                              controller: _emailController,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your Email';
-                                }
-                                if (!isValidEmail(value)) {
-                                  return 'Please enter a valid Email';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16.0),
-                            CustomTextFormField(
-                              label: 'Password',
-                              controller: _passwordController,
-                              obscureText: true,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your Password';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 100.0),
-                            SizedBox(
-                              width: double
-                                  .infinity, // Button width spans full width
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  _formKey.currentState!.validate() == true &&
-                                          !_isLoading
-                                      ? login()
-                                      : null;
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.amber,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                                child: _isLoading
-                                    ? const CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Colors.white),
-                                      )
-                                    : const Text(
-                                        'Sign In',
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.white),
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(height: 10.0),
-                            SizedBox(
-                              width: double
-                                  .infinity, // Button width spans full width
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(context,
-                                      MaterialPageRoute(builder: (context) {
-                                    return const RegisterScreen();
-                                  }));
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      const Color.fromARGB(255, 255, 255, 255),
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  side: const BorderSide(
-                                      color: Colors.amber, width: 1),
-                                ),
-                                child: const Text(
-                                  'Sign Up',
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.amber),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16.0),
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text(
-                                'Forgot Password?',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ],
+            height: double.infinity,
+            decoration: gradientBackground(context),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              // Center the form contents
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        //Logo of the app
+                        const SizedBox(height: 50.0),
+                        Image.asset(
+                          'assets/images/logo.jpg',
+                          width: 400,
+                          height: 100,
+                          fit: BoxFit.cover,
                         ),
-                      ),
+                        const SizedBox(height: 100.0),
+                        CustomTextFormField(
+                          label: 'Email',
+                          controller: _emailController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your Email';
+                            }
+                            if (!isValidEmail(value)) {
+                              return 'Please enter a valid Email';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16.0),
+                        CustomTextFormField(
+                          label: 'Password',
+                          controller: _passwordController,
+                          obscureText: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your Password';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 100.0),
+                        SizedBox(
+                          width:
+                              double.infinity, // Button width spans full width
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _formKey.currentState!.validate() == true &&
+                                      !_isLoading
+                                  ? login()
+                                  : null;
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.amber,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  )
+                                : const Text(
+                                    'Sign In',
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.white),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 10.0),
+                        SizedBox(
+                          width:
+                              double.infinity, // Button width spans full width
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) {
+                                return const RegisterScreen();
+                              }));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color.fromARGB(255, 255, 255, 255),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              side: const BorderSide(
+                                  color: Colors.amber, width: 1),
+                            ),
+                            child: const Text(
+                              'Sign Up',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.amber),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16.0),
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
-                  ))),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

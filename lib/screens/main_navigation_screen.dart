@@ -4,14 +4,15 @@ import 'profile_screen.dart';
 import 'business_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key});
+  final int? _index;
+  const MainNavigationScreen([this._index, Key? key]) : super(key: key);
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   final List<Widget> _screens = [
     const DashboardScreen(),
@@ -24,13 +25,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   @override
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget._index ?? 0;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: _screens[_selectedIndex],
       ),
-      // Container(
       //     decoration: const BoxDecoration(
       //         // color: Theme.of(context).colorScheme.background,
       //         // gradient: LinearGradient(

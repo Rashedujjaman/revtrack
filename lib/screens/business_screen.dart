@@ -7,8 +7,22 @@ import 'package:revtrack/widgets/skeleton.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class BusinessScreen extends StatelessWidget {
+class BusinessScreen extends StatefulWidget {
   const BusinessScreen({super.key});
+  @override
+  State<BusinessScreen> createState() => _BusinessScreenState();
+}
+
+class _BusinessScreenState extends State<BusinessScreen> {
+  get userId => Provider.of<UserProvider>(context, listen: false).userId;
+  List<Business> businesses = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Optionally, you can fetch businesses when the screen is initialized
+    getBusinessesByUser(userId);
+  }
 
   Future<void> addBusiness(String userId, String name, String logoUrl) async {
     try {
@@ -20,43 +34,51 @@ class BusinessScreen extends StatelessWidget {
     }
   }
 
+  Future<void> getBusinessesByUser(String userId) async {
+    try {
+      // Call the getBusinessesByUser method from BusinessService
+      businesses = await BusinessService().getBusinessesByUser(userId);
+    } catch (e) {
+      // Handle any errors that occur during the process
+      // print('Error getting businesses: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final userId = Provider.of<UserProvider>(context).userId;
     return Scaffold(
       // backgroundColor: Colors.transparent,
       body: Column(
         children: [
           const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(
-                child: Text(
-                  'All Your Businesses',
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                ),
-              )),
+            padding: EdgeInsets.all(16),
+            child: Center(
+              child: Text(
+                'All Your Businesses',
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
           Expanded(
             child: userId == null
                 ? const Text("User is not loged in")
-                : StreamBuilder<List<Map<String, dynamic>>>(
-                    stream: BusinessService().getBusinessesByUser(userId),
+                : FutureBuilder<void>(
+                    future: getBusinessesByUser(userId),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        // return const Center(child: CircularProgressIndicator());
                         return ListView.builder(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 16.0, horizontal: 8.0),
-                            itemCount: 6,
-                            itemBuilder: (context, index) {
-                              return const BusinessCardSkeleton();
-                            });
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16.0, horizontal: 8.0),
+                          itemCount: 6,
+                          itemBuilder: (context, index) {
+                            return const BusinessCardSkeleton();
+                          },
+                        );
                       }
 
                       if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       }
-
-                      final businesses = snapshot.data ?? [];
 
                       if (businesses.isEmpty) {
                         return const Center(
@@ -73,12 +95,12 @@ class BusinessScreen extends StatelessWidget {
                             color: Theme.of(context)
                                 .colorScheme
                                 .inversePrimary
-                                .withValues(alpha: .5),
-                            // margin: const EdgeInsets.symmetric(vertical: 8.0),
+                                .withValues(alpha: 0.5),
                             child: ListTile(
-                              leading: business['logoUrl'] != null
+                              leading: business.logoUrl != null ||
+                                      business.logoUrl!.isNotEmpty
                                   ? CachedNetworkImage(
-                                      imageUrl: business['logoUrl'],
+                                      imageUrl: business.logoUrl!,
                                       width: 50,
                                       height: 50,
                                       fit: BoxFit.cover,
@@ -88,16 +110,14 @@ class BusinessScreen extends StatelessWidget {
                                       },
                                     )
                                   : const Icon(Icons.business),
-                              title: Text(business['name']),
+                              title: Text(business.name),
                               trailing: const Icon(Icons.arrow_forward_ios),
                               onTap: () {
-                                Business businessObject =
-                                    Business.fromJson(business);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        BusinessOverviewScreen(businessObject),
+                                        BusinessOverviewScreen(business),
                                   ),
                                 );
                               },
@@ -107,7 +127,7 @@ class BusinessScreen extends StatelessWidget {
                       );
                     },
                   ),
-          )
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(

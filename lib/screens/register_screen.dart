@@ -61,11 +61,11 @@ class _RegistrationScreenState extends State<RegisterScreen> {
             context,
             MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
-          SnackbarService.successMessage(context, 'Registration Successful!');
+          SnackbarService().successMessage(context, 'Registration Successful!');
         }
       } catch (e) {
         if (mounted) {
-          SnackbarService.errorMessage(context, e.toString());
+          SnackbarService().errorMessage(context, e.toString());
         }
       }
     }

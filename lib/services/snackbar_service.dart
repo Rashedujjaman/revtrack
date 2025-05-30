@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SnackbarService {
-  static void successMessage(BuildContext context, String message) {
+  void successMessage(BuildContext context, String message) {
     final snackBar = SnackBar(
       content: Text(
         message,
@@ -14,7 +14,7 @@ class SnackbarService {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  static void errorMessage(BuildContext context, String message) {
+  void errorMessage(BuildContext context, String message) {
     final snackBar = SnackBar(
       content: Text(
         message,

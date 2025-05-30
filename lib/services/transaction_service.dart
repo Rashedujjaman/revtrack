@@ -75,7 +75,7 @@ class TransactionService {
         .toList();
   }
 
-  //Fetch categories
+  //Fetch income categories
   Future<List<String>> fetchIncomeCategories() async {
     try {
       final snapshot =
@@ -90,6 +90,7 @@ class TransactionService {
     }
   }
 
+  //Fetch income categories
   Future<List<String>> fetchExpenseCategories() async {
     try {
       final snapshot =

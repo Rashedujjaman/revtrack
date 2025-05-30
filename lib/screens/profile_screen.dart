@@ -26,12 +26,12 @@ class ProfileScreen extends StatelessWidget {
           context,
           MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
-        SnackbarService.successMessage(context, 'Logged out successfully!');
+        SnackbarService().successMessage(context, 'Logged out successfully!');
       }
     } catch (e) {
       if (context.mounted) {
         // Handle error
-        SnackbarService.errorMessage(context, e.toString());
+        SnackbarService().errorMessage(context, e.toString());
       }
     }
   }

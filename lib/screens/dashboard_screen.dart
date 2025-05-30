@@ -3,7 +3,7 @@ import 'package:revtrack/theme/gradient_provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 import 'package:revtrack/widgets/pie_chart.dart';
-import 'package:animated_number/src/animated_number_widget.dart';
+import 'package:animated_number/animated_number.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

@@ -1,16 +1,19 @@
+import 'package:intl/intl.dart';
+import 'package:revtrack/screens/main_navigation_screen.dart';
+import 'package:revtrack/services/business_service.dart';
+import 'package:revtrack/services/snackbar_service.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:flutter/material.dart';
+import 'package:animated_number/animated_number.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:revtrack/widgets/edit_business_bottom_sheet.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:flutter/material.dart';
-import 'package:revtrack/models/transaction_model.dart';
-import 'package:revtrack/screens/add_edit_transaction_screen.dart';
-
-import 'package:revtrack/models/business_model.dart';
-import 'package:revtrack/services/transaction_service.dart';
 import 'package:revtrack/widgets/skeleton.dart';
-import 'package:intl/intl.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:animated_number/src/animated_number_widget.dart';
+import 'package:revtrack/models/transaction_model.dart';
+import 'package:revtrack/models/business_model.dart';
+import 'package:revtrack/models/chart_data_model.dart';
+import 'package:revtrack/screens/add_edit_transaction_screen.dart';
+import 'package:revtrack/services/transaction_service.dart';
 
 class BusinessOverviewScreen extends StatefulWidget {
   final Business _business;
@@ -22,6 +25,8 @@ class BusinessOverviewScreen extends StatefulWidget {
 }
 
 class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
+  //*************************************************************************************************************************** */
+  // Variables for managing business overview state
   List<Transaction1> transactions = [];
   bool isLoading = false;
   String businessLogo = '';
@@ -37,11 +42,12 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
   double totalIncome = 0.00;
   double totalExpense = 0.00;
   double revenue = 0.00;
+  //*************************************************************************************************************************** */
 
   @override
   void initState() {
     isLoading = true;
-    businessLogo = widget._business.logoUrl;
+    businessLogo = widget._business.logoUrl ?? '';
     businessName = widget._business.name;
     super.initState();
     fetchTransactions();
@@ -69,6 +75,28 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
     });
   }
 
+  Future<void> deleteBusiness() async {
+    try {
+      BusinessService().deleteBusiness(widget._business.id);
+
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const MainNavigationScreen(1)),
+        );
+
+        // SnackbarService()
+        //     .successMessage(context, 'Business deleted successfully.');
+      }
+    } catch (e) {
+      SnackbarService().errorMessage(
+        context,
+        'Error deleting business: $e',
+      );
+    }
+  }
+
   void toggleExpanded() {
     setState(() {
       expanded = !expanded;
@@ -91,7 +119,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
     return calculateTotalIncome() - calculateTotalExpense();
   }
 
-  List<_ChartData> getCategoryBreakdownData(String type) {
+  List<ChartData> getCategoryBreakdownData(String type) {
     final filtered = transactions.where((t) => t.type == type);
     final Map<String, double> dataMap = {};
 
@@ -104,11 +132,11 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
     }
 
     return dataMap.entries
-        .map((entry) => _ChartData(entry.key, entry.value))
+        .map((entry) => ChartData(entry.key, entry.value))
         .toList();
   }
 
-  List<_ChartData> getMonthlyTotals(String type) {
+  List<ChartData> getMonthlyTotals(String type) {
     final Map<String, double> monthlyMap = {};
 
     for (var transaction in transactions.where((t) => t.type == type)) {
@@ -118,22 +146,22 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
           ifAbsent: () => transaction.amount);
     }
 
-    return monthlyMap.entries.map((e) => _ChartData(e.key, e.value)).toList();
+    return monthlyMap.entries.map((e) => ChartData(e.key, e.value)).toList();
   }
 
-  //   List<_ChartData> getDailyTotals(String type) {
-  //   final Map<String, double> dailyMap = {};
+  List<ChartData> getDailyTotals(String type) {
+    final Map<String, double> dailyMap = {};
 
-  //   for (var transaction in transactions.where((t) => t.type == type)) {
-  //     final key = DateFormat('MMM dd').format(transaction.dateCreated.toDate());
-  //     dailyMap.update(key, (val) => val + transaction.amount,
-  //         ifAbsent: () => transaction.amount);
-  //   }
+    for (var transaction in transactions.where((t) => t.type == type)) {
+      final key = DateFormat('MMM dd').format(transaction.dateCreated.toDate());
+      dailyMap.update(key, (val) => val + transaction.amount,
+          ifAbsent: () => transaction.amount);
+    }
 
-  //   return dailyMap.entries.map((e) => _ChartData(e.key, e.value)).toList();
-  // }
+    return dailyMap.entries.map((e) => ChartData(e.key, e.value)).toList();
+  }
 
-  List<_ChartData> getRevenueTrendData() {
+  List<ChartData> getRevenueTrendData() {
     final Map<String, double> monthlyMap = {};
 
     for (var transaction in transactions) {
@@ -150,7 +178,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
       );
     }
 
-    return monthlyMap.entries.map((e) => _ChartData(e.key, e.value)).toList();
+    return monthlyMap.entries.map((e) => ChartData(e.key, e.value)).toList();
   }
 
   @override
@@ -168,6 +196,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
             spacing: 4,
             children: [
               const SizedBox(height: 16),
+              // Business Overview Card
               Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
@@ -210,6 +239,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               spacing: 16,
                               children: [
+                                // Total Income, Expense, and Revenue labels
                                 const Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   spacing: 4,
@@ -234,7 +264,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                                   ],
                                 ),
 
-                                // Total Income, Expense, and Revenue
+                                // Total Income, Expense, and Revenue values
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   spacing: isLoading ? 8 : 4,
@@ -354,6 +384,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
               ),
 
               const SizedBox(height: 8),
+              // Date Range Selector
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -430,118 +461,112 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 ],
               ),
 
-              transactions.isEmpty
-                  ? const Text('No transactions found.')
-                  : StatefulBuilder(
-                      builder: (context, setState) {
-                        int visibleCount = 5;
+              isLoading == true
+                  ? ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 5,
+                      itemBuilder: (context, index) {
+                        return const TransactionCardSkeleton(); //Show skeleton for loading state
+                      })
+                  : transactions.isEmpty
+                      ? const Text('No transactions found.')
+                      : StatefulBuilder(
+                          builder: (context, setState) {
+                            int visibleCount = 5;
 
-                        final showAll =
-                            expanded || transactions.length <= visibleCount;
-                        final displayedTransactions = showAll
-                            ? transactions
-                            : transactions.take(visibleCount).toList();
+                            final showAll =
+                                expanded || transactions.length <= visibleCount;
+                            final displayedTransactions = showAll
+                                ? transactions
+                                : transactions.take(visibleCount).toList();
 
-                        return Column(
-                          children: [
-                            isLoading == true
-                                ? ListView.builder(
-                                    // shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    itemCount: 5,
-                                    itemBuilder: (context, index) {
-                                      return const TransactionCardSkeleton(); //Show skeleton for loading state
-                                    })
-                                : ListView.builder(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    // padding: const EdgeInsets.symmetric(
-                                    //     vertical: 16.0, horizontal: 0.0),
-                                    itemCount: displayedTransactions.length,
-                                    itemBuilder: (context, index) {
-                                      final transaction =
-                                          displayedTransactions[index];
-                                      return Card.outlined(
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 0.0, vertical: 4.0),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          side: BorderSide(
+                            return Column(
+                              children: [
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: displayedTransactions.length,
+                                  itemBuilder: (context, index) {
+                                    final transaction =
+                                        displayedTransactions[index];
+                                    return Card.outlined(
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 0.0, vertical: 4.0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        side: BorderSide(
+                                          color: transaction.type == 'Income'
+                                              ? Colors.green
+                                              : Colors.red,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      // color: Theme.of(context)
+                                      //     .colorScheme
+                                      //     .secondary
+                                      //     .withValues(alpha: .5),
+                                      child: ListTile(
+                                        leading: Icon(
+                                          transaction.type == 'Income'
+                                              ? Icons.arrow_downward
+                                              : Icons.arrow_upward,
+                                          color: transaction.type == 'Income'
+                                              ? Colors.green
+                                              : Colors.red,
+                                        ),
+                                        title: Text(
+                                          transaction.type,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
                                             color: transaction.type == 'Income'
                                                 ? Colors.green
                                                 : Colors.red,
-                                            width: 1,
                                           ),
                                         ),
-                                        // color: Theme.of(context)
-                                        //     .colorScheme
-                                        //     .secondary
-                                        //     .withValues(alpha: .5),
-                                        child: ListTile(
-                                          leading: Icon(
-                                            transaction.type == 'Income'
-                                                ? Icons.arrow_downward
-                                                : Icons.arrow_upward,
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Date: ${DateFormat('dd/MM/yyyy').format(transaction.dateCreated.toDate())}',
+                                              style:
+                                                  const TextStyle(fontSize: 12),
+                                            ),
+                                            Text(
+                                              transaction.category,
+                                              style:
+                                                  const TextStyle(fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: Text(
+                                          '৳ ${transaction.amount.toStringAsFixed(2)}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
                                             color: transaction.type == 'Income'
                                                 ? Colors.green
                                                 : Colors.red,
                                           ),
-                                          title: Text(
-                                            transaction.type,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color:
-                                                  transaction.type == 'Income'
-                                                      ? Colors.green
-                                                      : Colors.red,
-                                            ),
-                                          ),
-                                          subtitle: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Date: ${DateFormat('dd/MM/yyyy').format(transaction.dateCreated.toDate())}',
-                                                style: const TextStyle(
-                                                    fontSize: 12),
-                                              ),
-                                              Text(
-                                                transaction.category,
-                                                style: const TextStyle(
-                                                    fontSize: 12),
-                                              ),
-                                            ],
-                                          ),
-                                          trailing: Text(
-                                            '৳ ${transaction.amount.toStringAsFixed(2)}',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                              color:
-                                                  transaction.type == 'Income'
-                                                      ? Colors.green
-                                                      : Colors.red,
-                                            ),
-                                          ),
                                         ),
-                                      );
-                                    },
-                                  ),
-                            if (transactions.length > visibleCount &&
-                                !isLoading)
-                              TextButton(
-                                onPressed: toggleExpanded,
-                                child: Text(
-                                  expanded ? 'Show Less' : 'Show More',
+                                      ),
+                                    );
+                                  },
                                 ),
-                              ),
-                          ],
-                        );
-                      },
-                    ),
+                                if (transactions.length > visibleCount &&
+                                    !isLoading)
+                                  TextButton(
+                                    onPressed: toggleExpanded,
+                                    child: Text(
+                                      expanded ? 'Show Less' : 'Show More',
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
               // const SizedBox(height: 16),
               // Graphs Section
               // Line Chart
@@ -552,10 +577,10 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 legend: const Legend(isVisible: true),
                 title: const ChartTitle(text: 'Expense Breakdown'),
                 series: <CircularSeries>[
-                  PieSeries<_ChartData, String>(
+                  PieSeries<ChartData, String>(
                     dataSource: getCategoryBreakdownData('Expense'),
-                    xValueMapper: (_ChartData data, _) => data.category,
-                    yValueMapper: (_ChartData data, _) => data.value,
+                    xValueMapper: (ChartData data, _) => data.category,
+                    yValueMapper: (ChartData data, _) => data.value,
                     dataLabelSettings: const DataLabelSettings(isVisible: true),
                   ),
                 ],
@@ -567,10 +592,10 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 legend: const Legend(isVisible: true),
                 title: const ChartTitle(text: 'Income Breakdown'),
                 series: <CircularSeries>[
-                  PieSeries<_ChartData, String>(
+                  PieSeries<ChartData, String>(
                     dataSource: getCategoryBreakdownData('Income'),
-                    xValueMapper: (_ChartData data, _) => data.category,
-                    yValueMapper: (_ChartData data, _) => data.value,
+                    xValueMapper: (ChartData data, _) => data.category,
+                    yValueMapper: (ChartData data, _) => data.value,
                     dataLabelSettings: const DataLabelSettings(isVisible: true),
                   ),
                 ],
@@ -579,11 +604,11 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
               SfCartesianChart(
                 title: const ChartTitle(text: 'Monthly Income vs Expense'),
                 primaryXAxis: const CategoryAxis(),
-                series: <CartesianSeries<_ChartData, String>>[
-                  ColumnSeries<_ChartData, String>(
+                series: <CartesianSeries<ChartData, String>>[
+                  ColumnSeries<ChartData, String>(
                     dataSource: getMonthlyTotals('Income'),
-                    xValueMapper: (_ChartData data, _) => data.category,
-                    yValueMapper: (_ChartData data, _) => data.value,
+                    xValueMapper: (ChartData data, _) => data.category,
+                    yValueMapper: (ChartData data, _) => data.value,
                     name: 'Income',
                     color: Colors.green,
                     dataLabelSettings: const DataLabelSettings(
@@ -592,10 +617,10 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                       angle: -45,
                     ),
                   ),
-                  ColumnSeries<_ChartData, String>(
+                  ColumnSeries<ChartData, String>(
                     dataSource: getMonthlyTotals('Expense'),
-                    xValueMapper: (_ChartData data, _) => data.category,
-                    yValueMapper: (_ChartData data, _) => data.value,
+                    xValueMapper: (ChartData data, _) => data.category,
+                    yValueMapper: (ChartData data, _) => data.value,
                     name: 'Expense',
                     color: Colors.red,
                     dataLabelSettings: const DataLabelSettings(
@@ -612,11 +637,11 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 legend: const Legend(isVisible: true),
                 tooltipBehavior: TooltipBehavior(enable: true),
                 primaryXAxis: const CategoryAxis(),
-                series: <CartesianSeries<_ChartData, String>>[
-                  LineSeries<_ChartData, String>(
+                series: <CartesianSeries<ChartData, String>>[
+                  LineSeries<ChartData, String>(
                     dataSource: getRevenueTrendData(),
-                    xValueMapper: (_ChartData data, _) => data.category,
-                    yValueMapper: (_ChartData data, _) => data.value,
+                    xValueMapper: (ChartData data, _) => data.category,
+                    yValueMapper: (ChartData data, _) => data.value,
                     name: 'Revenue',
                     dataLabelSettings: const DataLabelSettings(
                       isVisible: true,
@@ -631,6 +656,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  //Edit Button
                   ElevatedButton(
                     onPressed: () {
                       // Edit Company Logic
@@ -660,11 +686,46 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                         },
                       );
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.withValues(alpha: .7),
+                    ),
                     child: const Text('Edit'),
                   ),
+                  //Delete button
                   ElevatedButton(
                     onPressed: () {
                       // Delete Company Logic
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Delete Business'),
+                            content: const Text(
+                                'Are you sure you want to delete this business? This action cannot be undone.'),
+                            actions: [
+                              TextButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                onPressed: () {
+                                  // Delete function call
+                                  deleteBusiness();
+                                },
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
                     },
                     style:
                         ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -672,6 +733,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -731,11 +793,4 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
       // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
-}
-
-class _ChartData {
-  final String category;
-  final double value;
-
-  _ChartData(this.category, this.value);
 }

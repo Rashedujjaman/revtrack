@@ -3,18 +3,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Business {
   final String id;
   final String name;
-  final String logoUrl;
+  final String? logoUrl;
   final String userId;
   final Timestamp dateCreated;
-  final bool isDeleted;
+  final bool? isDeleted;
 
   Business({
     required this.id,
     required this.name,
-    required this.logoUrl,
+    this.logoUrl,
     required this.userId,
     required this.dateCreated,
-    required this.isDeleted,
+    this.isDeleted,
   });
 
   // Factory method to create a Business object from JSON
@@ -39,5 +39,17 @@ class Business {
       'dateCreated': dateCreated,
       'isDeleted': isDeleted,
     };
+  }
+
+  factory Business.fromDocumentSnapshot(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Business(
+      id: doc.id,
+      name: data['name'],
+      logoUrl: data['logoUrl'],
+      userId: data['userId'],
+      dateCreated: data['dateCreated'],
+      isDeleted: data['isDeleted'] ?? false,
+    );
   }
 }

@@ -24,7 +24,7 @@ class _EditBusinessBottomSheetState extends State<EditBusinessBottomSheet> {
   @override
   void initState() {
     super.initState();
-    imageUrl = widget.business.logoUrl;
+    imageUrl = widget.business.logoUrl ?? '';
     _businessNameController.text = widget.business.name;
   }
 
@@ -37,7 +37,13 @@ class _EditBusinessBottomSheetState extends State<EditBusinessBottomSheet> {
           _imageFile = File(pickedFile.path);
         });
       }
-    } catch (e) {}
+    } catch (e) {
+      if (context.mounted && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _updateBusiness(businessName, imageFile) async {
@@ -60,7 +66,7 @@ class _EditBusinessBottomSheetState extends State<EditBusinessBottomSheet> {
           finalLogoUrl,
         );
 
-        if (context.mounted) {
+        if (mounted) {
           Navigator.pop(context, {
             'name': updatedName,
             'logoUrl': finalLogoUrl,
@@ -71,7 +77,7 @@ class _EditBusinessBottomSheetState extends State<EditBusinessBottomSheet> {
           );
         }
       } catch (e) {
-        if (context.mounted) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error updating business: $e')),
           );
