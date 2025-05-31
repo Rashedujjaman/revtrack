@@ -13,6 +13,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegisterScreen> {
+  //*************************************************************************************************************************** */
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
@@ -23,6 +24,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
+  //*************************************************************************************************************************** */
 
   bool isValidPhoneNumber(String value) {
     final RegExp regex = RegExp(r"^01[0-9]{8,9}$");
@@ -85,6 +87,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
+                  // Using a Form widget to validate inputs
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -92,6 +95,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const SizedBox(height: 50.0),
+                        // Title
                         const Center(
                           child: Text(
                             'Register Account',
@@ -102,6 +106,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         const SizedBox(height: 50.0),
+                        // First Name Field
                         CustomTextFormField(
                             label: 'First Name',
                             controller: _firstNameController,
@@ -112,6 +117,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                               return null;
                             }),
                         const SizedBox(height: 16.0),
+                        // Last Name Field
                         CustomTextFormField(
                             label: 'Last Name',
                             controller: _lastNameController,
@@ -122,6 +128,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                               return null;
                             }),
                         const SizedBox(height: 16.0),
+                        // Phone Number Field
                         CustomTextFormField(
                             label: 'Phone Number',
                             controller: _phoneNumberController,
@@ -135,6 +142,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                               return null;
                             }),
                         const SizedBox(height: 16.0),
+                        // Email Field
                         CustomTextFormField(
                             label: 'Email',
                             controller: _emailController,
@@ -148,6 +156,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                               return null;
                             }),
                         const SizedBox(height: 16.0),
+                        // Password Field
                         CustomTextFormField(
                           label: 'Password',
                           controller: _passwordController,
@@ -167,6 +176,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                           },
                         ),
                         const SizedBox(height: 16.0),
+                        // Confirm Password Field
                         CustomTextFormField(
                           label: 'Confirm Password',
                           controller: _confirmPasswordController,
@@ -185,6 +195,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                           },
                         ),
                         const SizedBox(height: 50.0),
+                        // Submit Button
                         ElevatedButton(
                           onPressed: () {
                             !_isLoading &&
@@ -211,6 +222,7 @@ class _RegistrationScreenState extends State<RegisterScreen> {
                                 ),
                         ),
                         const SizedBox(height: 16.0),
+                        // Navigate to Login Screen
                         TextButton(
                           onPressed: () {
                             // navigate Register Screen

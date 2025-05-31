@@ -8,13 +8,21 @@ import 'package:revtrack/theme/theme_provider.dart';
 import 'package:revtrack/services/authentication_service.dart';
 import 'package:revtrack/services/user_provider.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  //*************************************************************************************************************************** */
   static const Map<String, String> user = {
     'Name': 'MD RASHEDUJJAMAN REZA',
     'Email': 'rashedujjaman.reza@gmail.com',
     'Phone': '01789456123',
   };
+  //*************************************************************************************************************************** */
 
   void _logOut(BuildContext context) async {
     try {

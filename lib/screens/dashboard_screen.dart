@@ -13,6 +13,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  //*************************************************************************************************************************** */
   final List<_SalesData> data = [
     _SalesData('Jan', 50000),
     _SalesData('Feb', 280000),
@@ -20,7 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _SalesData('Apr', 520000),
     _SalesData('May', 241325),
   ];
-
+  //*************************************************************************************************************************** */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,211 +35,212 @@ class _DashboardScreenState extends State<DashboardScreen> {
               minHeight: MediaQuery.of(context).size.height,
             ),
             child: IntrinsicHeight(
-                child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                const Text(
-                  'Welcome to RevTrack',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const Text(
+                    'Welcome to RevTrack',
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                // Container(
-                //   padding: const EdgeInsets.all(20),
-                //   // height: 160,
-                //   decoration: BoxDecoration(
-                //     borderRadius: const BorderRadius.all(
-                //       Radius.circular(30),
-                //     ),
-                //     color: Theme.of(context).colorScheme.secondary,
-                //   ),
-                //   child: Center(
-                //     child: Row(
-                //         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                //         crossAxisAlignment: CrossAxisAlignment.center,
-                //         children: <Widget>[
-                //           // Container(
-                //           //   height: 120,
-                //           //   width: 120,
-                //           //   decoration: BoxDecoration(
-                //           //     borderRadius: const BorderRadius.all(
-                //           //       Radius.circular(30),
-                //           //     ),
-                //           //     color: Theme.of(context).colorScheme.tertiary,
-                //           //   ),
-                //           //   child: const CircleAvatar(
-                //           //     radius: 40,
-                //           //     backgroundColor:
-                //           //         Color(0xFF62BDBD), // Avatar background color
-                //           //     child: CircleAvatar(
-                //           //       // Inner circle for the Icon
-                //           //       radius:
-                //           //           39, // Slightly smaller to create the border
-                //           //       backgroundImage: NetworkImage(
-                //           //           'https://avatars.githubusercontent.com/u/68024439?v=4'),
-                //           //     ),
-                //           //   ),
-                //           // ),
-                //           Container(
-                //             height: 120,
-                //             width: 120,
-                //             decoration: BoxDecoration(
-                //               borderRadius: const BorderRadius.all(
-                //                 Radius.circular(30),
-                //               ),
-                //               color: Theme.of(context).colorScheme.tertiary,
-                //             ),
-                //             child: const Center(
-                //               child: CircleAvatar(
-                //                 radius: 40,
-                //                 backgroundColor: Color(
-                //                     0xFF62BDBD), // Avatar background color
-                //                 child: CircleAvatar(
-                //                   // Inner circle for the Icon
-                //                   radius:
-                //                       39, // Slightly smaller to create the border
-                //                   backgroundImage: NetworkImage(
-                //                       'https://avatars.githubusercontent.com/u/68024439?v=4'),
-                //                 ),
-                //               ),
-                //             ),
-                //           ),
-                //         ]),
-                //   ),
-                // ),
-                Container(
-                  margin: const EdgeInsets.only(top: 20),
-                  height: 120,
-                  // width: 120,
-                  decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(50),
-                        bottomLeft: Radius.circular(50),
-                      ),
-                      color: Theme.of(context).colorScheme.surfaceDim),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              'Monthly Revenue : ',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                            // const AnimatedNumber(
-                            //   startValue: 0,
-                            //   endValue: 2000,
-                            //   duration: Duration(seconds: 2),
-                            //   isFloatingPoint: false,
-                            //   style: TextStyle(
-                            //     color: Colors.orange,
-                            //     fontSize: 24,
-                            //   ),
-                            // ),
-                            const AnimatedNumber(
-                              startValue: 0,
-                              endValue: 5500.38273626732,
-                              duration: Duration(seconds: 2),
-                              isFloatingPoint: true,
-                              decimalPoint: 2,
-                              style: TextStyle(
-                                color: Colors.lightBlue,
-                                fontSize: 42,
-                              ),
-                            ),
-                            // Text(
-                            //   "2,41,325",
-                            //   style: TextStyle(
-                            //     fontSize: 24,
-                            //     fontWeight: FontWeight.bold,
-                            //     color: Theme.of(context).colorScheme.tertiary,
-                            //   ),
-                            // ),
-                          ],
+                  // Container(
+                  //   padding: const EdgeInsets.all(20),
+                  //   // height: 160,
+                  //   decoration: BoxDecoration(
+                  //     borderRadius: const BorderRadius.all(
+                  //       Radius.circular(30),
+                  //     ),
+                  //     color: Theme.of(context).colorScheme.secondary,
+                  //   ),
+                  //   child: Center(
+                  //     child: Row(
+                  //         mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  //         crossAxisAlignment: CrossAxisAlignment.center,
+                  //         children: <Widget>[
+                  //           // Container(
+                  //           //   height: 120,
+                  //           //   width: 120,
+                  //           //   decoration: BoxDecoration(
+                  //           //     borderRadius: const BorderRadius.all(
+                  //           //       Radius.circular(30),
+                  //           //     ),
+                  //           //     color: Theme.of(context).colorScheme.tertiary,
+                  //           //   ),
+                  //           //   child: const CircleAvatar(
+                  //           //     radius: 40,
+                  //           //     backgroundColor:
+                  //           //         Color(0xFF62BDBD), // Avatar background color
+                  //           //     child: CircleAvatar(
+                  //           //       // Inner circle for the Icon
+                  //           //       radius:
+                  //           //           39, // Slightly smaller to create the border
+                  //           //       backgroundImage: NetworkImage(
+                  //           //           'https://avatars.githubusercontent.com/u/68024439?v=4'),
+                  //           //     ),
+                  //           //   ),
+                  //           // ),
+                  //           Container(
+                  //             height: 120,
+                  //             width: 120,
+                  //             decoration: BoxDecoration(
+                  //               borderRadius: const BorderRadius.all(
+                  //                 Radius.circular(30),
+                  //               ),
+                  //               color: Theme.of(context).colorScheme.tertiary,
+                  //             ),
+                  //             child: const Center(
+                  //               child: CircleAvatar(
+                  //                 radius: 40,
+                  //                 backgroundColor: Color(
+                  //                     0xFF62BDBD), // Avatar background color
+                  //                 child: CircleAvatar(
+                  //                   // Inner circle for the Icon
+                  //                   radius:
+                  //                       39, // Slightly smaller to create the border
+                  //                   backgroundImage: NetworkImage(
+                  //                       'https://avatars.githubusercontent.com/u/68024439?v=4'),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         ]),
+                  //   ),
+                  // ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    height: 120,
+                    // width: 120,
+                    decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(50),
+                          bottomLeft: Radius.circular(50),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              'Yearly Revenue : ',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
+                        color: Theme.of(context).colorScheme.surfaceDim),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text(
+                                'Monthly Revenue : ',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "11,11,325",
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.tertiary,
+                              // const AnimatedNumber(
+                              //   startValue: 0,
+                              //   endValue: 2000,
+                              //   duration: Duration(seconds: 2),
+                              //   isFloatingPoint: false,
+                              //   style: TextStyle(
+                              //     color: Colors.orange,
+                              //     fontSize: 24,
+                              //   ),
+                              // ),
+                              const AnimatedNumber(
+                                startValue: 0,
+                                endValue: 5500.38273626732,
+                                duration: Duration(seconds: 2),
+                                isFloatingPoint: true,
+                                decimalPoint: 2,
+                                style: TextStyle(
+                                  color: Colors.lightBlue,
+                                  fontSize: 42,
+                                ),
                               ),
-                            ),
-                          ],
+                              // Text(
+                              //   "2,41,325",
+                              //   style: TextStyle(
+                              //     fontSize: 24,
+                              //     fontWeight: FontWeight.bold,
+                              //     color: Theme.of(context).colorScheme.tertiary,
+                              //   ),
+                              // ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text(
+                                'Yearly Revenue : ',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              Text(
+                                "11,11,325",
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.tertiary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 300,
+                    child: SfCartesianChart(
+                      primaryXAxis: const CategoryAxis(),
+                      title: const ChartTitle(
+                          text: 'Half yearly revenue analysis'),
+                      legend: const Legend(isVisible: true),
+                      tooltipBehavior: TooltipBehavior(enable: true),
+                      series: <CartesianSeries<_SalesData, String>>[
+                        LineSeries<_SalesData, String>(
+                          dataSource: data,
+                          xValueMapper: (_SalesData sales, _) => sales.year,
+                          yValueMapper: (_SalesData sales, _) => sales.sales,
+                          name: 'Revenue',
+                          dataLabelSettings:
+                              const DataLabelSettings(isVisible: true),
                         ),
                       ],
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: 300,
-                  child: SfCartesianChart(
-                    primaryXAxis: const CategoryAxis(),
-                    title:
-                        const ChartTitle(text: 'Half yearly revenue analysis'),
-                    legend: const Legend(isVisible: true),
-                    tooltipBehavior: TooltipBehavior(enable: true),
-                    series: <CartesianSeries<_SalesData, String>>[
-                      LineSeries<_SalesData, String>(
-                        dataSource: data,
-                        xValueMapper: (_SalesData sales, _) => sales.year,
-                        yValueMapper: (_SalesData sales, _) => sales.sales,
-                        name: 'Revenue',
-                        dataLabelSettings:
-                            const DataLabelSettings(isVisible: true),
-                      ),
-                    ],
+                  SizedBox(
+                    height: 300,
+                    child: DashboardPieChart(),
                   ),
-                ),
-                SizedBox(
-                  height: 300,
-                  child: DashboardPieChart(),
-                ),
-                SizedBox(
-                  height: 150,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    //Initialize the spark charts widget
-                    child: SfSparkLineChart.custom(
-                      //Enable the trackball
-                      trackball: const SparkChartTrackball(
-                        activationMode: SparkChartActivationMode.tap,
+                  SizedBox(
+                    height: 150,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      //Initialize the spark charts widget
+                      child: SfSparkLineChart.custom(
+                        //Enable the trackball
+                        trackball: const SparkChartTrackball(
+                          activationMode: SparkChartActivationMode.tap,
+                        ),
+                        //Enable marker
+                        marker: const SparkChartMarker(
+                          displayMode: SparkChartMarkerDisplayMode.all,
+                        ),
+                        //Enable data label
+                        labelDisplayMode: SparkChartLabelDisplayMode.all,
+                        xValueMapper: (int index) => data[index].year,
+                        yValueMapper: (int index) => data[index].sales,
+                        dataCount: 5,
                       ),
-                      //Enable marker
-                      marker: const SparkChartMarker(
-                        displayMode: SparkChartMarkerDisplayMode.all,
-                      ),
-                      //Enable data label
-                      labelDisplayMode: SparkChartLabelDisplayMode.all,
-                      xValueMapper: (int index) => data[index].year,
-                      yValueMapper: (int index) => data[index].sales,
-                      dataCount: 5,
                     ),
                   ),
-                ),
-              ],
-            )),
+                ],
+              ),
+            ),
           ),
         ),
       ),

@@ -14,8 +14,10 @@ class BusinessScreen extends StatefulWidget {
 }
 
 class _BusinessScreenState extends State<BusinessScreen> {
+  //*************************************************************************************************************************** */
   get userId => Provider.of<UserProvider>(context, listen: false).userId;
   List<Business> businesses = [];
+  //*************************************************************************************************************************** */
 
   @override
   void initState() {

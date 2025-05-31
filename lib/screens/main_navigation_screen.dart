@@ -12,6 +12,7 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  //*************************************************************************************************************************** */
   late int _selectedIndex;
 
   final List<Widget> _screens = [
@@ -19,6 +20,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const BusinessScreen(),
     const ProfileScreen(),
   ];
+  //*************************************************************************************************************************** */
 
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);

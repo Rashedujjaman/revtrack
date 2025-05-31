@@ -16,12 +16,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  //*************************************************************************************************************************** */
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   bool _isLoading = false;
-
+  //*************************************************************************************************************************** */
   bool isValidEmail(String value) {
     final RegExp regex =
         RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');

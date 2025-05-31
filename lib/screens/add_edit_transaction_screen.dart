@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/transaction_service.dart';
-// import 'package:revtrack/services/snackbar_service.dart';
-// import 'package:revtrack/services/user_provider.dart';
-// import 'package:revtrack/services/business_service.dart';
-// import 'package:provider/provider.dart';
 
 class AddEditTransactionScreen extends StatefulWidget {
   final String _businessId;
@@ -22,12 +17,13 @@ class AddEditTransactionScreen extends StatefulWidget {
 }
 
 class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
-  // final TextEditingController typeController = TextEditingController();
+  //*************************************************************************************************************************** */
   final TextEditingController amountController = TextEditingController();
-
   final TextEditingController dateController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
 
+  // Global key for the form
+  // This key will be used to validate the form
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String type = '';
@@ -37,6 +33,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
   bool _isLoading = false;
 
   List<String> _categories = [];
+  //*************************************************************************************************************************** */
 
   @override
   void initState() {
