@@ -14,8 +14,10 @@ import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/models/chart_data_model.dart';
 import 'package:revtrack/screens/add_edit_transaction_screen.dart';
 import 'package:revtrack/services/transaction_service.dart';
+import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/widgets/pie_chart.dart';
 import 'package:revtrack/widgets/cartesian_chart.dart';
+import 'package:provider/provider.dart';
 
 class BusinessOverviewScreen extends StatefulWidget {
   final Business _business;
@@ -29,6 +31,7 @@ class BusinessOverviewScreen extends StatefulWidget {
 class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
   //*************************************************************************************************************************** */
   // Variables for managing business overview state
+  get userId => Provider.of<UserProvider>(context, listen: false).userId;
   List<Transaction1> transactions = [];
   bool isLoading = false;
   String businessLogo = '';
@@ -642,9 +645,15 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                         elevation: 5,
                         context: context,
                         isScrollControlled: true,
+                        showDragHandle: true,
+                        sheetAnimationStyle: AnimationStyle(
+                          duration: const Duration(milliseconds: 700),
+                          curve: Curves.easeInOutBack,
+                        ),
                         builder: (context) {
-                          return EditBusinessBottomSheet(
+                          return BusinessBottomSheet(
                             business: widget._business,
+                            userId: userId,
                           );
                         },
                       );

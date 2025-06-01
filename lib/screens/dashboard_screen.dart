@@ -1,5 +1,4 @@
 // import 'dart:ffi';
-
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:revtrack/models/transaction_model.dart';
@@ -27,13 +26,6 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   //*************************************************************************************************************************** */
   get userId => Provider.of<UserProvider>(context, listen: false).userId;
-  // final List<ChartData> data = [
-  //   ChartData('Jan', 50000),
-  //   ChartData('Feb', 280000),
-  //   ChartData('Mar', 120000),
-  //   ChartData('Apr', 520000),
-  //   ChartData('May', 241325),
-  // ];
 
   List<Business> businesses = [];
   List<Transaction1> transactions = [];
@@ -76,30 +68,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // This method is used to fetch businesses from the database
   Future<void> fetchBusinesses() async {
-    try {
-      businesses = await BusinessService().getBusinessesByUser(userId);
-      if (businesses.isNotEmpty) {
-        for (var business in businesses) {
-          transactions.addAll(
-            await fetchTransactions(business.id),
-          );
-        }
+    businesses = await BusinessService().getBusinessesByUser(userId);
+    if (businesses.isNotEmpty) {
+      for (var business in businesses) {
+        transactions.addAll(
+          await fetchTransactions(business.id),
+        );
       }
-      setState(() {
-        if (transactions.isNotEmpty) {
-          revenueDistributionData = getRevenueDistributionByBusinesses();
-          revenueTrendData = getRevenueTrendData();
-          totalYearlyRevenue = calculateRevenue(selectedDateRange);
-          totalMonthlyRevenue = calculateRevenue(currentMonthRange);
-        }
-        isLoading = false;
-      });
-    } catch (e) {
-      null; // Handle any errors that occur during the fetch
-      setState(() {
-        isLoading = false;
-      });
     }
+    setState(() {
+      if (transactions.isNotEmpty) {
+        revenueDistributionData = getRevenueDistributionByBusinesses();
+        revenueTrendData = getRevenueTrendData();
+        totalYearlyRevenue = calculateRevenue(selectedDateRange);
+        totalMonthlyRevenue = calculateRevenue(currentMonthRange);
+      }
+      isLoading = false;
+    });
   }
 
   // This method can be used to fetch transactions from the database
@@ -153,17 +138,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
             : -transaction.amount,
       );
     }
-    // Sort the entries by date (parse the key back to DateTime)
-    List<MapEntry<String, double>> sortedEntries = monthlyMap.entries.toList()
-      ..sort((a, b) {
-        DateTime dateA = DateFormat('MMM yy').parse(a.key);
-        DateTime dateB = DateFormat('MMM yy').parse(b.key);
-        return dateA.compareTo(dateB);
-      });
 
-    List<ChartData> data =
-        sortedEntries.map((e) => ChartData(e.key, e.value)).toList();
-    return data;
+    // Convert to list and sort by date
+    var sortedData = monthlyMap.entries
+        .map((e) => ChartData(e.key, e.value))
+        .toList()
+      ..sort((a, b) => DateFormat('MMM yy')
+          .parse(a.key)
+          .compareTo(DateFormat('MMM yy').parse(b.key)));
+
+    return sortedData;
   }
 
   // List<ChartData> getRevenueDistributionByCategory() {

@@ -4,18 +4,18 @@ import 'package:image_picker/image_picker.dart';
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/business_service.dart';
 
-class EditBusinessBottomSheet extends StatefulWidget {
-  final Business business;
+class BusinessBottomSheet extends StatefulWidget {
+  final Business? business;
+  final String userId;
 
-  const EditBusinessBottomSheet({Key? key, required this.business})
+  const BusinessBottomSheet({Key? key, this.business, required this.userId})
       : super(key: key);
 
   @override
-  State<EditBusinessBottomSheet> createState() =>
-      _EditBusinessBottomSheetState();
+  State<BusinessBottomSheet> createState() => _BusinessBottomSheetState();
 }
 
-class _EditBusinessBottomSheetState extends State<EditBusinessBottomSheet> {
+class _BusinessBottomSheetState extends State<BusinessBottomSheet> {
   final TextEditingController _businessNameController = TextEditingController();
   File? _imageFile;
   String imageUrl = '';
@@ -24,8 +24,11 @@ class _EditBusinessBottomSheetState extends State<EditBusinessBottomSheet> {
   @override
   void initState() {
     super.initState();
-    imageUrl = widget.business.logoUrl ?? '';
-    _businessNameController.text = widget.business.name;
+    if (widget.business != null) {
+      // If businessId is provided, fetch the business details
+      imageUrl = widget.business!.logoUrl ?? '';
+      _businessNameController.text = widget.business!.name;
+    }
   }
 
   Future<void> _pickImage() async {
@@ -46,46 +49,69 @@ class _EditBusinessBottomSheetState extends State<EditBusinessBottomSheet> {
     }
   }
 
-  Future<void> _updateBusiness(businessName, imageFile) async {
-    final updatedName = businessName;
-    setState(() {
-      isLoading = true;
-    });
+  Future<void> _saveBusiness() async {
+    final businessName = _businessNameController.text.trim();
 
-    if (updatedName.isNotEmpty) {
-      try {
+    if (businessName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Business name cannot be empty')),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      if (widget.business == null) {
+        // Adding new business
+        String logoUrl = '';
+        if (_imageFile != null) {
+          logoUrl = await BusinessService()
+              .uploadImageToFirebase(_imageFile!, widget.userId);
+        }
+
+        await BusinessService()
+            .addBusiness(widget.userId, businessName, logoUrl);
+
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Business added successfully')),
+          );
+        }
+      } else {
+        // Editing existing business
         String finalLogoUrl = imageUrl;
         if (_imageFile != null) {
           finalLogoUrl = await BusinessService()
-              .uploadImageToFirebase(_imageFile!, widget.business.id);
+              .uploadImageToFirebase(_imageFile!, widget.business!.id);
         }
 
         await BusinessService().updateBusiness(
-          widget.business.id,
-          updatedName,
+          widget.business!.id,
+          businessName,
           finalLogoUrl,
         );
 
         if (mounted) {
           Navigator.pop(context, {
-            'name': updatedName,
+            'name': businessName,
             'logoUrl': finalLogoUrl,
           });
-
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Business updated successfully')),
           );
         }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error updating business: $e')),
-          );
-        }
-      } finally {
-        setState(() {
-          isLoading = false;
-        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
       }
     }
   }
@@ -103,8 +129,10 @@ class _EditBusinessBottomSheetState extends State<EditBusinessBottomSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Edit Business',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              widget.business == null ? 'Add Business' : 'Edit Business',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 16),
             Stack(
               alignment: Alignment.bottomRight,
@@ -137,9 +165,7 @@ class _EditBusinessBottomSheetState extends State<EditBusinessBottomSheet> {
                   bottom: 0,
                   right: 0,
                   child: GestureDetector(
-                    onTap: () async {
-                      await _pickImage();
-                    },
+                    onTap: _pickImage,
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: const BoxDecoration(
@@ -171,19 +197,12 @@ class _EditBusinessBottomSheetState extends State<EditBusinessBottomSheet> {
                   side: const BorderSide(color: Colors.blue, width: 2),
                 ),
               ),
-              onPressed: _imageFile == null &&
-                      _businessNameController.text.trim() ==
-                          widget.business.name
-                  ? null
-                  : () async {
-                      await _updateBusiness(
-                        _businessNameController.text.trim(),
-                        _imageFile,
-                      );
-                    },
+              onPressed: isLoading ? null : () => _saveBusiness(),
               child: isLoading
                   ? const CircularProgressIndicator()
-                  : const Text('Save Changes'),
+                  : Text(widget.business == null
+                      ? 'Add Business'
+                      : 'Save Changes'),
             ),
             const SizedBox(height: 16),
           ],

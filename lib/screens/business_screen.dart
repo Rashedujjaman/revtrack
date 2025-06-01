@@ -6,6 +6,7 @@ import 'package:revtrack/screens/business_overview_screen.dart';
 import 'package:revtrack/widgets/skeleton.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:revtrack/widgets/edit_business_bottom_sheet.dart';
 
 class BusinessScreen extends StatefulWidget {
   const BusinessScreen({super.key});
@@ -17,13 +18,22 @@ class _BusinessScreenState extends State<BusinessScreen> {
   //*************************************************************************************************************************** */
   get userId => Provider.of<UserProvider>(context, listen: false).userId;
   List<Business> businesses = [];
+  bool isLoading = false;
   //*************************************************************************************************************************** */
 
   @override
   void initState() {
     super.initState();
     // Optionally, you can fetch businesses when the screen is initialized
-    getBusinessesByUser(userId);
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    setState(() {
+      isLoading = true;
+    });
+    // Fetch businesses for the user
+    await getBusinessesByUser(userId);
   }
 
   Future<void> addBusiness(String userId, String name, String logoUrl) async {
@@ -40,6 +50,9 @@ class _BusinessScreenState extends State<BusinessScreen> {
     try {
       // Call the getBusinessesByUser method from BusinessService
       businesses = await BusinessService().getBusinessesByUser(userId);
+      setState(() {
+        isLoading = false; // Update loading state
+      });
     } catch (e) {
       // Handle any errors that occur during the process
       // print('Error getting businesses: $e');
@@ -67,7 +80,8 @@ class _BusinessScreenState extends State<BusinessScreen> {
                 : FutureBuilder<void>(
                     future: getBusinessesByUser(userId),
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
+                      if (snapshot.connectionState == ConnectionState.waiting &&
+                          isLoading) {
                         return ListView.builder(
                           padding: const EdgeInsets.symmetric(
                               vertical: 16.0, horizontal: 8.0),
@@ -135,68 +149,33 @@ class _BusinessScreenState extends State<BusinessScreen> {
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add',
         onPressed: () {
-          _showAddBusinessDialog(context, userId);
+          // _showAddBusinessDialog(context, userId);
+          final updatedData = showModalBottomSheet(
+            barrierColor: Theme.of(context).colorScheme.primary.withValues(
+                  alpha: .3,
+                ),
+            elevation: 5,
+            context: context,
+            isScrollControlled: true,
+            showDragHandle: true,
+            sheetAnimationStyle: AnimationStyle(
+              duration: const Duration(milliseconds: 700),
+              curve: Curves.easeInOutBack,
+            ),
+            builder: (context) {
+              return BusinessBottomSheet(
+                userId: userId,
+              );
+            },
+          );
+          updatedData.then((value) {
+            if (value != null && value is Business) {
+              fetchData();
+            }
+          });
         },
         child: const Icon(Icons.add),
       ),
-    );
-  }
-
-  void _showAddBusinessDialog(BuildContext context, String? userId) {
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController logoController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shadowColor: Theme.of(context).colorScheme.inversePrimary,
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          title: const Text('Add New Business'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Business Name'),
-              ),
-              TextField(
-                controller: logoController,
-                decoration: const InputDecoration(labelText: 'Logo URL'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final String name = nameController.text.trim();
-                final String logoUrl = logoController.text.trim();
-
-                if (name.isNotEmpty && userId != null) {
-                  try {
-                    await BusinessService().addBusiness(userId, name, logoUrl);
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      // Show an error message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error adding business: $e')),
-                      );
-                    }
-                  }
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
