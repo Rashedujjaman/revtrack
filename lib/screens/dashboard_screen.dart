@@ -408,13 +408,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   SizedBox(
                       height: 300,
-                      child: CartesianChart(data: revenueTrendData)),
+                      child: isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : CartesianChart(
+                              data: revenueTrendData, title: 'Revenue Trend')),
                   SizedBox(
                     height: 300,
                     child: isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : PieChart(
                             data: revenueDistributionData,
+                            title: 'Revenue Distribution',
                           ),
                   ),
                   // SizedBox(

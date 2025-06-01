@@ -14,6 +14,8 @@ import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/models/chart_data_model.dart';
 import 'package:revtrack/screens/add_edit_transaction_screen.dart';
 import 'package:revtrack/services/transaction_service.dart';
+import 'package:revtrack/widgets/pie_chart.dart';
+import 'package:revtrack/widgets/cartesian_chart.dart';
 
 class BusinessOverviewScreen extends StatefulWidget {
   final Business _business;
@@ -571,35 +573,21 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
               // Graphs Section
               // Line Chart
               //Expense breakdown through pie chart
-              SfCircularChart(
-                borderWidth: 1,
-                borderColor: Colors.red,
-                legend: const Legend(isVisible: true),
-                title: const ChartTitle(text: 'Expense Breakdown'),
-                series: <CircularSeries>[
-                  PieSeries<ChartData, String>(
-                    dataSource: getCategoryBreakdownData('Expense'),
-                    xValueMapper: (ChartData data, _) => data.key,
-                    yValueMapper: (ChartData data, _) => data.value,
-                    dataLabelSettings: const DataLabelSettings(isVisible: true),
-                  ),
-                ],
-              ),
-              //Income breakdown through pie chart
-              SfCircularChart(
-                borderWidth: 1,
-                borderColor: Colors.green,
-                legend: const Legend(isVisible: true),
-                title: const ChartTitle(text: 'Income Breakdown'),
-                series: <CircularSeries>[
-                  PieSeries<ChartData, String>(
-                    dataSource: getCategoryBreakdownData('Income'),
-                    xValueMapper: (ChartData data, _) => data.key,
-                    yValueMapper: (ChartData data, _) => data.value,
-                    dataLabelSettings: const DataLabelSettings(isVisible: true),
-                  ),
-                ],
-              ),
+
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : PieChart(
+                      data: getCategoryBreakdownData('Expense'),
+                      title: 'Expense Breakdown',
+                      borderColor: Colors.red,
+                    ),
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : PieChart(
+                      data: getCategoryBreakdownData('Income'),
+                      title: 'Income Breakdown',
+                      borderColor: Colors.green,
+                    ),
               //Monthly Income vs Expense Column Chart
               SfCartesianChart(
                 title: const ChartTitle(text: 'Monthly Income vs Expense'),
@@ -632,24 +620,10 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 ],
               ),
               // Revenue Trend Line Chart
-              SfCartesianChart(
-                title: const ChartTitle(text: 'Revenue Trend'),
-                legend: const Legend(isVisible: true),
-                tooltipBehavior: TooltipBehavior(enable: true),
-                primaryXAxis: const CategoryAxis(),
-                series: <CartesianSeries<ChartData, String>>[
-                  LineSeries<ChartData, String>(
-                    dataSource: getRevenueTrendData(),
-                    xValueMapper: (ChartData data, _) => data.key,
-                    yValueMapper: (ChartData data, _) => data.value,
-                    name: 'Revenue',
-                    dataLabelSettings: const DataLabelSettings(
-                      isVisible: true,
-                      labelAlignment: ChartDataLabelAlignment.top,
-                    ),
-                  )
-                ],
-              ),
+              isLoading
+                  ? const CircularProgressIndicator()
+                  : CartesianChart(
+                      data: getRevenueTrendData(), title: 'Revenue Trend'),
               const SizedBox(height: 24),
 
               //Action Buttons
