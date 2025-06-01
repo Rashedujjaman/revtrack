@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/business_service.dart';
+import 'package:revtrack/services/snackbar_service.dart';
 
 class BusinessBottomSheet extends StatefulWidget {
   final Business? business;
@@ -42,8 +43,9 @@ class _BusinessBottomSheetState extends State<BusinessBottomSheet> {
       }
     } catch (e) {
       if (context.mounted && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking image: $e')),
+        SnackbarService().errorMessage(
+          context,
+          'Error picking image: $e',
         );
       }
     }
@@ -53,8 +55,9 @@ class _BusinessBottomSheetState extends State<BusinessBottomSheet> {
     final businessName = _businessNameController.text.trim();
 
     if (businessName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Business name cannot be empty')),
+      SnackbarService().errorMessage(
+        context,
+        'Business name cannot be empty',
       );
       return;
     }
@@ -75,8 +78,9 @@ class _BusinessBottomSheetState extends State<BusinessBottomSheet> {
 
         if (mounted) {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Business added successfully')),
+          SnackbarService().successMessage(
+            context,
+            'Business added successfully',
           );
         }
       } else {
@@ -98,15 +102,17 @@ class _BusinessBottomSheetState extends State<BusinessBottomSheet> {
             'name': businessName,
             'logoUrl': finalLogoUrl,
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Business updated successfully')),
+          SnackbarService().successMessage(
+            context,
+            'Business updated successfully',
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+        SnackbarService().errorMessage(
+          context,
+          'Error: ${e.toString()}',
         );
       }
     } finally {

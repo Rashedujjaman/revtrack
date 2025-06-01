@@ -111,3 +111,150 @@ class TransactionCardSkeleton extends StatelessWidget {
     );
   }
 }
+
+class CartesianChartSkeleton extends StatelessWidget {
+  final double height;
+  final double width;
+  const CartesianChartSkeleton(
+      {super.key, this.height = 250, this.width = double.infinity});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(0),
+        child: Shimmer.fromColors(
+          baseColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          highlightColor:
+              Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 20,
+                width: 120,
+                color: Colors.white,
+                margin: const EdgeInsets.only(bottom: 16),
+              ),
+              Container(
+                height: height,
+                width: width,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: CustomPaint(
+                  painter: _CartesianChartSkeletonPainter(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CartesianChartSkeletonPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.grey[300]!
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    // Draw X and Y axes
+    canvas.drawLine(Offset(40, size.height - 20),
+        Offset(size.width - 10, size.height - 20), paint);
+    canvas.drawLine(Offset(40, size.height - 20), Offset(40, 10), paint);
+
+    // Draw fake line chart
+    final path = Path();
+    path.moveTo(40, size.height - 40);
+    path.lineTo(size.width * 0.3, size.height - 80);
+    path.lineTo(size.width * 0.5, size.height - 60);
+    path.lineTo(size.width * 0.7, size.height - 120);
+    path.lineTo(size.width - 20, size.height - 50);
+    canvas.drawPath(path, paint..color = Colors.grey[400]!);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class PieChartSkeleton extends StatelessWidget {
+  final double height;
+  final double width;
+  const PieChartSkeleton(
+      {super.key, this.height = 250, this.width = double.infinity});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(0),
+        child: Shimmer.fromColors(
+          baseColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          highlightColor:
+              Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 20,
+                width: 120,
+                color: Colors.white,
+                margin: const EdgeInsets.only(bottom: 16),
+              ),
+              Center(
+                child: Container(
+                  height: height,
+                  width: height, // Make it a square for the pie
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: CustomPaint(
+                    painter: _PieChartSkeletonPainter(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PieChartSkeletonPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 24
+      ..color = Colors.grey[300]!;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.shortestSide / 2) - 16;
+
+    // Draw 4 segments as fake pie slices
+    double startAngle = -1.57; // -90 degrees
+    for (int i = 0; i < 4; i++) {
+      paint.color = Colors.grey[300]!.withOpacity(0.7 - i * 0.15);
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        1.4, // ~80 degrees per slice
+        false,
+        paint,
+      );
+      startAngle += 1.6;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}

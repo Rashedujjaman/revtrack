@@ -81,8 +81,9 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
       }
     } catch (e) {
       if (context.mounted && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking image: $e')),
+        SnackbarService().errorMessage(
+          context,
+          'Error picking image: $e',
         );
       }
     }

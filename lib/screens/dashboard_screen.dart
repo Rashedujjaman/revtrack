@@ -14,6 +14,7 @@ import 'package:revtrack/services/transaction_service.dart';
 import 'package:revtrack/services/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:revtrack/widgets/revenue_prediction_chart.dart';
+import 'package:revtrack/widgets/skeleton.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:animated_number/animated_number.dart';
 import 'package:ml_algo/ml_algo.dart';
@@ -491,14 +492,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       color: Colors.white,
                                     ),
                                   ),
-                            // Text(
-                            //   "11,11,325",
-                            //   style: TextStyle(
-                            //     fontSize: 24,
-                            //     fontWeight: FontWeight.bold,
-                            //     color: Theme.of(context).colorScheme.tertiary,
-                            //   ),
-                            // ),
                           ],
                         ),
                       ],
@@ -506,18 +499,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const CartesianChartSkeleton()
                     : CartesianChart(
                         data: revenueTrendData, title: 'Revenue Trend'),
                 isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const PieChartSkeleton()
                     : PieChart(
                         data: revenueDistributionData,
                         title: 'Revenue Distribution',
                       ),
 
                 isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const CartesianChartSkeleton()
                     : RevenuePredictionChart(
                         transactions: transactions,
                         historicalData: revenueTrendData,
