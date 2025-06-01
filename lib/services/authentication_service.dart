@@ -29,17 +29,6 @@ class AuthenticationService {
     }
   }
 
-  // signOut() async {
-  //   try {
-  //     await FirebaseService.auth.signOut();
-  //     return true;
-  //   } on FirebaseAuthException catch (e) {
-  //     throw handleAuthError(e);
-  //   } catch (e) {
-  //     throw 'An error occurred while signing out. Please try again later.';
-  //   }
-  // }
-
   // Sign out user
   Future<bool> signOut() async {
     try {

@@ -49,6 +49,8 @@ dependencies:
   animated_number: ^1.0.2
   animated_flip_counter: ^0.3.4
   image_picker: ^1.1.2
+  ml_algo: ^16.17.13
+  ml_dataframe: ^1.6.0
 
 dev_dependencies:
   flutter_test:

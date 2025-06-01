@@ -10,9 +10,11 @@ class CartesianChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SfCartesianChart(
-      primaryXAxis: const CategoryAxis(),
       title: ChartTitle(text: title),
       legend: const Legend(isVisible: true),
+      primaryXAxis: const CategoryAxis(
+        labelRotation: -90,
+      ),
       tooltipBehavior: TooltipBehavior(enable: true),
       series: <CartesianSeries<ChartData, String>>[
         LineSeries<ChartData, String>(

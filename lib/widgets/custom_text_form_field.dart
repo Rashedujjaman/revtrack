@@ -40,6 +40,7 @@ class CustomTextFormField extends StatelessWidget {
             : Theme.of(context).colorScheme.secondary.withValues(
                   alpha: 200,
                 ),
+        iconColor: Theme.of(context).colorScheme.primary,
         border: const OutlineInputBorder(),
         floatingLabelBehavior: floatingLabelBehavior,
         floatingLabelAlignment: FloatingLabelAlignment.start,
