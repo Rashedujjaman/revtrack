@@ -37,8 +37,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void login() async {
-    final email = _emailController.text;
-    final password = _passwordController.text;
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
     setState(() => _isLoading = true);
 
@@ -89,9 +89,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         //Logo of the app
                         const SizedBox(height: 50.0),
                         Image.asset(
-                          'assets/images/logo.jpg',
+                          'assets/images/logo.png',
                           width: 400,
-                          height: 100,
+                          height: 150,
                           fit: BoxFit.cover,
                         ),
                         const SizedBox(height: 100.0),

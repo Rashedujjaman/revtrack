@@ -101,12 +101,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       // mainAxisAlignment: MainAxisAlignment.center,
                       spacing: 8,
                       children: [
-                        const Text(
+                        Text(
                           'Profile',
                           style: TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 255, 255, 255),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(
+                                  alpha: 0.5,
+                                ),
                           ),
                         ),
                         // const SizedBox(height: 20),

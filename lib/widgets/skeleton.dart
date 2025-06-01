@@ -125,9 +125,10 @@ class CartesianChartSkeleton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(0),
         child: Shimmer.fromColors(
-          baseColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          baseColor:
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
           highlightColor:
-              Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+              Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -167,7 +168,7 @@ class _CartesianChartSkeletonPainter extends CustomPainter {
     // Draw X and Y axes
     canvas.drawLine(Offset(40, size.height - 20),
         Offset(size.width - 10, size.height - 20), paint);
-    canvas.drawLine(Offset(40, size.height - 20), Offset(40, 10), paint);
+    canvas.drawLine(Offset(40, size.height - 20), const Offset(40, 10), paint);
 
     // Draw fake line chart
     final path = Path();
@@ -196,9 +197,10 @@ class PieChartSkeleton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(0),
         child: Shimmer.fromColors(
-          baseColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          baseColor:
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
           highlightColor:
-              Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+              Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -212,7 +214,7 @@ class PieChartSkeleton extends StatelessWidget {
                 child: Container(
                   height: height,
                   width: height, // Make it a square for the pie
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
@@ -243,7 +245,7 @@ class _PieChartSkeletonPainter extends CustomPainter {
     // Draw 4 segments as fake pie slices
     double startAngle = -1.57; // -90 degrees
     for (int i = 0; i < 4; i++) {
-      paint.color = Colors.grey[300]!.withOpacity(0.7 - i * 0.15);
+      paint.color = Colors.grey[300]!.withValues(alpha: 0.7 - i * 0.15);
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle,

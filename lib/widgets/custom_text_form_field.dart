@@ -31,15 +31,16 @@ class CustomTextFormField extends StatelessWidget {
       obscureText: obscureText,
       obscuringCharacter: '*',
       keyboardType: keyboardType,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.primary,
+      ),
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,
         filled: filled,
         fillColor: Theme.of(context).colorScheme.brightness == Brightness.light
             ? Colors.white
-            : Theme.of(context).colorScheme.secondary.withValues(
-                  alpha: 200,
-                ),
+            : Theme.of(context).colorScheme.secondary.withAlpha(200),
         iconColor: Theme.of(context).colorScheme.primary,
         border: const OutlineInputBorder(),
         floatingLabelBehavior: floatingLabelBehavior,
