@@ -500,21 +500,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 isLoading
                     ? const CartesianChartSkeleton()
-                    : CartesianChart(
-                        data: revenueTrendData, title: 'Revenue Trend'),
+                    : revenueTrendData.isNotEmpty
+                        ? CartesianChart(
+                            data: revenueTrendData, title: 'Revenue Trend')
+                        : const SizedBox.shrink(),
                 isLoading
                     ? const PieChartSkeleton()
-                    : PieChart(
-                        data: revenueDistributionData,
-                        title: 'Revenue Distribution',
-                      ),
+                    : revenueDistributionData.length > 1
+                        ? PieChart(
+                            data: revenueDistributionData,
+                            title: 'Revenue Distribution',
+                          )
+                        : Center(
+                            child: Text(
+                                'Add transactions under businesses to see revenue distribution',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 18,
+                                  textBaseline: TextBaseline.alphabetic,
+                                ),
+                                textAlign: TextAlign.center),
+                          ),
 
                 isLoading
                     ? const CartesianChartSkeleton()
-                    : RevenuePredictionChart(
-                        transactions: transactions,
-                        historicalData: revenueTrendData,
-                        predictions: predictedRevenueData)
+                    : predictedRevenueData.isNotEmpty
+                        ? RevenuePredictionChart(
+                            transactions: transactions,
+                            historicalData: revenueTrendData,
+                            predictions: predictedRevenueData)
+                        : const SizedBox.shrink(),
 
                 // SizedBox(
                 //   height: 150,
