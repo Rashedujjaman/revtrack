@@ -1,52 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:revtrack/models/chart_data_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-class DashboardPieChart extends StatelessWidget {
-  DashboardPieChart({super.key});
-  final List<CompanyRevenueData> data = [
-    CompanyRevenueData('Com A', 35000),
-    CompanyRevenueData('Com B', 50000),
-    CompanyRevenueData('Com C', 25000),
-    CompanyRevenueData('Com D', 45000),
-    CompanyRevenueData('Com E', 30000),
-  ];
+class PieChart extends StatelessWidget {
+  final List<ChartData> data;
+  const PieChart({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Revenue Distribution'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: SfCircularChart(
-            legend: const Legend(isVisible: true),
-            onLegendItemRender: (LegendRenderArgs args) {
-              if (args.text == 'Com A') {
-                args.color = Colors.red;
-              }
-            },
-            series: <PieSeries<CompanyRevenueData, String>>[
-              PieSeries<CompanyRevenueData, String>(
-                dataSource: data,
-                xValueMapper: (CompanyRevenueData data, _) => data.companyName,
-                yValueMapper: (CompanyRevenueData data, _) => data.revenue,
-                dataLabelSettings: const DataLabelSettings(isVisible: true),
-              ),
-            ],
+      body: Center(
+        child: SfCircularChart(
+          title: const ChartTitle(text: 'Revenue Distribution'),
+          tooltipBehavior: TooltipBehavior(enable: true),
+          legend: const Legend(
+            isVisible: true,
+            overflowMode: LegendItemOverflowMode.wrap,
+            position: LegendPosition.bottom,
+            // alignment: ChartAlignment.far,
           ),
+          series: <PieSeries<ChartData, String>>[
+            PieSeries<ChartData, String>(
+              dataSource: data,
+              xValueMapper: (ChartData data, _) => data.key,
+              yValueMapper: (ChartData data, _) => data.value,
+              dataLabelSettings: const DataLabelSettings(
+                isVisible: true,
+                connectorLineSettings: ConnectorLineSettings(
+                  type: ConnectorType.curve,
+                  length: '15%',
+                ),
+              ),
+              explode: true,
+              pointColorMapper: (ChartData data, _) {
+                // You can customize the color mapping here
+                int total = data.value.toInt();
+                if (total < 0) {
+                  return Colors.red; // Negative values in red
+                }
+                // return Colors
+                //     .primaries[data.value.toInt() % Colors.primaries.length];
+              },
+            ),
+          ],
         ),
       ),
     );
   }
-}
-
-class CompanyRevenueData {
-  final String companyName;
-  final double revenue;
-
-  CompanyRevenueData(this.companyName, this.revenue);
 }

@@ -579,7 +579,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 series: <CircularSeries>[
                   PieSeries<ChartData, String>(
                     dataSource: getCategoryBreakdownData('Expense'),
-                    xValueMapper: (ChartData data, _) => data.category,
+                    xValueMapper: (ChartData data, _) => data.key,
                     yValueMapper: (ChartData data, _) => data.value,
                     dataLabelSettings: const DataLabelSettings(isVisible: true),
                   ),
@@ -594,7 +594,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 series: <CircularSeries>[
                   PieSeries<ChartData, String>(
                     dataSource: getCategoryBreakdownData('Income'),
-                    xValueMapper: (ChartData data, _) => data.category,
+                    xValueMapper: (ChartData data, _) => data.key,
                     yValueMapper: (ChartData data, _) => data.value,
                     dataLabelSettings: const DataLabelSettings(isVisible: true),
                   ),
@@ -607,7 +607,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 series: <CartesianSeries<ChartData, String>>[
                   ColumnSeries<ChartData, String>(
                     dataSource: getMonthlyTotals('Income'),
-                    xValueMapper: (ChartData data, _) => data.category,
+                    xValueMapper: (ChartData data, _) => data.key,
                     yValueMapper: (ChartData data, _) => data.value,
                     name: 'Income',
                     color: Colors.green,
@@ -619,7 +619,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                   ),
                   ColumnSeries<ChartData, String>(
                     dataSource: getMonthlyTotals('Expense'),
-                    xValueMapper: (ChartData data, _) => data.category,
+                    xValueMapper: (ChartData data, _) => data.key,
                     yValueMapper: (ChartData data, _) => data.value,
                     name: 'Expense',
                     color: Colors.red,
@@ -640,7 +640,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                 series: <CartesianSeries<ChartData, String>>[
                   LineSeries<ChartData, String>(
                     dataSource: getRevenueTrendData(),
-                    xValueMapper: (ChartData data, _) => data.category,
+                    xValueMapper: (ChartData data, _) => data.key,
                     yValueMapper: (ChartData data, _) => data.value,
                     name: 'Revenue',
                     dataLabelSettings: const DataLabelSettings(

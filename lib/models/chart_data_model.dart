@@ -1,6 +1,6 @@
 class ChartData {
-  final String category;
+  final String key;
   final double value;
 
-  ChartData(this.category, this.value);
+  ChartData(this.key, this.value);
 }

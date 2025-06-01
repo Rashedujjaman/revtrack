@@ -13,28 +13,32 @@ import 'package:revtrack/services/user_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
-  }
-  // on FirebaseException catch (e) {
-  //   // print('Firebase initialization error: ${e.code} - ${e.message}');
+  // try {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // }
-  catch (e) {
-    // print('General initialization error: $e');
-  }
+  // on FirebaseException catch (e) {
+  // print('Firebase initialization error: ${e.code} - ${e.message}');
+  // }
+  // catch (e) {
+  // print('General initialization error: $e');
+  // }
 
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: false,
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
 
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    systemNavigationBarColor: Colors.transparent,
-    // systemNavigationBarColor: const Color.fromARGB(255, 100, 230, 240),
-    // systemNavigationBarIconBrightness: Brightness.dark,
-  ));
+  // Set status bar and navigation bar colors and icon brightness based on theme mode
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark, // dark icons for light mode
+      statusBarBrightness: Brightness.light, // for iOS
+      systemNavigationBarIconBrightness:
+          Brightness.dark, // dark icons for light mode
+    ),
+  );
 
   // runApp(ChangeNotifierProvider(
   //     create: (context) => ThemeProvider(), child: const MyApp(),

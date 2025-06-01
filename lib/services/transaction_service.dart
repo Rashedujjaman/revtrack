@@ -47,18 +47,19 @@ class TransactionService {
   }
 
   // Get all transactions
-  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
-      getAllTransactions() async {
+  Future<List<Transaction1>> getAllTransactions() async {
     try {
       QuerySnapshot<Map<String, dynamic>> snapshot =
           await firestore.collection('Transaction').get();
-      return snapshot.docs;
+      return snapshot.docs
+          .map((doc) => Transaction1.fromDocumentSnapshot(doc))
+          .toList();
     } catch (e) {
       rethrow;
     }
   }
 
-  // Get transactions by business ID
+  // Get transactions by business ID & date range
   Future<List<Transaction1>> getTransactionsByBusiness(
       String businessId, DateTimeRange dateRange) async {
     final snapshot = await firestore

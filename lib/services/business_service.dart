@@ -21,6 +21,7 @@ class BusinessService {
     }
   }
 
+//Update business
   Future<void> updateBusiness(
       String businessId, String name, String logoUrl) async {
     try {
@@ -47,12 +48,16 @@ class BusinessService {
   }
 
   //Get all businesses
-  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
-      getAllBusinesses() async {
+  Future<List<Business>> getAllBusinesses() async {
     try {
-      QuerySnapshot<Map<String, dynamic>> snapshot =
-          await firestore.collection('Business').get();
-      return snapshot.docs;
+      final snapshot = await firestore
+          .collection('Business')
+          .where('isDeleted', isEqualTo: false)
+          .orderBy('name')
+          .get();
+      return snapshot.docs
+          .map((doc) => Business.fromDocumentSnapshot(doc))
+          .toList();
     } catch (e) {
       rethrow;
     }
@@ -71,12 +76,6 @@ class BusinessService {
       rethrow;
     }
   }
-
-  // //Get business by UID
-  // Future<DocumentSnapshot<Map<String, dynamic>>> getBusinessesByUser(
-  //     String uid) async {
-  //   return await firestore.collection('Business').doc(uid).get();
-  // }
 
   // Fetch businesses by user ID
   Future<List<Business>> getBusinessesByUser(String userId) async {
