@@ -12,6 +12,7 @@ ThemeData lightMode = ThemeData(
       secondary: Colors.grey.shade300,
       tertiary: Colors.amber,
       surfaceContainerHighest: Colors.grey[300]!,
+      // Set status bar and navigation bar colors and icon brightness based on theme mode
     ));
 
 ThemeData darkMode = ThemeData(

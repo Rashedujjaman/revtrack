@@ -352,9 +352,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               !isLoading
                                   ? AnimatedNumber(
                                       startValue: 0,
-                                      endValue: totalMonthlyRevenue > 0
-                                          ? totalMonthlyRevenue
-                                          : 0.0,
+                                      endValue: totalMonthlyRevenue,
                                       duration: const Duration(seconds: 2),
                                       isFloatingPoint: true,
                                       decimalPoint: 2,
@@ -394,9 +392,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               !isLoading
                                   ? AnimatedNumber(
                                       startValue: 0,
-                                      endValue: totalYearlyRevenue > 0
-                                          ? totalYearlyRevenue
-                                          : 0.0,
+                                      endValue: totalYearlyRevenue,
                                       duration: const Duration(seconds: 2),
                                       isFloatingPoint: true,
                                       decimalPoint: 2,
@@ -449,41 +445,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
                                   textAlign: TextAlign.center),
                             ),
-
                   isLoading
                       ? const CartesianChartSkeleton()
                       : predictedRevenueData.isNotEmpty
                           ? RevenuePredictionChart(
-                              transactions: transactions,
+                              title: 'Revenue Prediction',
                               historicalData: revenueTrendData,
                               predictions: predictedRevenueData)
                           : const SizedBox.shrink(),
-
-                  // SizedBox(
-                  //   height: 150,
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.all(8.0),
-                  //     //Initialize the spark charts widget
-                  //     child: SfSparkLineChart.custom(
-                  //       //Enable the trackball
-                  //       trackball: const SparkChartTrackball(
-                  //         activationMode: SparkChartActivationMode.tap,
-                  //       ),
-                  //       //Enable marker
-                  //       marker: const SparkChartMarker(
-                  //         displayMode: SparkChartMarkerDisplayMode.all,
-                  //       ),
-                  //       //Enable data label
-                  //       labelDisplayMode: SparkChartLabelDisplayMode.all,
-                  //       xValueMapper: (int index) => data[index].key,
-                  //       yValueMapper: (int index) => data[index].value,
-                  //       dataCount: 5,
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
-              // ),
             ),
           ),
         ),

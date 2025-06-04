@@ -187,6 +187,15 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                                     _categories.length, (int index) {
                                   final String category = _categories[index];
                                   return ChoiceChip(
+                                    showCheckmark: false,
+                                    labelStyle: TextStyle(
+                                        color: category == selectedCategory
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .surface
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .primary),
                                     label: Text(category),
                                     selected: category == selectedCategory,
                                     onSelected: (selected) {
@@ -195,9 +204,21 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                                             selected ? category : '';
                                       });
                                     },
+                                    side: category == selectedCategory
+                                        ? BorderSide(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .tertiary,
+                                            width: 1.0)
+                                        : BorderSide(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            width: 1.0),
                                     selectedColor: Theme.of(context)
                                         .colorScheme
-                                        .inversePrimary,
+                                        .primary
+                                        .withValues(alpha: 0.8),
                                   );
                                 }).toList(),
                               )

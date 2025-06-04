@@ -23,6 +23,7 @@ class CartesianChart extends StatelessWidget {
           yValueMapper: (ChartData sales, _) => sales.value,
           name: 'Revenue',
           dataLabelSettings: const DataLabelSettings(isVisible: true),
+          markerSettings: const MarkerSettings(isVisible: true),
         ),
       ],
     );

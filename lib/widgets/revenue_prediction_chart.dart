@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:revtrack/models/chart_data_model.dart';
-import 'package:revtrack/models/transaction_model.dart';
 
 class RevenuePredictionChart extends StatelessWidget {
-  final List<Transaction1> transactions;
+  final String title;
   final List<ChartData> historicalData;
   final List<ChartData> predictions;
 
   const RevenuePredictionChart({
     Key? key,
-    required this.transactions,
+    required this.title,
     required this.historicalData,
     required this.predictions,
   }) : super(key: key);
@@ -21,7 +20,7 @@ class RevenuePredictionChart extends StatelessWidget {
     final predictions = this.predictions;
 
     return SfCartesianChart(
-      title: const ChartTitle(text: 'Revenue Trend & Forecast'),
+      title: ChartTitle(text: title),
       legend: const Legend(isVisible: true),
       primaryXAxis: const CategoryAxis(
         labelRotation: -45,
