@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android' version '2.0.0' apply true
@@ -14,22 +17,29 @@ if (localPropertiesFile.exists()) {
     }
 }
 
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode', '1')
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode', '2')
 
 
-def flutterVersionName = localProperties.getProperty('flutter.versionName', '1.0')
+def flutterVersionName = localProperties.getProperty('flutter.versionName', '2.0.1')
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 
 android {
     namespace 'com.example.revtrack'
     compileSdkVersion 35
 
     defaultConfig {
-        applicationId "com.example.revtrack"
+        applicationId "com.rdj.revtrack"
         minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        // versionCode flutterVersionCode.toInteger()
+        // versionName flutterVersionName
+        versionCode 2
+        versionName "2.0.1"
         multiDexEnabled true
         ndkVersion "27.0.12077973"
     }
@@ -47,12 +57,24 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+    signingConfigs {
+        release {
+            keyAlias = keystoreProperties["keyAlias"]
+            keyPassword = keystoreProperties["keyPassword"]
+            storeFile = file(keystoreProperties["storeFile"])
+            storePassword = keystoreProperties["storePassword"]
+        }
+    }
+
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+
+            minifyEnabled true
+            shrinkResources true
         }
     }
 }
