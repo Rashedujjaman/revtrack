@@ -30,7 +30,7 @@ void main() async {
 
   // Set status bar and navigation bar colors and icon brightness based on theme mode
   SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(
+    const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       systemNavigationBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark, // dark icons for light mode

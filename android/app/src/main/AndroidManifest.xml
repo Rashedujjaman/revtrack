@@ -2,7 +2,7 @@
     package="com.example.revtrack">
 
     <application
-        android:label="revtrack"
+        android:label="RevTrack"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
