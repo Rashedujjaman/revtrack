@@ -13,15 +13,16 @@ import 'package:revtrack/services/user_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // try {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // }
-  // on FirebaseException catch (e) {
-  // print('Firebase initialization error: ${e.code} - ${e.message}');
-  // }
-  // catch (e) {
-  // print('General initialization error: $e');
-  // }
+  try {
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
+  } on FirebaseException catch (e) {
+    // Handle Firebase initialization error
+    print('Firebase initialization error: ${e.message}');
+  } catch (e) {
+    // Handle other errors
+    print('Error initializing Firebase: $e');
+  }
 
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: false,
