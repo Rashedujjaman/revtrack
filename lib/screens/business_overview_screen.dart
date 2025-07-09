@@ -544,6 +544,9 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                                               style:
                                                   const TextStyle(fontSize: 12),
                                             ),
+                                            Text(
+                                              transaction.note ?? '',
+                                            )
                                           ],
                                         ),
                                         trailing: Text(
