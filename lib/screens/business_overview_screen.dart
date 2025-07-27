@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:animated_number/animated_number.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:revtrack/widgets/edit_business_bottom_sheet.dart';
+// import 'package:revtrack/widgets/edit_business_bottom_sheet.dart';
 import 'package:revtrack/widgets/skeleton.dart';
 import 'package:revtrack/models/transaction_model.dart';
 import 'package:revtrack/models/business_model.dart';
@@ -17,6 +17,7 @@ import 'package:revtrack/services/transaction_service.dart';
 import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/widgets/pie_chart.dart';
 import 'package:revtrack/widgets/cartesian_chart.dart';
+import 'package:revtrack/widgets/date_range_selector.dart';
 import 'package:provider/provider.dart';
 
 class BusinessOverviewScreen extends StatefulWidget {
@@ -28,18 +29,24 @@ class BusinessOverviewScreen extends StatefulWidget {
   State<BusinessOverviewScreen> createState() => _BusinessOverviewScreenState();
 }
 
-class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
+class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
+    with AutomaticKeepAliveClientMixin {
   //*************************************************************************************************************************** */
   // Variables for managing business overview state
   get userId => Provider.of<UserProvider>(context, listen: false).userId;
   List<Transaction1> transactions = [];
   bool isLoading = false;
+  bool _disposed = false;
+
+  @override
+  bool get wantKeepAlive => true;
+
   String businessLogo = '';
   String businessName = '';
 
   bool expanded = false;
   DateTimeRange _selectedDateRange = DateTimeRange(
-    start: DateTime(DateTime.now().year, 1, 1),
+    start: DateTime(DateTime.now().year, DateTime.now().month, 1),
     end: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day,
         23, 59, 59, 999, 999),
   );
@@ -58,7 +65,15 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
     fetchTransactions();
   }
 
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   Future<void> fetchTransactions() async {
+    if (_disposed) return;
+
     setState(() {
       isLoading = true;
       transactions.clear();
@@ -66,6 +81,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
     // Fetch transactions for the selected business and date range
     final result = await TransactionService()
         .getTransactionsByBusiness(widget._business.id, _selectedDateRange);
+
+    if (_disposed) return;
 
     setState(() {
       transactions = result;
@@ -106,6 +123,26 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
     setState(() {
       expanded = !expanded;
     });
+  }
+
+  void _editTransaction(Transaction1 transaction) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddEditTransactionScreen(
+          widget._business.id,
+          widget._business.name,
+          transaction.type,
+          true, // isEdit = true
+          transaction: transaction,
+        ),
+      ),
+    );
+
+    if (result == true) {
+      // Refresh transactions if edit was successful
+      fetchTransactions();
+    }
   }
 
   double calculateTotalIncome() {
@@ -188,6 +225,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Business Overview'),
@@ -200,7 +238,25 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             spacing: 4,
             children: [
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
+              // Date Range Selector at the top
+              DateRangeSelector(
+                initialRange: _selectedDateRange,
+                onChanged: (DateTimeRange newRange) async {
+                  setState(() {
+                    _selectedDateRange = newRange;
+                    isLoading = true;
+                  });
+                  await fetchTransactions();
+                },
+                presetLabels: const [
+                  'This Week',
+                  'This Month',
+                  'Last 6 Months',
+                  'This Year',
+                ],
+              ),
+              const SizedBox(height: 4),
               // Business Overview Card
               Container(
                 padding:
@@ -387,84 +443,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 8),
-              // Date Range Selector
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  isLoading
-                      ? Shimmer.fromColors(
-                          baseColor: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withValues(alpha: 0.5),
-                          highlightColor:
-                              Theme.of(context).colorScheme.secondary,
-                          child: Container(
-                            width: 280,
-                            height: 20,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                            ),
-                          ),
-                        )
-                      : TextButton.icon(
-                          icon: const Icon(Icons.date_range),
-                          label: Text(
-                            '${DateFormat('dd/MM/yyyy').format(_selectedDateRange.start)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateRange.end)}',
-                          ),
-                          onPressed: isLoading
-                              ? null
-                              : () async {
-                                  final picked = await showDateRangePicker(
-                                    context: context,
-                                    firstDate: DateTime.now().subtract(
-                                        const Duration(days: 365 * 5)),
-                                    lastDate: DateTime.now(),
-                                    initialDateRange: _selectedDateRange,
-                                  );
-                                  if (picked != null &&
-                                      picked != _selectedDateRange) {
-                                    setState(() {
-                                      _selectedDateRange = DateTimeRange(
-                                        start: picked.start,
-                                        end: picked.end.add(const Duration(
-                                            hours: 23,
-                                            minutes: 59,
-                                            seconds: 59)),
-                                      );
-                                    });
-                                    await fetchTransactions();
-                                  }
-                                },
-                        ),
-                  IconButton(
-                    icon: const Icon(Icons.restore),
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            setState(() {
-                              _selectedDateRange = DateTimeRange(
-                                start: DateTime(DateTime.now().year, 1, 1),
-                                end: DateTime(
-                                    DateTime.now().year,
-                                    DateTime.now().month,
-                                    DateTime.now().day,
-                                    23,
-                                    59,
-                                    59,
-                                    999,
-                                    999),
-                              );
-
-                              isLoading = true;
-                            });
-                            await fetchTransactions();
-                          },
-                  ),
-                ],
-              ),
 
               isLoading == true
                   ? ListView.builder(
@@ -495,70 +474,249 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                                   itemBuilder: (context, index) {
                                     final transaction =
                                         displayedTransactions[index];
-                                    return Card.outlined(
+                                    return Container(
                                       margin: const EdgeInsets.symmetric(
-                                          horizontal: 0.0, vertical: 4.0),
-                                      shape: RoundedRectangleBorder(
+                                          horizontal: 0.0, vertical: 6.0),
+                                      decoration: BoxDecoration(
                                         borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        side: BorderSide(
-                                          color: transaction.type == 'Income'
-                                              ? Colors.green
-                                              : Colors.red,
-                                          width: 1,
-                                        ),
-                                      ),
-                                      // color: Theme.of(context)
-                                      //     .colorScheme
-                                      //     .secondary
-                                      //     .withValues(alpha: .5),
-                                      child: ListTile(
-                                        leading: Icon(
-                                          transaction.type == 'Income'
-                                              ? Icons.arrow_downward
-                                              : Icons.arrow_upward,
-                                          color: transaction.type == 'Income'
-                                              ? Colors.green
-                                              : Colors.red,
-                                        ),
-                                        title: Text(
-                                          transaction.type,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: transaction.type == 'Income'
-                                                ? Colors.green
-                                                : Colors.red,
-                                          ),
-                                        ),
-                                        subtitle: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Date: ${DateFormat('dd/MM/yyyy').format(transaction.dateCreated.toDate())}',
-                                              style:
-                                                  const TextStyle(fontSize: 12),
-                                            ),
-                                            Text(
-                                              transaction.category,
-                                              style:
-                                                  const TextStyle(fontSize: 12),
-                                            ),
-                                            Text(
-                                              transaction.note ?? '',
-                                            )
+                                            BorderRadius.circular(16.0),
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            (transaction.type == 'Income'
+                                                    ? Colors.green
+                                                    : Colors.red)
+                                                .withOpacity(0.1),
+                                            (transaction.type == 'Income'
+                                                    ? Colors.green
+                                                    : Colors.red)
+                                                .withOpacity(0.05),
                                           ],
                                         ),
-                                        trailing: Text(
-                                          '৳ ${transaction.amount.toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                            color: transaction.type == 'Income'
-                                                ? Colors.green
-                                                : Colors.red,
-                                          ),
+                                        border: Border.all(
+                                          color: (transaction.type == 'Income'
+                                                  ? Colors.green
+                                                  : Colors.red)
+                                              .withOpacity(0.3),
+                                          width: 1.5,
                                         ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: (transaction.type == 'Income'
+                                                    ? Colors.green
+                                                    : Colors.red)
+                                                .withOpacity(0.1),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(16.0),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8),
+                                                      decoration: BoxDecoration(
+                                                        color: transaction
+                                                                    .type ==
+                                                                'Income'
+                                                            ? Colors.green
+                                                                .withOpacity(
+                                                                    0.2)
+                                                            : Colors.red
+                                                                .withOpacity(
+                                                                    0.2),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12),
+                                                      ),
+                                                      child: Icon(
+                                                        transaction.type ==
+                                                                'Income'
+                                                            ? Icons.trending_up
+                                                            : Icons
+                                                                .trending_down,
+                                                        color:
+                                                            transaction.type ==
+                                                                    'Income'
+                                                                ? Colors.green
+                                                                : Colors.red,
+                                                        size: 24,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 12),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            transaction
+                                                                .category,
+                                                            style: TextStyle(
+                                                              fontSize: 18,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .onSurface,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 2),
+                                                          Text(
+                                                            transaction.type,
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: transaction
+                                                                          .type ==
+                                                                      'Income'
+                                                                  ? Colors.green
+                                                                  : Colors.red,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .end,
+                                                      children: [
+                                                        Text(
+                                                          NumberFormat.currency(
+                                                                  symbol: '৳ ')
+                                                              .format(
+                                                                  transaction
+                                                                      .amount),
+                                                          style: TextStyle(
+                                                            fontSize: 20,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: transaction
+                                                                        .type ==
+                                                                    'Income'
+                                                                ? Colors.green
+                                                                : Colors.red,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 12),
+                                                if (transaction.note != null &&
+                                                    transaction
+                                                        .note!.isNotEmpty)
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 6),
+                                                    decoration: BoxDecoration(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .surfaceContainerHighest
+                                                          .withOpacity(0.5),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                    ),
+                                                    child: Text(
+                                                      transaction.note!,
+                                                      style: TextStyle(
+                                                        fontSize: 13,
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurfaceVariant,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                const SizedBox(height: 8),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.schedule,
+                                                      size: 14,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurfaceVariant,
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      DateFormat('dd MMM yyyy')
+                                                          .format(transaction
+                                                              .dateCreated
+                                                              .toDate()),
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurfaceVariant,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 8),
+                                              ],
+                                            ),
+                                          ),
+                                          Positioned(
+                                            bottom: 8,
+                                            right: 8,
+                                            child: Material(
+                                              color: Colors.transparent,
+                                              child: InkWell(
+                                                onTap: () => _editTransaction(
+                                                    transaction),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary
+                                                        .withOpacity(0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                    border: Border.all(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .primary
+                                                          .withOpacity(0.3),
+                                                    ),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.edit,
+                                                    size: 18,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     );
                                   },
@@ -595,36 +753,39 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                       borderColor: Colors.green,
                     ),
               //Monthly Income vs Expense Column Chart
-              SfCartesianChart(
-                title: const ChartTitle(text: 'Monthly Income vs Expense'),
-                primaryXAxis: const CategoryAxis(),
-                series: <CartesianSeries<ChartData, String>>[
-                  ColumnSeries<ChartData, String>(
-                    dataSource: getMonthlyTotals('Income'),
-                    xValueMapper: (ChartData data, _) => data.key,
-                    yValueMapper: (ChartData data, _) => data.value,
-                    name: 'Income',
-                    color: Colors.green,
-                    dataLabelSettings: const DataLabelSettings(
-                      isVisible: true,
-                      labelAlignment: ChartDataLabelAlignment.auto,
-                      angle: -45,
-                    ),
-                  ),
-                  ColumnSeries<ChartData, String>(
-                    dataSource: getMonthlyTotals('Expense'),
-                    xValueMapper: (ChartData data, _) => data.key,
-                    yValueMapper: (ChartData data, _) => data.value,
-                    name: 'Expense',
-                    color: Colors.red,
-                    dataLabelSettings: const DataLabelSettings(
-                      isVisible: true,
-                      labelAlignment: ChartDataLabelAlignment.auto,
-                      angle: -45,
-                    ),
-                  ),
-                ],
-              ),
+              !_disposed
+                  ? SfCartesianChart(
+                      title:
+                          const ChartTitle(text: 'Monthly Income vs Expense'),
+                      primaryXAxis: const CategoryAxis(),
+                      series: <CartesianSeries<ChartData, String>>[
+                        ColumnSeries<ChartData, String>(
+                          dataSource: getMonthlyTotals('Income'),
+                          xValueMapper: (ChartData data, _) => data.key,
+                          yValueMapper: (ChartData data, _) => data.value,
+                          name: 'Income',
+                          color: Colors.green,
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                            labelAlignment: ChartDataLabelAlignment.auto,
+                            angle: -45,
+                          ),
+                        ),
+                        ColumnSeries<ChartData, String>(
+                          dataSource: getMonthlyTotals('Expense'),
+                          xValueMapper: (ChartData data, _) => data.key,
+                          yValueMapper: (ChartData data, _) => data.value,
+                          name: 'Expense',
+                          color: Colors.red,
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                            labelAlignment: ChartDataLabelAlignment.auto,
+                            angle: -45,
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
               // Revenue Trend Line Chart
               isLoading
                   ? const CircularProgressIndicator()
@@ -632,94 +793,94 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
                       data: getRevenueTrendData(), title: 'Revenue Trend'),
               const SizedBox(height: 24),
 
-              //Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  //Edit Button
-                  ElevatedButton(
-                    onPressed: () {
-                      // Edit Company Logic
-                      final updatedData = showModalBottomSheet(
-                        barrierColor:
-                            Theme.of(context).colorScheme.primary.withValues(
-                                  alpha: .3,
-                                ),
-                        elevation: 5,
-                        context: context,
-                        isScrollControlled: true,
-                        showDragHandle: true,
-                        sheetAnimationStyle: AnimationStyle(
-                          duration: const Duration(milliseconds: 700),
-                          curve: Curves.easeInOutBack,
-                        ),
-                        builder: (context) {
-                          return BusinessBottomSheet(
-                            business: widget._business,
-                            userId: userId,
-                          );
-                        },
-                      );
-                      updatedData.then(
-                        (value) {
-                          if (value != null && context.mounted) {
-                            setState(() {
-                              businessName = value['name'];
-                              businessLogo = value['logoUrl'];
-                            });
-                          }
-                          fetchTransactions();
-                        },
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.withValues(alpha: .7),
-                    ),
-                    child: const Text('Edit'),
-                  ),
-                  //Delete button
-                  ElevatedButton(
-                    onPressed: () {
-                      // Delete Company Logic
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('Delete Business'),
-                            content: const Text(
-                                'Are you sure you want to delete this business? This action cannot be undone.'),
-                            actions: [
-                              TextButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                ),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                ),
-                                onPressed: () {
-                                  // Delete function call
-                                  deleteBusiness();
-                                },
-                                child: const Text('Delete'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: const Text('Delete'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+              // //Action Buttons
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              //   children: [
+              //     //Edit Button
+              //     ElevatedButton(
+              //       onPressed: () {
+              //         // Edit Company Logic
+              //         final updatedData = showModalBottomSheet(
+              //           barrierColor:
+              //               Theme.of(context).colorScheme.primary.withValues(
+              //                     alpha: .3,
+              //                   ),
+              //           elevation: 5,
+              //           context: context,
+              //           isScrollControlled: true,
+              //           showDragHandle: true,
+              //           sheetAnimationStyle: AnimationStyle(
+              //             duration: const Duration(milliseconds: 700),
+              //             curve: Curves.easeInOutBack,
+              //           ),
+              //           builder: (context) {
+              //             return BusinessBottomSheet(
+              //               business: widget._business,
+              //               userId: userId,
+              //             );
+              //           },
+              //         );
+              //         updatedData.then(
+              //           (value) {
+              //             if (value != null && context.mounted) {
+              //               setState(() {
+              //                 businessName = value['name'];
+              //                 businessLogo = value['logoUrl'];
+              //               });
+              //             }
+              //             fetchTransactions();
+              //           },
+              //         );
+              //       },
+              //       style: ElevatedButton.styleFrom(
+              //         backgroundColor: Colors.blue.withValues(alpha: .7),
+              //       ),
+              //       child: const Text('Edit'),
+              //     ),
+              //     //Delete button
+              //     ElevatedButton(
+              //       onPressed: () {
+              //         // Delete Company Logic
+              //         showDialog(
+              //           context: context,
+              //           builder: (context) {
+              //             return AlertDialog(
+              //               title: const Text('Delete Business'),
+              //               content: const Text(
+              //                   'Are you sure you want to delete this business? This action cannot be undone.'),
+              //               actions: [
+              //                 TextButton(
+              //                   style: ElevatedButton.styleFrom(
+              //                     backgroundColor: Colors.green,
+              //                   ),
+              //                   onPressed: () {
+              //                     Navigator.pop(context);
+              //                   },
+              //                   child: const Text('Cancel'),
+              //                 ),
+              //                 TextButton(
+              //                   style: ElevatedButton.styleFrom(
+              //                     backgroundColor: Colors.red,
+              //                   ),
+              //                   onPressed: () {
+              //                     // Delete function call
+              //                     deleteBusiness();
+              //                   },
+              //                   child: const Text('Delete'),
+              //                 ),
+              //               ],
+              //             );
+              //           },
+              //         );
+              //       },
+              //       style:
+              //           ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              //       child: const Text('Delete'),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 16),
             ],
           ),
         ),
@@ -776,7 +937,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen> {
           ],
         ),
       ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

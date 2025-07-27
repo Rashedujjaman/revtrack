@@ -20,12 +20,16 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen>
+    with AutomaticKeepAliveClientMixin {
   //*************************************************************************************************************************** */
   get userId => Provider.of<UserProvider>(context, listen: false).userId;
   late UserModel user;
 
   bool isLoading = true;
+
+  @override
+  bool get wantKeepAlive => true;
   //*************************************************************************************************************************** */
 
   @override
@@ -73,6 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       // backgroundColor: Colors.transparent,
       body: ListView(
@@ -192,15 +197,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.dark_mode),
-            trailing: Switch(
-              value: Theme.of(context).brightness == Brightness.dark,
-              onChanged: (bool value) {
-                Provider.of<ThemeProvider>(context, listen: false)
-                    .toggleTheme();
-                // Handle toggle logic here
+            trailing: Consumer<ThemeProvider>(
+              builder: (context, themeProvider, child) {
+                return Switch(
+                  value: themeProvider.isDarkMode,
+                  onChanged: (bool value) async {
+                    await themeProvider.toggleTheme();
+                  },
+                );
               },
             ),
             title: const Text('Dark Mode'),
+            onTap: () async {
+              await Provider.of<ThemeProvider>(context, listen: false)
+                  .toggleTheme();
+            },
           ),
           ListTile(
             iconColor: Colors.red,

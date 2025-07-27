@@ -25,12 +25,23 @@ class TransactionService {
   }
 
   // Update transaction
-  Future<void> updateTransaction(Transaction1 transaction, String uid) async {
+  Future<void> updateTransaction(
+      String transactionId,
+      String businessId,
+      String type,
+      String category,
+      double amount,
+      DateTime selectedDate,
+      String note) async {
     try {
-      await firestore.collection('Transaction').doc(uid).update({
-        'type': transaction.type,
-        'amount': transaction.amount,
-        'category': transaction.category,
+      await firestore.collection('Transaction').doc(transactionId).update({
+        'businessId': businessId,
+        'type': type,
+        'amount': amount,
+        'category': category,
+        'dateCreated': selectedDate,
+        'dateModified': DateTime.now(),
+        'note': note,
       });
     } catch (e) {
       rethrow;

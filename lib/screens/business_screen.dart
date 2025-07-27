@@ -4,8 +4,8 @@ import 'package:revtrack/services/business_service.dart';
 import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/screens/business_overview_screen.dart';
 import 'package:revtrack/widgets/skeleton.dart';
+import 'package:revtrack/widgets/business_card.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:revtrack/widgets/edit_business_bottom_sheet.dart';
 
 class BusinessScreen extends StatefulWidget {
@@ -14,11 +14,16 @@ class BusinessScreen extends StatefulWidget {
   State<BusinessScreen> createState() => _BusinessScreenState();
 }
 
-class _BusinessScreenState extends State<BusinessScreen> {
+class _BusinessScreenState extends State<BusinessScreen>
+    with AutomaticKeepAliveClientMixin {
   //*************************************************************************************************************************** */
   get userId => Provider.of<UserProvider>(context, listen: false).userId;
   List<Business> businesses = [];
   bool isLoading = false;
+  bool _disposed = false;
+
+  @override
+  bool get wantKeepAlive => true;
   //*************************************************************************************************************************** */
 
   @override
@@ -28,7 +33,15 @@ class _BusinessScreenState extends State<BusinessScreen> {
     fetchData();
   }
 
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   Future<void> fetchData() async {
+    if (_disposed) return;
+
     setState(() {
       isLoading = true;
     });
@@ -50,17 +63,75 @@ class _BusinessScreenState extends State<BusinessScreen> {
     try {
       // Call the getBusinessesByUser method from BusinessService
       businesses = await BusinessService().getBusinessesByUser(userId);
+
+      if (_disposed) return;
+
       setState(() {
         isLoading = false; // Update loading state
       });
     } catch (e) {
       // Handle any errors that occur during the process
       // print('Error getting businesses: $e');
+      if (!_disposed) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
+  }
+
+  void _showDeleteDialog(BuildContext context, Business business) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Business'),
+          content: Text(
+              'Are you sure you want to delete "${business.name}"? This action cannot be undone.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  await BusinessService().deleteBusiness(business.id);
+                  if (mounted) {
+                    fetchData(); // Refresh the list
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            'Business "${business.name}" deleted successfully'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to delete business: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       // backgroundColor: Colors.transparent,
       body: Column(
@@ -107,37 +178,49 @@ class _BusinessScreenState extends State<BusinessScreen> {
                         itemCount: businesses.length,
                         itemBuilder: (context, index) {
                           final business = businesses[index];
-                          return Card(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .inversePrimary
-                                .withValues(alpha: 0.5),
-                            child: ListTile(
-                              leading: business.logoUrl != null ||
-                                      business.logoUrl!.isNotEmpty
-                                  ? CachedNetworkImage(
-                                      imageUrl: business.logoUrl!,
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                      errorWidget: (context, url, error) {
-                                        return const Icon(
-                                            Icons.image_not_supported);
-                                      },
-                                    )
-                                  : const Icon(Icons.business),
-                              title: Text(business.name),
-                              trailing: const Icon(Icons.arrow_forward_ios),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        BusinessOverviewScreen(business),
-                                  ),
-                                );
-                              },
-                            ),
+                          return BusinessCard(
+                            business: business,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      BusinessOverviewScreen(business),
+                                ),
+                              );
+                            },
+                            onEdit: () {
+                              final updatedData = showModalBottomSheet(
+                                barrierColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(
+                                      alpha: .3,
+                                    ),
+                                elevation: 5,
+                                context: context,
+                                isScrollControlled: true,
+                                showDragHandle: true,
+                                sheetAnimationStyle: AnimationStyle(
+                                  duration: const Duration(milliseconds: 700),
+                                  curve: Curves.easeInOutBack,
+                                ),
+                                builder: (context) {
+                                  return BusinessBottomSheet(
+                                    userId: userId,
+                                    business: business,
+                                  );
+                                },
+                              );
+                              updatedData.then((value) {
+                                if (value != null) {
+                                  fetchData();
+                                }
+                              });
+                            },
+                            onDelete: () {
+                              _showDeleteDialog(context, business);
+                            },
                           );
                         },
                       );

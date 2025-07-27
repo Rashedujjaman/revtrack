@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:revtrack/services/transaction_service.dart';
+import 'package:revtrack/models/transaction_model.dart';
 
 class AddEditTransactionScreen extends StatefulWidget {
   final String _businessId;
   final String _businessName;
   final String _type;
   final bool _isEdit;
+  final Transaction1? transaction; // Optional transaction for editing
 
   const AddEditTransactionScreen(
       this._businessId, this._businessName, this._type, this._isEdit,
-      {super.key});
+      {this.transaction, super.key});
 
   @override
   State<AddEditTransactionScreen> createState() =>
@@ -42,7 +44,20 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
     });
     super.initState();
     type = widget._type;
-    dateController.text = DateTime.now().toLocal().toString().split(' ')[0];
+
+    // If editing, populate fields with existing transaction data
+    if (widget._isEdit && widget.transaction != null) {
+      final transaction = widget.transaction!;
+      amountController.text = transaction.amount.toString();
+      selectedDate = transaction.dateCreated.toDate();
+      dateController.text = selectedDate.toLocal().toString().split(' ')[0];
+      noteController.text = transaction.note ?? '';
+      selectedCategory = transaction.category;
+      type = transaction.type;
+    } else {
+      dateController.text = DateTime.now().toLocal().toString().split(' ')[0];
+    }
+
     fetchCategories();
     // TransactionService().createIncomeAndExpenseCategories();
   }
@@ -65,14 +80,34 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
       setState(() {
         _isLoading = true;
       });
-      await TransactionService().addTransaction(
-        businessId,
-        type,
-        category,
-        amount,
-        selectedDate,
-        note,
-      );
+
+      if (widget._isEdit && widget.transaction != null) {
+        // Update existing transaction
+        final transactionId = widget.transaction!.id;
+        if (transactionId != null) {
+          await TransactionService().updateTransaction(
+            transactionId,
+            businessId,
+            type,
+            category,
+            amount,
+            selectedDate,
+            note,
+          );
+        } else {
+          throw Exception('Transaction ID is null');
+        }
+      } else {
+        // Add new transaction
+        await TransactionService().addTransaction(
+          businessId,
+          type,
+          category,
+          amount,
+          selectedDate,
+          note,
+        );
+      }
       return true;
     } catch (e) {
       return false;

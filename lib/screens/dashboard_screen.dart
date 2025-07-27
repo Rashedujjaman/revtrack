@@ -1,12 +1,11 @@
-// import 'dart:ffi';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:revtrack/models/transaction_model.dart';
 import 'package:revtrack/theme/gradient_provider.dart';
 import 'package:revtrack/widgets/cartesian_chart.dart';
-// import 'package:syncfusion_flutter_charts/charts.dart';
-// import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 import 'package:revtrack/widgets/pie_chart.dart';
+import 'package:revtrack/widgets/summary_card.dart';
+import 'package:revtrack/widgets/safe_chart_container.dart';
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/models/chart_data_model.dart';
 import 'package:revtrack/services/business_service.dart';
@@ -15,8 +14,6 @@ import 'package:revtrack/services/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:revtrack/widgets/revenue_prediction_chart.dart';
 import 'package:revtrack/widgets/skeleton.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:animated_number/animated_number.dart';
 import 'package:ml_algo/ml_algo.dart';
 import 'package:ml_dataframe/ml_dataframe.dart';
 
@@ -27,7 +24,8 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with AutomaticKeepAliveClientMixin {
   //*************************************************************************************************************************** */
   // get userId => Provider.of<UserProvider>(context, listen: false).userId;
 
@@ -41,6 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   double totalMonthlyRevenue = 0.0;
   double totalYearlyRevenue = 0.0;
   bool isLoading = true;
+  bool _disposed = false;
   String? errorMessage;
 
   // Date ranges
@@ -71,8 +70,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadDashboardData();
   }
 
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   Future<void> _loadDashboardData() async {
     try {
+      if (_disposed) return;
+
       setState(() {
         isLoading = true;
         errorMessage = null;
@@ -84,10 +94,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final fetchedBusinesses =
           await BusinessService().getBusinessesByUser(userId);
 
+      if (_disposed) return;
+
       // 2. Fetch transactions for all businesses in parallel
       final allTransactions = await Future.wait(fetchedBusinesses
               .map((business) => fetchTransactions(business.id)))
           .then((listOfLists) => listOfLists.expand((list) => list).toList());
+
+      if (_disposed) return;
 
       // 3. Calculate metrics
       final yearlyRevenue =
@@ -98,6 +112,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           fetchedBusinesses, allTransactions);
       final trendData = getRevenueTrendData(allTransactions);
       final predictions = predictFutureRevenue(trendData);
+
+      if (_disposed) return;
 
       // Single state update with all new data
       setState(() {
@@ -111,6 +127,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         isLoading = false;
       });
     } catch (e) {
+      if (_disposed) return;
+
       setState(() {
         errorMessage = 'Failed to load dashboard data: ${e.toString()}';
         isLoading = false;
@@ -283,6 +301,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (errorMessage != null) {
       return Center(
         child: Column(
@@ -315,144 +334,69 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 mainAxisSize: MainAxisSize.min,
                 spacing: 16.0,
                 children: <Widget>[
-                  const Text(
-                    'Welcome to RevTrack',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 20),
-                    height: 120,
-                    // width: 120,
-                    decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(50),
-                          bottomLeft: Radius.circular(50),
-                        ),
-                        color: Theme.of(context).colorScheme.surfaceDim),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Text(
-                                'Monthly Revenue : ',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              !isLoading
-                                  ? AnimatedNumber(
-                                      startValue: 0,
-                                      endValue: totalMonthlyRevenue,
-                                      duration: const Duration(seconds: 2),
-                                      isFloatingPoint: true,
-                                      decimalPoint: 2,
-                                      style: const TextStyle(
-                                        color: Colors.lightBlue,
-                                        fontSize: 32,
-                                      ),
-                                    )
-                                  : Shimmer.fromColors(
-                                      baseColor: Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withValues(alpha: 0.3),
-                                      highlightColor: Theme.of(context)
-                                          .colorScheme
-                                          .secondary,
-                                      child: Container(
-                                        width: 70,
-                                        height: 16,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Text(
-                                'Yearly Revenue : ',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              !isLoading
-                                  ? AnimatedNumber(
-                                      startValue: 0,
-                                      endValue: totalYearlyRevenue,
-                                      duration: const Duration(seconds: 2),
-                                      isFloatingPoint: true,
-                                      decimalPoint: 2,
-                                      style: const TextStyle(
-                                        color: Colors.amber,
-                                        fontSize: 32,
-                                      ),
-                                    )
-                                  : Shimmer.fromColors(
-                                      baseColor: Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withValues(alpha: 0.3),
-                                      highlightColor: Theme.of(context)
-                                          .colorScheme
-                                          .secondary,
-                                      child: Container(
-                                        width: 70,
-                                        height: 16,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ],
-                          ),
-                        ],
+                  // const Text(
+                  //   'Welcome to RevTrack',
+                  //   style: TextStyle(
+                  //     fontSize: 30,
+                  //     fontWeight: FontWeight.bold,
+                  //     color: Colors.white,
+                  //   ),
+                  // ),
+                  MultiSummaryCard(
+                    title: 'Revenue Overview',
+                    isLoading: isLoading,
+                    items: [
+                      SummaryItem(
+                        label: 'Monthly Revenue',
+                        value: totalMonthlyRevenue,
+                        icon: Icons.calendar_month,
+                        color: Colors.lightBlue,
                       ),
-                    ),
+                      SummaryItem(
+                        label: 'Yearly Revenue',
+                        value: totalYearlyRevenue,
+                        icon: Icons.calendar_today,
+                        color: Colors.amber,
+                      ),
+                    ],
                   ),
-                  isLoading
-                      ? const CartesianChartSkeleton()
-                      : revenueTrendData.isNotEmpty
-                          ? CartesianChart(
-                              data: revenueTrendData, title: 'Revenue Trend')
-                          : const SizedBox.shrink(),
-                  isLoading
-                      ? const PieChartSkeleton()
-                      : revenueDistributionData.length > 1
-                          ? PieChart(
-                              data: revenueDistributionData,
-                              title: 'Revenue Distribution',
-                            )
-                          : Center(
-                              child: Text(
-                                  'Add transactions under businesses to see revenue distribution',
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    fontSize: 18,
-                                    textBaseline: TextBaseline.alphabetic,
-                                  ),
-                                  textAlign: TextAlign.center),
-                            ),
-                  isLoading
-                      ? const CartesianChartSkeleton()
-                      : predictedRevenueData.isNotEmpty
-                          ? RevenuePredictionChart(
-                              title: 'Revenue Prediction',
-                              historicalData: revenueTrendData,
-                              predictions: predictedRevenueData)
-                          : const SizedBox.shrink(),
+                  SafeChartContainer(
+                    isLoading: isLoading,
+                    loadingWidget: const CartesianChartSkeleton(),
+                    child: revenueTrendData.isNotEmpty
+                        ? CartesianChart(
+                            data: revenueTrendData, title: 'Revenue Trend')
+                        : const SizedBox.shrink(),
+                  ),
+                  SafeChartContainer(
+                    isLoading: isLoading,
+                    loadingWidget: const PieChartSkeleton(),
+                    child: revenueDistributionData.length > 1
+                        ? PieChart(
+                            data: revenueDistributionData,
+                            title: 'Revenue Distribution',
+                          )
+                        : Center(
+                            child: Text(
+                                'Add transactions under businesses to see revenue distribution',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 18,
+                                  textBaseline: TextBaseline.alphabetic,
+                                ),
+                                textAlign: TextAlign.center),
+                          ),
+                  ),
+                  SafeChartContainer(
+                    isLoading: isLoading,
+                    loadingWidget: const CartesianChartSkeleton(),
+                    child: predictedRevenueData.isNotEmpty
+                        ? RevenuePredictionChart(
+                            title: 'Revenue Prediction',
+                            historicalData: revenueTrendData,
+                            predictions: predictedRevenueData)
+                        : const SizedBox.shrink(),
+                  ),
                 ],
               ),
             ),
