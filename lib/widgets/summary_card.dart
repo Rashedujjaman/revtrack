@@ -31,7 +31,7 @@ class SummaryCard extends StatelessWidget {
       child: Material(
         elevation: 6,
         borderRadius: BorderRadius.circular(16),
-        shadowColor: color.withOpacity(0.3),
+        shadowColor: color.withValues(alpha: 0.3),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
@@ -40,11 +40,11 @@ class SummaryCard extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 backgroundColor,
-                backgroundColor.withOpacity(0.8),
+                backgroundColor.withValues(alpha: 0.8),
               ],
             ),
             border: Border.all(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -63,7 +63,7 @@ class SummaryCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.2),
+                          color: color.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -99,7 +99,7 @@ class SummaryCard extends StatelessWidget {
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurface
-                                          .withOpacity(0.7),
+                                          .withValues(alpha: 0.7),
                                     ),
                               ),
                             ],
@@ -119,10 +119,10 @@ class SummaryCard extends StatelessWidget {
                       color: Theme.of(context)
                           .colorScheme
                           .surface
-                          .withOpacity(0.8),
+                          .withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: color.withOpacity(0.1),
+                        color: color.withValues(alpha: 0.1),
                       ),
                     ),
                     child: Row(
@@ -140,8 +140,8 @@ class SummaryCard extends StatelessWidget {
                         ),
                         if (isLoading)
                           Shimmer.fromColors(
-                            baseColor: color.withOpacity(0.3),
-                            highlightColor: color.withOpacity(0.6),
+                            baseColor: color.withValues(alpha: 0.3),
+                            highlightColor: color.withValues(alpha: 0.6),
                             child: Container(
                               width: 80,
                               height: 24,
@@ -200,7 +200,7 @@ class MultiSummaryCard extends StatelessWidget {
       child: Material(
         elevation: 8,
         borderRadius: BorderRadius.circular(20),
-        shadowColor: Theme.of(context).shadowColor.withOpacity(0.3),
+        shadowColor: Theme.of(context).shadowColor.withValues(alpha: 0.3),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
@@ -209,11 +209,12 @@ class MultiSummaryCard extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
               ],
             ),
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              color:
+                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -254,10 +255,10 @@ class MultiSummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: item.color.withOpacity(0.1),
+        color: item.color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: item.color.withOpacity(0.2),
+          color: item.color.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -265,7 +266,7 @@ class MultiSummaryCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: item.color.withOpacity(0.2),
+              color: item.color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -298,8 +299,8 @@ class MultiSummaryCard extends StatelessWidget {
                     ),
                     if (isLoading)
                       Shimmer.fromColors(
-                        baseColor: item.color.withOpacity(0.3),
-                        highlightColor: item.color.withOpacity(0.6),
+                        baseColor: item.color.withValues(alpha: 0.3),
+                        highlightColor: item.color.withValues(alpha: 0.6),
                         child: Container(
                           width: 60,
                           height: 20,

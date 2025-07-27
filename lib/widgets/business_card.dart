@@ -23,7 +23,7 @@ class BusinessCard extends StatelessWidget {
       child: Material(
         elevation: 8,
         borderRadius: BorderRadius.circular(20),
-        shadowColor: Theme.of(context).shadowColor.withOpacity(0.3),
+        shadowColor: Theme.of(context).shadowColor.withValues(alpha: 0.3),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
@@ -32,11 +32,12 @@ class BusinessCard extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
               ],
             ),
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              color:
+                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -62,7 +63,7 @@ class BusinessCard extends StatelessWidget {
                             BoxShadow(
                               color: Theme.of(context)
                                   .shadowColor
-                                  .withOpacity(0.2),
+                                  .withValues(alpha: 0.2),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -140,7 +141,7 @@ class BusinessCard extends StatelessWidget {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .primaryContainer
-                                    .withOpacity(0.5),
+                                    .withValues(alpha: 0.5),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -167,7 +168,7 @@ class BusinessCard extends StatelessWidget {
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(0.7),
+                              .withValues(alpha: 0.7),
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -220,13 +221,13 @@ class BusinessCard extends StatelessWidget {
                       color: Theme.of(context)
                           .colorScheme
                           .surfaceContainer
-                          .withOpacity(0.3),
+                          .withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: Theme.of(context)
                             .colorScheme
                             .outline
-                            .withOpacity(0.1),
+                            .withValues(alpha: 0.1),
                       ),
                     ),
                     child: Row(
@@ -246,7 +247,7 @@ class BusinessCard extends StatelessWidget {
                           color: Theme.of(context)
                               .colorScheme
                               .outline
-                              .withOpacity(0.2),
+                              .withValues(alpha: 0.2),
                         ),
                         Expanded(
                           child: _buildStatItem(
@@ -263,7 +264,7 @@ class BusinessCard extends StatelessWidget {
                           color: Theme.of(context)
                               .colorScheme
                               .outline
-                              .withOpacity(0.2),
+                              .withValues(alpha: 0.2),
                         ),
                         Expanded(
                           child: _buildStatItem(
@@ -307,7 +308,7 @@ class BusinessCard extends StatelessWidget {
                       //       color: Theme.of(context)
                       //           .colorScheme
                       //           .outline
-                      //           .withOpacity(0.3),
+                      //           .withValues(alpha: 0.3),
                       //     ),
                       //     borderRadius: BorderRadius.circular(12),
                       //   ),
@@ -357,7 +358,10 @@ class BusinessCard extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.7),
               ),
           textAlign: TextAlign.center,
         ),

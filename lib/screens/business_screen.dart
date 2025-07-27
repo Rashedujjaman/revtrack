@@ -99,21 +99,21 @@ class _BusinessScreenState extends State<BusinessScreen>
               child: const Text('Delete'),
               onPressed: () async {
                 Navigator.of(context).pop();
+                final messenger = ScaffoldMessenger.of(context);
                 try {
                   await BusinessService().deleteBusiness(business.id);
                   if (mounted) {
                     fetchData(); // Refresh the list
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            'Business "${business.name}" deleted successfully'),
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('Business deleted successfully'),
                         backgroundColor: Colors.green,
                       ),
                     );
                   }
                 } catch (e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    messenger.showSnackBar(
                       SnackBar(
                         content: Text('Failed to delete business: $e'),
                         backgroundColor: Colors.red,
@@ -201,8 +201,8 @@ class _BusinessScreenState extends State<BusinessScreen>
                                 context: context,
                                 isScrollControlled: true,
                                 showDragHandle: true,
-                                sheetAnimationStyle: AnimationStyle(
-                                  duration: const Duration(milliseconds: 700),
+                                sheetAnimationStyle: const AnimationStyle(
+                                  duration: Duration(milliseconds: 700),
                                   curve: Curves.easeInOutBack,
                                 ),
                                 builder: (context) {
@@ -241,8 +241,8 @@ class _BusinessScreenState extends State<BusinessScreen>
             context: context,
             isScrollControlled: true,
             showDragHandle: true,
-            sheetAnimationStyle: AnimationStyle(
-              duration: const Duration(milliseconds: 700),
+            sheetAnimationStyle: const AnimationStyle(
+              duration: Duration(milliseconds: 700),
               curve: Curves.easeInOutBack,
             ),
             builder: (context) {

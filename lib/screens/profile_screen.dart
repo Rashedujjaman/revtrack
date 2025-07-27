@@ -180,8 +180,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                 context: context,
                 isScrollControlled: true,
                 showDragHandle: true,
-                sheetAnimationStyle: AnimationStyle(
-                  duration: const Duration(milliseconds: 700),
+                sheetAnimationStyle: const AnimationStyle(
+                  duration: Duration(milliseconds: 700),
                   curve: Curves.easeInOutBack,
                 ),
                 builder: (context) {

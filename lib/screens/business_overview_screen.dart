@@ -178,6 +178,27 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
         .toList();
   }
 
+  List<ChartData> getAdaptiveTotals(String type) {
+    // Calculate the difference in days between start and end date
+    final daysDifference =
+        _selectedDateRange.end.difference(_selectedDateRange.start).inDays;
+
+    // Use daily data if the range is less than 45 days, otherwise use monthly data
+    if (daysDifference < 45) {
+      return getDailyTotals(type);
+    } else {
+      return getMonthlyTotals(type);
+    }
+  }
+
+  String getChartTitle() {
+    final daysDifference =
+        _selectedDateRange.end.difference(_selectedDateRange.start).inDays;
+    return daysDifference < 45
+        ? 'Daily Income vs Expense'
+        : 'Monthly Income vs Expense';
+  }
+
   List<ChartData> getMonthlyTotals(String type) {
     final Map<String, double> monthlyMap = {};
 
@@ -221,6 +242,110 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
     }
 
     return monthlyMap.entries.map((e) => ChartData(e.key, e.value)).toList();
+  }
+
+  List<ChartData> getAdaptiveRevenueTrendData() {
+    // Calculate the difference in days between start and end date
+    final daysDifference =
+        _selectedDateRange.end.difference(_selectedDateRange.start).inDays;
+
+    if (daysDifference < 45) {
+      // Use daily data for short periods
+      final Map<String, double> dailyMap = {};
+
+      for (var transaction in transactions) {
+        final key =
+            DateFormat('MMM dd').format(transaction.dateCreated.toDate());
+        dailyMap.update(
+          key,
+          (val) => transaction.type == 'Income'
+              ? val + transaction.amount
+              : val - transaction.amount,
+          ifAbsent: () => transaction.type == 'Income'
+              ? transaction.amount
+              : -transaction.amount,
+        );
+      }
+
+      return dailyMap.entries.map((e) => ChartData(e.key, e.value)).toList();
+    } else {
+      // Use monthly data for longer periods
+      return getRevenueTrendData();
+    }
+  }
+
+  String getRevenueTrendTitle() {
+    final daysDifference =
+        _selectedDateRange.end.difference(_selectedDateRange.start).inDays;
+    return daysDifference < 45
+        ? 'Daily Revenue Trend'
+        : 'Monthly Revenue Trend';
+  }
+
+  List<ChartData> getAdaptiveIncomeData() {
+    // Calculate the difference in days between start and end date
+    final daysDifference =
+        _selectedDateRange.end.difference(_selectedDateRange.start).inDays;
+
+    if (daysDifference < 45) {
+      // Use daily data for short periods
+      final Map<String, double> dailyMap = {};
+
+      for (var transaction in transactions.where((t) => t.type == 'Income')) {
+        final key =
+            DateFormat('MMM dd').format(transaction.dateCreated.toDate());
+        dailyMap.update(
+          key,
+          (val) => val + transaction.amount,
+          ifAbsent: () => transaction.amount,
+        );
+      }
+
+      return dailyMap.entries.map((e) => ChartData(e.key, e.value)).toList();
+    } else {
+      // Use monthly data for longer periods
+      return getMonthlyTotals('Income');
+    }
+  }
+
+  List<ChartData> getAdaptiveExpenseData() {
+    // Calculate the difference in days between start and end date
+    final daysDifference =
+        _selectedDateRange.end.difference(_selectedDateRange.start).inDays;
+
+    if (daysDifference < 45) {
+      // Use daily data for short periods
+      final Map<String, double> dailyMap = {};
+
+      for (var transaction in transactions.where((t) => t.type == 'Expense')) {
+        final key =
+            DateFormat('MMM dd').format(transaction.dateCreated.toDate());
+        dailyMap.update(
+          key,
+          (val) => val + transaction.amount,
+          ifAbsent: () => transaction.amount,
+        );
+      }
+
+      return dailyMap.entries.map((e) => ChartData(e.key, e.value)).toList();
+    } else {
+      // Use monthly data for longer periods
+      return getMonthlyTotals('Expense');
+    }
+  }
+
+  String getIncomeChartTitle() {
+    final daysDifference =
+        _selectedDateRange.end.difference(_selectedDateRange.start).inDays;
+    return daysDifference < 45 ? 'Daily Income Trend' : 'Monthly Income Trend';
+  }
+
+  String getExpenseChartTitle() {
+    final daysDifference =
+        _selectedDateRange.end.difference(_selectedDateRange.start).inDays;
+    return daysDifference < 45
+        ? 'Daily Expense Trend'
+        : 'Monthly Expense Trend';
   }
 
   @override
@@ -487,18 +612,18 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                                             (transaction.type == 'Income'
                                                     ? Colors.green
                                                     : Colors.red)
-                                                .withOpacity(0.1),
+                                                .withValues(alpha: 0.1),
                                             (transaction.type == 'Income'
                                                     ? Colors.green
                                                     : Colors.red)
-                                                .withOpacity(0.05),
+                                                .withValues(alpha: 0.05),
                                           ],
                                         ),
                                         border: Border.all(
                                           color: (transaction.type == 'Income'
                                                   ? Colors.green
                                                   : Colors.red)
-                                              .withOpacity(0.3),
+                                              .withValues(alpha: 0.3),
                                           width: 1.5,
                                         ),
                                         boxShadow: [
@@ -506,7 +631,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                                             color: (transaction.type == 'Income'
                                                     ? Colors.green
                                                     : Colors.red)
-                                                .withOpacity(0.1),
+                                                .withValues(alpha: 0.1),
                                             blurRadius: 8,
                                             offset: const Offset(0, 2),
                                           ),
@@ -531,11 +656,11 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                                                                     .type ==
                                                                 'Income'
                                                             ? Colors.green
-                                                                .withOpacity(
-                                                                    0.2)
+                                                                .withValues(
+                                                                    alpha: 0.2)
                                                             : Colors.red
-                                                                .withOpacity(
-                                                                    0.2),
+                                                                .withValues(
+                                                                    alpha: 0.2),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(12),
@@ -633,7 +758,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                                                       color: Theme.of(context)
                                                           .colorScheme
                                                           .surfaceContainerHighest
-                                                          .withOpacity(0.5),
+                                                          .withValues(
+                                                              alpha: 0.5),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               8),
@@ -694,7 +820,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                                                     color: Theme.of(context)
                                                         .colorScheme
                                                         .primary
-                                                        .withOpacity(0.1),
+                                                        .withValues(alpha: 0.1),
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             20),
@@ -702,7 +828,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                                                       color: Theme.of(context)
                                                           .colorScheme
                                                           .primary
-                                                          .withOpacity(0.3),
+                                                          .withValues(
+                                                              alpha: 0.3),
                                                     ),
                                                   ),
                                                   child: Icon(
@@ -752,15 +879,14 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                       title: 'Income Breakdown',
                       borderColor: Colors.green,
                     ),
-              //Monthly Income vs Expense Column Chart
+              //Adaptive Income vs Expense Column Chart (Daily or Monthly based on date range)
               !_disposed
                   ? SfCartesianChart(
-                      title:
-                          const ChartTitle(text: 'Monthly Income vs Expense'),
+                      title: ChartTitle(text: getChartTitle()),
                       primaryXAxis: const CategoryAxis(),
                       series: <CartesianSeries<ChartData, String>>[
                         ColumnSeries<ChartData, String>(
-                          dataSource: getMonthlyTotals('Income'),
+                          dataSource: getAdaptiveTotals('Income'),
                           xValueMapper: (ChartData data, _) => data.key,
                           yValueMapper: (ChartData data, _) => data.value,
                           name: 'Income',
@@ -772,7 +898,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                           ),
                         ),
                         ColumnSeries<ChartData, String>(
-                          dataSource: getMonthlyTotals('Expense'),
+                          dataSource: getAdaptiveTotals('Expense'),
                           xValueMapper: (ChartData data, _) => data.key,
                           yValueMapper: (ChartData data, _) => data.value,
                           name: 'Expense',
@@ -790,7 +916,65 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
               isLoading
                   ? const CircularProgressIndicator()
                   : CartesianChart(
-                      data: getRevenueTrendData(), title: 'Revenue Trend'),
+                      data: getAdaptiveRevenueTrendData(),
+                      title: getRevenueTrendTitle()),
+
+              // Income Trend Line Chart
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : SfCartesianChart(
+                      title: ChartTitle(text: getIncomeChartTitle()),
+                      primaryXAxis: const CategoryAxis(),
+                      series: <CartesianSeries<ChartData, String>>[
+                        LineSeries<ChartData, String>(
+                          dataSource: getAdaptiveIncomeData(),
+                          xValueMapper: (ChartData data, _) => data.key,
+                          yValueMapper: (ChartData data, _) => data.value,
+                          name: 'Income',
+                          color: Colors.green,
+                          width: 3,
+                          markerSettings: const MarkerSettings(
+                            isVisible: true,
+                            color: Colors.green,
+                            borderColor: Colors.white,
+                            borderWidth: 2,
+                          ),
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                            labelAlignment: ChartDataLabelAlignment.auto,
+                          ),
+                        ),
+                      ],
+                    ),
+
+              // Expense Trend Line Chart
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : SfCartesianChart(
+                      title: ChartTitle(text: getExpenseChartTitle()),
+                      primaryXAxis: const CategoryAxis(),
+                      series: <CartesianSeries<ChartData, String>>[
+                        LineSeries<ChartData, String>(
+                          dataSource: getAdaptiveExpenseData(),
+                          xValueMapper: (ChartData data, _) => data.key,
+                          yValueMapper: (ChartData data, _) => data.value,
+                          name: 'Expense',
+                          color: Colors.red,
+                          width: 3,
+                          markerSettings: const MarkerSettings(
+                            isVisible: true,
+                            color: Colors.red,
+                            borderColor: Colors.white,
+                            borderWidth: 2,
+                          ),
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                            labelAlignment: ChartDataLabelAlignment.auto,
+                          ),
+                        ),
+                      ],
+                    ),
+
               const SizedBox(height: 24),
 
               // //Action Buttons
