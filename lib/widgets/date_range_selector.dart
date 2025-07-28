@@ -77,7 +77,8 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
         break;
       case 'This Week':
         newRange = DateTimeRange(
-          start: now.subtract(Duration(days: now.weekday - 1)),
+          // start: now.subtract(Duration(days: now.weekday - 1)),
+          start: DateTime(now.year, now.month, now.day - 6),
           end: now,
         );
         break;
