@@ -4,6 +4,7 @@ import 'package:revtrack/services/navigation_provider.dart';
 import 'dashboard_screen.dart';
 import 'profile_screen.dart';
 import 'business_screen.dart';
+import 'bank_accounts_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   final int? _index;
@@ -21,6 +22,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   final List<Widget> _screens = [
     const DashboardScreen(),
     const BusinessScreen(),
+    const BankAccountsScreen(),
     const ProfileScreen(),
   ];
 
@@ -85,6 +87,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
                   icon: Icon(Icons.dashboard), label: 'Dashboard'),
               BottomNavigationBarItem(
                   icon: Icon(Icons.business), label: 'Business'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.account_balance), label: 'Accounts'),
               BottomNavigationBarItem(icon: Icon(Icons.face), label: 'Profile'),
             ],
           ),

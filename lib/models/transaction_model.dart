@@ -10,6 +10,7 @@ class Transaction1 {
   final Timestamp? dateModified;
   final bool? isDeleted;
   final String? note;
+  final String? bankAccountId;
 
   Transaction1({
     this.id,
@@ -21,6 +22,7 @@ class Transaction1 {
     this.dateModified,
     this.isDeleted,
     this.note,
+    this.bankAccountId,
   });
 
   // Factory method to create a Record object from JSON
@@ -35,6 +37,7 @@ class Transaction1 {
       dateModified: json['dateModified'],
       isDeleted: json['isDeleted'] ?? false,
       note: json['note'],
+      bankAccountId: json['bankAccountId'],
     );
   }
 
@@ -50,6 +53,7 @@ class Transaction1 {
       'dateModified': dateModified,
       'isDeleted': isDeleted,
       'note': note,
+      'bankAccountId': bankAccountId,
     };
   }
 
@@ -67,6 +71,7 @@ class Transaction1 {
       dateModified: data['dateModified'],
       isDeleted: data['isDeleted'] ?? false,
       note: data['note'],
+      bankAccountId: data['bankAccountId'],
     );
   }
 }

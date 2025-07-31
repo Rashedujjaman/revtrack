@@ -253,10 +253,179 @@ class _PieChartSkeletonPainter extends CustomPainter {
         false,
         paint,
       );
-      startAngle += 1.6;
     }
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class BankAccountCardSkeleton extends StatelessWidget {
+  const BankAccountCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header row
+            Row(
+              children: [
+                Shimmer.fromColors(
+                  baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  highlightColor: Theme.of(context).colorScheme.secondary,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Shimmer.fromColors(
+                  baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  highlightColor: Theme.of(context).colorScheme.secondary,
+                  child: Container(
+                    height: 20,
+                    width: 80,
+                    color: Colors.white,
+                  ),
+                ),
+                const Spacer(),
+                Shimmer.fromColors(
+                  baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  highlightColor: Theme.of(context).colorScheme.secondary,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Account name
+            Shimmer.fromColors(
+              baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              highlightColor: Theme.of(context).colorScheme.secondary,
+              child: Container(
+                height: 18,
+                width: 150,
+                color: Colors.white,
+              ),
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Bank name and account number
+            Row(
+              children: [
+                Shimmer.fromColors(
+                  baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  highlightColor: Theme.of(context).colorScheme.secondary,
+                  child: Container(
+                    height: 14,
+                    width: 100,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Shimmer.fromColors(
+                  baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  highlightColor: Theme.of(context).colorScheme.secondary,
+                  child: Container(
+                    width: 4,
+                    height: 4,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Shimmer.fromColors(
+                  baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  highlightColor: Theme.of(context).colorScheme.secondary,
+                  child: Container(
+                    height: 14,
+                    width: 60,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Balance
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Shimmer.fromColors(
+                      baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                      highlightColor: Theme.of(context).colorScheme.secondary,
+                      child: Container(
+                        height: 12,
+                        width: 80,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Shimmer.fromColors(
+                      baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                      highlightColor: Theme.of(context).colorScheme.secondary,
+                      child: Container(
+                        height: 20,
+                        width: 120,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Shimmer.fromColors(
+                      baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                      highlightColor: Theme.of(context).colorScheme.secondary,
+                      child: Container(
+                        height: 12,
+                        width: 60,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Shimmer.fromColors(
+                      baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                      highlightColor: Theme.of(context).colorScheme.secondary,
+                      child: Container(
+                        height: 14,
+                        width: 80,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

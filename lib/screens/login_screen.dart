@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:revtrack/screens/main_navigation_screen.dart';
 import 'package:revtrack/screens/register_screen.dart';
+import 'package:revtrack/screens/reset_password_screen.dart';
 import 'package:revtrack/services/authentication_service.dart';
 import 'package:revtrack/services/snackbar_service.dart';
 import 'package:revtrack/services/user_provider.dart';
@@ -88,11 +89,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         //Logo of the app
                         const SizedBox(height: 50.0),
-                        Image.asset(
-                          'assets/images/logo.png',
-                          width: 400,
-                          height: 150,
-                          fit: BoxFit.cover,
+                        ColorFiltered(
+                          colorFilter: const ColorFilter.matrix(<double>[
+                            1, 0, 0, 0, 0,
+                            0, 1, 0, 0, 0,
+                            0, 0, 1, 0, 0,
+                            -1, -1, -1, 2, 0, // This makes white transparent
+                          ]),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            width: 400,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                         const SizedBox(height: 100.0),
                         CustomTextFormField(
@@ -180,7 +189,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 16.0),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ResetPasswordPage(),
+                              ),
+                            );
+                          },
                           child: const Text(
                             'Forgot Password?',
                             style: TextStyle(color: Colors.white),

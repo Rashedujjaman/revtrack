@@ -14,5 +14,6 @@ class NavigationProvider with ChangeNotifier {
 
   void goToDashboard() => setCurrentIndex(0);
   void goToBusiness() => setCurrentIndex(1);
-  void goToProfile() => setCurrentIndex(2);
+  void goToBankAccounts() => setCurrentIndex(2);
+  void goToProfile() => setCurrentIndex(3);
 }

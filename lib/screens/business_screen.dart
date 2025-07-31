@@ -230,6 +230,7 @@ class _BusinessScreenState extends State<BusinessScreen>
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'add_business',
         tooltip: 'Add',
         onPressed: () {
           // _showAddBusinessDialog(context, userId);

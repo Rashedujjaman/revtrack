@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:revtrack/services/transaction_service.dart';
+import 'package:revtrack/services/bank_account_service.dart';
+import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/models/transaction_model.dart';
+import 'package:revtrack/models/bank_account_model.dart';
 
 class AddEditTransactionScreen extends StatefulWidget {
   final String _businessId;
@@ -31,10 +35,13 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
   String type = '';
   DateTime selectedDate = DateTime.now();
   String selectedCategory = '';
+  String? selectedBankAccountId;
 
   bool _isLoading = false;
 
   List<String> _categories = [];
+  List<BankAccount> _bankAccounts = [];
+  String? get userId => Provider.of<UserProvider>(context, listen: false).userId;
   //*************************************************************************************************************************** */
 
   @override
@@ -53,13 +60,41 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
       dateController.text = selectedDate.toLocal().toString().split(' ')[0];
       noteController.text = transaction.note ?? '';
       selectedCategory = transaction.category;
+      selectedBankAccountId = transaction.bankAccountId;
       type = transaction.type;
     } else {
       dateController.text = DateTime.now().toLocal().toString().split(' ')[0];
     }
 
     fetchCategories();
+    _loadBankAccounts();
     // TransactionService().createIncomeAndExpenseCategories();
+  }
+
+  Future<void> _loadBankAccounts() async {
+    if (userId != null) {
+      try {
+        final accounts = await BankAccountService().getBankAccountsByUser(userId!);
+        setState(() {
+          _bankAccounts = accounts;
+          
+          // Validate selectedBankAccountId exists in current accounts
+          if (selectedBankAccountId != null) {
+            final accountExists = _bankAccounts.any((account) => account.id == selectedBankAccountId);
+            if (!accountExists) {
+              selectedBankAccountId = null; // Reset if account no longer exists
+            }
+          }
+        });
+      } catch (e) {
+        // Handle error silently or show a snackbar
+        debugPrint('Error loading bank accounts: $e');
+        setState(() {
+          _bankAccounts = [];
+          selectedBankAccountId = null; // Reset on error
+        });
+      }
+    }
   }
 
   Future<void> fetchCategories() async {
@@ -93,6 +128,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
             amount,
             selectedDate,
             note,
+            selectedBankAccountId,
           );
         } else {
           throw Exception('Transaction ID is null');
@@ -106,6 +142,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
           amount,
           selectedDate,
           note,
+          selectedBankAccountId,
         );
       }
       return true;
@@ -207,6 +244,115 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
                             border: OutlineInputBorder(),
                           ),
                         ),
+                        const SizedBox(height: 24.0),
+                        
+                        // Bank Account Selection
+                        _bankAccounts.isEmpty
+                            ? Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.info_outline, color: Colors.blue[600]),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'No Bank Accounts',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.blue[800],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Add bank accounts to track your balances automatically',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.blue[700],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : DropdownButtonFormField<String>(
+                                value: selectedBankAccountId,
+                                decoration: const InputDecoration(
+                                  labelText: 'Bank Account (Optional)',
+                                  hintText: 'Select a bank account',
+                                  border: OutlineInputBorder(),
+                                  // prefixIcon: Icon(Icons.account_balance),
+                                  // helperText: 'Select an account to track balance changes',
+                                ),
+                                items: [
+                                  const DropdownMenuItem<String>(
+                                    value: null,
+                                    child: Text('Select Bank Account'),
+                                  ),
+                                  ..._bankAccounts.map((account) {
+                                    return DropdownMenuItem<String>(
+                                      value: account.id,
+                                      child: Container(
+                                        constraints: const BoxConstraints(maxWidth: 250),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              account.accountType == AccountType.credit
+                                                  ? Icons.credit_card
+                                                  : Icons.account_balance,
+                                              size: 18,
+                                              color: account.accountType == AccountType.credit
+                                                  ? Colors.orange
+                                                  : Colors.blue,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    account.accountName,
+                                                    style: const TextStyle(fontWeight: FontWeight.w500),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                  Text(
+                                                    '${account.bankName} • ${account.accountType.name.toUpperCase()}',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ],
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    selectedBankAccountId = value;
+                                  });
+                                },
+                                validator: null, // Optional field
+                                isExpanded: true, // Prevent overflow issues
+                                isDense: false,
+                              ),
+
                         const SizedBox(height: 30.0),
                         Text('Select Transaction Category',
                             style: Theme.of(context).textTheme.titleMedium),

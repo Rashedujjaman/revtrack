@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:revtrack/models/transaction_model.dart';
+// import 'package:revtrack/services/bank_account_service.dart';
 import 'package:flutter/material.dart';
 
 class TransactionService {
@@ -7,9 +8,13 @@ class TransactionService {
 
   // Add transaction
   Future<void> addTransaction(String businessId, String type, String category,
-      double amount, DateTime? selectedDate, String? note) async {
+      double amount, DateTime? selectedDate, String? note, [String? bankAccountId]) async {
     try {
-      await firestore.collection('Transaction').doc().set({
+      final batch = firestore.batch();
+      
+      // Add the transaction
+      final transactionRef = firestore.collection('Transaction').doc();
+      batch.set(transactionRef, {
         'businessId': businessId,
         'type': type,
         'amount': amount,
@@ -18,7 +23,32 @@ class TransactionService {
         'dateModified': DateTime.now(),
         'isDeleted': false,
         'note': note ?? '',
+        'bankAccountId': bankAccountId,
       });
+      
+      // Update bank account balance if bank account is selected
+      if (bankAccountId != null) {
+        final bankAccountRef = firestore.collection('BankAccounts').doc(bankAccountId);
+        final bankAccountDoc = await bankAccountRef.get();
+        
+        if (bankAccountDoc.exists) {
+          final currentBalance = (bankAccountDoc.data()!['currentBalance'] ?? 0.0) as double;
+          double newBalance;
+          
+          if (type == 'Income') {
+            newBalance = currentBalance + amount;
+          } else {
+            newBalance = currentBalance - amount;
+          }
+          
+          batch.update(bankAccountRef, {
+            'currentBalance': newBalance,
+            'lastTransactionDate': selectedDate ?? DateTime.now(),
+          });
+        }
+      }
+      
+      await batch.commit();
     } catch (e) {
       rethrow;
     }
@@ -32,9 +62,20 @@ class TransactionService {
       String category,
       double amount,
       DateTime selectedDate,
-      String note) async {
+      String note,
+      [String? bankAccountId]) async {
     try {
-      await firestore.collection('Transaction').doc(transactionId).update({
+      // Get the existing transaction to check for bank account changes
+      final existingTransactionDoc = await firestore.collection('Transaction').doc(transactionId).get();
+      final existingTransaction = existingTransactionDoc.exists 
+          ? Transaction1.fromDocumentSnapshot(existingTransactionDoc)
+          : null;
+          
+      final batch = firestore.batch();
+      
+      // Update the transaction
+      final transactionRef = firestore.collection('Transaction').doc(transactionId);
+      batch.update(transactionRef, {
         'businessId': businessId,
         'type': type,
         'amount': amount,
@@ -42,7 +83,58 @@ class TransactionService {
         'dateCreated': selectedDate,
         'dateModified': DateTime.now(),
         'note': note,
+        'bankAccountId': bankAccountId,
       });
+      
+      // Handle bank account balance updates
+      if (existingTransaction != null) {
+        // Reverse the old transaction's impact on the old bank account
+        if (existingTransaction.bankAccountId != null) {
+          final oldBankAccountRef = firestore.collection('BankAccounts').doc(existingTransaction.bankAccountId!);
+          final oldBankAccountDoc = await oldBankAccountRef.get();
+          
+          if (oldBankAccountDoc.exists) {
+            final oldCurrentBalance = (oldBankAccountDoc.data()!['currentBalance'] ?? 0.0) as double;
+            double revertedBalance;
+            
+            // Reverse the old transaction
+            if (existingTransaction.type == 'Income') {
+              revertedBalance = oldCurrentBalance - existingTransaction.amount;
+            } else {
+              revertedBalance = oldCurrentBalance + existingTransaction.amount;
+            }
+            
+            batch.update(oldBankAccountRef, {
+              'currentBalance': revertedBalance,
+              'lastTransactionDate': DateTime.now(),
+            });
+          }
+        }
+        
+        // Apply the new transaction to the new bank account
+        if (bankAccountId != null) {
+          final newBankAccountRef = firestore.collection('BankAccounts').doc(bankAccountId);
+          final newBankAccountDoc = await newBankAccountRef.get();
+          
+          if (newBankAccountDoc.exists) {
+            final newCurrentBalance = (newBankAccountDoc.data()!['currentBalance'] ?? 0.0) as double;
+            double newBalance;
+            
+            if (type == 'Income') {
+              newBalance = newCurrentBalance + amount;
+            } else {
+              newBalance = newCurrentBalance - amount;
+            }
+            
+            batch.update(newBankAccountRef, {
+              'currentBalance': newBalance,
+              'lastTransactionDate': selectedDate,
+            });
+          }
+        }
+      }
+      
+      await batch.commit();
     } catch (e) {
       rethrow;
     }
