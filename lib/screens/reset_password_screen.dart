@@ -139,12 +139,20 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 40),
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _resetPassword,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                     child: _isLoading
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.center,

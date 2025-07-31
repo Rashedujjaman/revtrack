@@ -164,7 +164,7 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
                   'Balance Overview',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 
                 // Net Balance Card
                 _buildOverviewCard(
@@ -210,7 +210,7 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
                 : Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

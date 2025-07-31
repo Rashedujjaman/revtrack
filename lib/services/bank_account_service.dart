@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:revtrack/models/bank_account_model.dart';
 
 class BankAccountService {
@@ -32,13 +33,14 @@ class BankAccountService {
           .collection('BankAccounts')
           .where('userId', isEqualTo: userId)
           .where('isActive', isEqualTo: true)
-          .orderBy('dateCreated', descending: true)
+          .orderBy('currentBalance', descending: true)
           .get();
 
       return snapshot.docs
           .map((doc) => BankAccount.fromDocumentSnapshot(doc))
           .toList();
     } catch (e) {
+      debugPrint('Error fetching bank accounts: $e');
       rethrow;
     }
   }

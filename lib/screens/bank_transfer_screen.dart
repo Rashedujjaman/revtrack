@@ -187,21 +187,22 @@ class _BankTransferScreenState extends State<BankTransferScreen> {
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.account_balance),
                       ),
+                      dropdownColor: Theme.of(context).colorScheme.surfaceDim,
                       items: _availableAccounts.map((account) {
                         return DropdownMenuItem(
                           value: account.id,
                           child: Row(
                             children: [
-                              Icon(
-                                account.accountType == AccountType.credit
-                                    ? Icons.credit_card
-                                    : Icons.account_balance,
-                                size: 20,
-                                color: account.accountType == AccountType.credit
-                                    ? Colors.orange
-                                    : Colors.blue,
-                              ),
-                              const SizedBox(width: 12),
+                              // Icon(
+                              //   account.accountType == AccountType.credit
+                              //       ? Icons.credit_card
+                              //       : Icons.account_balance,
+                              //   size: 20,
+                              //   color: account.accountType == AccountType.credit
+                              //       ? Colors.orange
+                              //       : Colors.blue,
+                              // ),
+                              // const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,6 +241,7 @@ class _BankTransferScreenState extends State<BankTransferScreen> {
                         return null;
                       },
                       isExpanded: true,
+                      isDense: false,
                     ),
                     const SizedBox(height: 24),
 
