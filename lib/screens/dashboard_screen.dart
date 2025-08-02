@@ -11,7 +11,7 @@ import 'package:revtrack/services/business_service.dart';
 import 'package:revtrack/services/transaction_service.dart';
 import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/services/user_stats_service.dart';
-import 'package:revtrack/theme/gradient_provider.dart';
+// import 'package:revtrack/theme/gradient_provider.dart';
 import 'package:revtrack/widgets/cartesian_chart.dart';
 import 'package:revtrack/widgets/pie_chart.dart';
 import 'package:revtrack/widgets/summary_card.dart';
@@ -353,6 +353,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    bool isLightMode = Theme.of(context).brightness == Brightness.light;
     super.build(context);
     if (errorMessage != null) {
       return Center(
@@ -373,7 +374,24 @@ class _DashboardScreenState extends State<DashboardScreen>
       // backgroundColor: Colors.transparent,
       body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        decoration: gradientBackground(context),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          colors: isLightMode
+            ? [
+                Colors.white, 
+                const Color(0xFF64E6F0), // Cyan top
+                Colors.white,             // White middle
+                // const Color(0xFF64E6F0), // Cyan bottom
+              ]
+            : [
+                Colors.transparent,       // Transparent top
+                Colors.grey[800]!,        // Dark grey middle
+                Colors.transparent,       // Transparent bottom
+              ],
+          ),
+        ),
         child: RefreshIndicator(
           onRefresh: _refreshData,
           child: SingleChildScrollView(
@@ -428,10 +446,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
@@ -439,7 +457,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                           Icon(
                             Icons.analytics_outlined,
                             size: 48,
-                            color: Colors.white70,
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -447,7 +465,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -456,7 +474,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.white70,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                           const SizedBox(height: 20),

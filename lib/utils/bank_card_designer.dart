@@ -211,7 +211,7 @@ class GeometricPatternPainter extends CustomPainter {
   }
 
   void _drawHexagonPattern(Canvas canvas, Size size, Paint paint) {
-    final hexSize = 30.0;
+    const hexSize = 30.0;
     for (int x = 0; x < (size.width / hexSize).ceil() + 2; x++) {
       for (int y = 0; y < (size.height / hexSize).ceil() + 2; y++) {
         paint.color = colors[(x + y) % colors.length].withValues(alpha: 0.2);
@@ -240,7 +240,7 @@ class GeometricPatternPainter extends CustomPainter {
   }
 
   void _drawDiamondPattern(Canvas canvas, Size size, Paint paint) {
-    final diamondSize = 40.0;
+    const diamondSize = 40.0;
     for (int x = 0; x < (size.width / diamondSize).ceil() + 2; x++) {
       for (int y = 0; y < (size.height / diamondSize).ceil() + 2; y++) {
         paint.color = colors[(x + y) % colors.length].withValues(alpha: 0.25);
@@ -286,7 +286,7 @@ class GeometricPatternPainter extends CustomPainter {
   }
 
   void _drawPolygonPattern(Canvas canvas, Size size, Paint paint) {
-    final polygonSize = 35.0;
+    const polygonSize = 35.0;
     for (int x = 0; x < (size.width / polygonSize).ceil() + 2; x++) {
       for (int y = 0; y < (size.height / polygonSize).ceil() + 2; y++) {
         paint.color = colors[(x + y) % colors.length].withValues(alpha: 0.3);

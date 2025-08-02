@@ -198,13 +198,13 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
         children: [
           // Overview Cards
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             child: Column(
               children: [
-                const Text(
-                  'Balance Overview',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
+                // const Text(
+                //   'Balance Overview',
+                //   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                // ),
                 const SizedBox(height: 8),
                 
                 // Net Balance Card
@@ -349,46 +349,48 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
   /// Returns: Container with formatted financial overview card
   Widget _buildOverviewCard(String title, double amount, Color color, IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: 30),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[600],
-                  ),
+
+          const SizedBox(width: 20),
+
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[600],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  NumberFormat.currency(symbol: '৳').format(amount),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+              ),
+              // const SizedBox(height: 4),
+              Text(
+                NumberFormat.currency(symbol: '৳').format(amount),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: color,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -416,7 +418,7 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
                 padding: const EdgeInsets.all(4),
@@ -426,32 +428,23 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
                 ),
                 child: Icon(icon, color: color, size: 24),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                  ],
+
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[600],
                 ),
               ),
+                  
             ],
           ),
-
-          const SizedBox(height: 4),
           
           Text(
             NumberFormat.currency(symbol: '৳').format(amount),
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: color,
             ),

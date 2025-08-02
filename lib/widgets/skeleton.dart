@@ -6,41 +6,204 @@ import 'package:flutter/material.dart';
 /// Features:
 /// - Shimmer animation effect during data loading
 /// - Theme-aware colors with transparency
-/// - Card layout matching actual BusinessCard widget
-/// - Leading icon placeholder with shimmer
-/// - Title text placeholder with proper sizing
-/// - Trailing arrow icon for consistency
+/// - Card layout matching actual BusinessCard widget structure
+/// - Logo, header, stats, and action button placeholders
+/// - Proper spacing and sizing to match real card dimensions
 class BusinessCardSkeleton extends StatelessWidget {
   const BusinessCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color:
-          Theme.of(context).colorScheme.inversePrimary.withValues(alpha: 0.3),
-      child: ListTile(
-        leading: Shimmer.fromColors(
-          baseColor:
-              Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-          highlightColor: Theme.of(context).colorScheme.secondary,
-          child: Container(
-            width: 50,
-            height: 50,
-            color: Colors.white,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Material(
+        elevation: 8,
+        borderRadius: BorderRadius.circular(20),
+        shadowColor: Theme.of(context).shadowColor.withValues(alpha: 0.3),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.surfaceDim.withValues(alpha: 0.3),
+                Theme.of(context).colorScheme.surfaceDim.withValues(alpha: 0.6),
+              ],
+            ),
+            border: Border.all(
+              color:
+                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Row with Logo and Actions
+                Row(
+                  children: [
+                    // Business Logo Skeleton
+                    Shimmer.fromColors(
+                      baseColor: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.3),
+                      highlightColor: Theme.of(context).colorScheme.secondary,
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+
+                    // Business Name Skeleton
+                    Expanded(
+                      child: Shimmer.fromColors(
+                        baseColor: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.3),
+                        highlightColor: Theme.of(context).colorScheme.secondary,
+                        child: Container(
+                          height: 24,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Menu Icon Skeleton
+                    Shimmer.fromColors(
+                      baseColor: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.3),
+                      highlightColor: Theme.of(context).colorScheme.secondary,
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // Business Stats Row Skeleton
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainer
+                        .withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.1),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(child: _buildStatItemSkeleton(context)),
+                      Container(
+                        width: 1,
+                        height: 40,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outline
+                            .withValues(alpha: 0.2),
+                      ),
+                      Expanded(child: _buildStatItemSkeleton(context)),
+                      Container(
+                        width: 1,
+                        height: 40,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outline
+                            .withValues(alpha: 0.2),
+                      ),
+                      Expanded(child: _buildStatItemSkeleton(context)),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Action Button Skeleton
+                Shimmer.fromColors(
+                  baseColor: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.3),
+                  highlightColor: Theme.of(context).colorScheme.secondary,
+                  child: Container(
+                    width: double.infinity,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        title: Shimmer.fromColors(
-          baseColor:
-              Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
-          highlightColor: Theme.of(context).colorScheme.secondary,
-          child: Container(
-            height: 16,
-            width: 120,
-            color: Colors.white,
-            margin: const EdgeInsets.symmetric(vertical: 4.0),
+      ),
+    );
+  }
+
+  Widget _buildStatItemSkeleton(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor:
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+      highlightColor: Theme.of(context).colorScheme.secondary,
+      child: Column(
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+          const SizedBox(height: 4),
+          Container(
+            height: 12,
+            width: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Container(
+            height: 10,
+            width: 30,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ],
       ),
     );
   }

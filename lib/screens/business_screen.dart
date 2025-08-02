@@ -43,7 +43,7 @@ class _BusinessScreenState extends State<BusinessScreen>
     super.dispose();
   }
 
-  /// Fetches businesses for the current user
+  /// Fetches businesses for the current user with comprehensive error handling
   Future<void> _fetchBusinesses() async {
     if (_disposed || userId == null) return;
 
@@ -61,10 +61,18 @@ class _BusinessScreenState extends State<BusinessScreen>
         isLoading = false;
       });
     } catch (e) {
-      if (!_disposed) {
+      if (!_disposed && mounted) {
         setState(() {
           isLoading = false;
         });
+        
+        // Show error message to user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading businesses: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -128,136 +136,110 @@ class _BusinessScreenState extends State<BusinessScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      // backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          // const Padding(
-          //   padding: EdgeInsets.all(0),
-          //   child: Center(
-          //     child: Text(
-          //       'All Your Businesses',
-          //       style: TextStyle(
-          //         fontSize: 24,
-          //         fontWeight: FontWeight.bold,
-          //       ),
-          //     ),
-          //   ),
-          // ),
           Expanded(
             child: userId == null
-                ? const Text("User is not loged in")
-                : FutureBuilder<void>(
-                    future: _fetchBusinesses(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting &&
-                          isLoading) {
-                        return ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16.0, horizontal: 8.0),
-                          itemCount: 6,
-                          itemBuilder: (context, index) {
-                            return const BusinessCardSkeleton();
-                          },
-                        );
-                      }
-
-                      if (snapshot.hasError) {
-                        return Center(child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.error, color: Colors.red, size: 48),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Error: ${snapshot.error}',
-                              style: TextStyle(color: Theme.of(context).colorScheme.error),
-                            ),
-                          ],
-                        ));
-                      }
-
-                      if (businesses.isEmpty) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(32),
-                            child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.business, size: 60, color: Colors.grey),
-                              SizedBox(height: 8),
-                              Text('No businesses found',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 32),
-                              Text('Tap the "+" button to add a new business and get started tracking your revenue.',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 16,
-
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                          ),
-                        );
-                      }
-
-                      return ListView.builder(
-                        // padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16),
-                        itemCount: businesses.length,
-                        itemBuilder: (context, index) {
-                          final business = businesses[index];
-                          return BusinessCard(
-                            business: business,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      BusinessOverviewScreen(business),
-                                ),
-                              );
+                ? const Center(
+                    child: Text(
+                      "User is not logged in",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _fetchBusinesses,
+                    child: isLoading
+                        ? ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16.0, horizontal: 8.0),
+                            itemCount: 6,
+                            itemBuilder: (context, index) {
+                              return const BusinessCardSkeleton();
                             },
-                            onEdit: () {
-                              final updatedData = showModalBottomSheet(
-                                barrierColor: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withValues(
-                                      alpha: .3,
+                          )
+                        : businesses.isEmpty
+                            ? ListView(
+                                children: const [
+                                  SizedBox(height: 200),
+                                  Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(32),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.business, size: 60, color: Colors.grey),
+                                          SizedBox(height: 8),
+                                          Text(
+                                            'No businesses found',
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          SizedBox(height: 32),
+                                          Text(
+                                            'Tap the "+" button to add a new business and get started tracking your revenue.',
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 16,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                elevation: 5,
-                                context: context,
-                                isScrollControlled: true,
-                                showDragHandle: true,
-                                sheetAnimationStyle: const AnimationStyle(
-                                  duration: Duration(milliseconds: 700),
-                                  curve: Curves.easeInOutBack,
-                                ),
-                                builder: (context) {
-                                  return BusinessBottomSheet(
-                                    userId: userId!,
+                                  ),
+                                ],
+                              )
+                            : ListView.builder(
+                                itemCount: businesses.length,
+                                itemBuilder: (context, index) {
+                                  final business = businesses[index];
+                                  return BusinessCard(
                                     business: business,
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              BusinessOverviewScreen(business),
+                                        ),
+                                      );
+                                    },
+                                    onEdit: () {
+                                      final updatedData = showModalBottomSheet(
+                                        barrierColor: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withValues(alpha: 0.3),
+                                        elevation: 5,
+                                        context: context,
+                                        isScrollControlled: true,
+                                        showDragHandle: true,
+                                        sheetAnimationStyle: const AnimationStyle(
+                                          duration: Duration(milliseconds: 700),
+                                          curve: Curves.easeInOutBack,
+                                        ),
+                                        builder: (context) {
+                                          return BusinessBottomSheet(
+                                            userId: userId!,
+                                            business: business,
+                                          );
+                                        },
+                                      );
+                                      updatedData.then((value) {
+                                        if (value != null) {
+                                          _fetchBusinesses();
+                                        }
+                                      });
+                                    },
+                                    onDelete: () {
+                                      _showDeleteDialog(context, business);
+                                    },
                                   );
                                 },
-                              );
-                              updatedData.then((value) {
-                                if (value != null) {
-                                  _fetchBusinesses();
-                                }
-                              });
-                            },
-                            onDelete: () {
-                              _showDeleteDialog(context, business);
-                            },
-                          );
-                        },
-                      );
-                    },
+                              ),
                   ),
           ),
         ],

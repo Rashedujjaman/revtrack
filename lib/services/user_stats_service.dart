@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/business_model.dart';
 import '../models/transaction_model.dart';
 
@@ -261,7 +262,10 @@ class UserStatsService {
         'totalExpenses': 0.0,
       };
     } catch (e) {
-      print('Error getting user stats: $e');
+      // Log error in debug mode only
+      if (kDebugMode) {
+        print('Error getting user stats: $e');
+      }
       return {
         'totalBusinesses': 0,
         'totalRevenue': 0.0,
