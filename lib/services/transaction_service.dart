@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:revtrack/models/transaction_model.dart';
 import 'package:revtrack/services/business_stats_service.dart';
+import 'package:revtrack/services/user_stats_service.dart';
 // import 'package:revtrack/services/bank_account_service.dart';
 import 'package:flutter/material.dart';
 
@@ -58,6 +59,23 @@ class TransactionService {
         transactionType: type,
         amount: amount,
       );
+      
+      // Update user statistics
+      final businessDoc = await firestore.collection('Business').doc(businessId).get();
+      if (businessDoc.exists) {
+        final businessData = businessDoc.data() as Map<String, dynamic>;
+        final userId = businessData['userId'] as String;
+        
+        final transaction = Transaction1(
+          businessId: businessId,
+          type: type,
+          amount: amount,
+          category: category,
+          dateCreated: Timestamp.fromDate(selectedDate ?? DateTime.now()),
+        );
+        
+        await UserStatsService.onTransactionAdded(userId, transaction);
+      }
     } catch (e) {
       rethrow;
     }
@@ -154,6 +172,23 @@ class TransactionService {
           newTransactionType: type,
           newAmount: amount,
         );
+        
+        // Update user statistics
+        final businessDoc = await firestore.collection('Business').doc(businessId).get();
+        if (businessDoc.exists) {
+          final businessData = businessDoc.data() as Map<String, dynamic>;
+          final userId = businessData['userId'] as String;
+          
+          final newTransaction = Transaction1(
+            businessId: businessId,
+            type: type,
+            amount: amount,
+            category: category,
+            dateCreated: Timestamp.fromDate(selectedDate),
+          );
+          
+          await UserStatsService.onTransactionUpdated(userId, existingTransaction, newTransaction);
+        }
       }
     } catch (e) {
       rethrow;
@@ -168,9 +203,11 @@ class TransactionService {
       final existingTransaction = existingTransactionDoc.exists 
           ? Transaction1.fromDocumentSnapshot(existingTransactionDoc)
           : null;
-      
-      await firestore.collection('Transaction').doc(uid).delete();
-      
+
+      await firestore.collection('Transaction').doc(uid).update({
+        'isDeleted': true,
+      });
+
       // Update business statistics after successful transaction deletion
       if (existingTransaction != null) {
         await _businessStatsService.onTransactionDeleted(
@@ -178,6 +215,15 @@ class TransactionService {
           transactionType: existingTransaction.type,
           amount: existingTransaction.amount,
         );
+        
+        // Update user statistics
+        final businessDoc = await firestore.collection('Business').doc(existingTransaction.businessId).get();
+        if (businessDoc.exists) {
+          final businessData = businessDoc.data() as Map<String, dynamic>;
+          final userId = businessData['userId'] as String;
+          
+          await UserStatsService.onTransactionDeleted(userId, existingTransaction);
+        }
       }
     } catch (e) {
       rethrow;

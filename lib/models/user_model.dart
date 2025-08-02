@@ -8,6 +8,12 @@ class UserModel {
   final String? phoneNumber;
   final String? imageUrl;
   final bool? isActive;
+  final int? totalBusinesses;
+  final double? totalRevenue;
+  final int? totalTransactions;
+  final double? totalIncomes;
+  final double? totalExpenses;
+  final String? role;
 
   UserModel({
     required this.uid,
@@ -17,6 +23,12 @@ class UserModel {
     this.phoneNumber,
     this.imageUrl,
     this.isActive,
+    this.totalBusinesses,
+    this.totalRevenue,
+    this.totalTransactions,
+    this.totalIncomes,
+    this.totalExpenses,
+    this.role,
   });
 
   // Convert a UserModel object into a Map
@@ -29,6 +41,12 @@ class UserModel {
       'phoneNumber': phoneNumber,
       'imageUrl': imageUrl,
       'isActive': isActive,
+      'totalBusinesses': totalBusinesses,
+      'totalRevenue': totalRevenue,
+      'totalTransactions': totalTransactions,
+      'totalIncomes': totalIncomes,
+      'totalExpenses': totalExpenses,
+      'role': role,
     };
   }
 
@@ -42,6 +60,12 @@ class UserModel {
       phoneNumber: map['phoneNumber'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
       isActive: map['isActive'] ?? false,
+      totalBusinesses: map['totalBusinesses'] ?? 0,
+      totalRevenue: (map['totalRevenue'] ?? 0.0).toDouble(),
+      totalTransactions: map['totalTransactions'] ?? 0,
+      totalIncomes: (map['totalIncomes'] ?? 0.0).toDouble(),
+      totalExpenses: (map['totalExpenses'] ?? 0.0).toDouble(),
+      role: map['role'] ?? 'user', // Default role if not provided
     );
   }
 
@@ -55,6 +79,12 @@ class UserModel {
       phoneNumber: data['phoneNumber'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
       isActive: data['isActive'] ?? false,
+      totalBusinesses: data['totalBusinesses'] ?? 0,
+      totalRevenue: (data['totalRevenue'] ?? 0.0).toDouble(),
+      totalTransactions: data['totalTransactions'] ?? 0,
+      totalIncomes: (data['totalIncomes'] ?? 0.0).toDouble(),
+      totalExpenses: (data['totalExpenses'] ?? 0.0).toDouble(),
+      role: data['role'] ?? 'user', // Default role if not provided
     );
   }
 }

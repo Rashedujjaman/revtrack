@@ -12,6 +12,7 @@ import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/models/user_model.dart';
 import 'package:revtrack/widgets/edit_profile_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:revtrack/screens/admin_settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     with AutomaticKeepAliveClientMixin {
   //*************************************************************************************************************************** */
   get userId => Provider.of<UserProvider>(context, listen: false).userId;
-  late UserModel user;
+  UserModel? user; // Changed from late to nullable
 
   bool isLoading = true;
 
@@ -102,69 +103,71 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: Center(
               child: isLoading
                   ? const CircularProgressIndicator()
-                  : Column(
-                      // mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 8,
-                      children: [
-                        Text(
-                          'Profile',
-                          style: TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withValues(
-                                  alpha: 0.5,
-                                ),
-                          ),
+                  : user == null
+                      ? const Text('Failed to load user data')
+                      : Column(
+                          // mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 8,
+                          children: [
+                            Text(
+                              'Profile',
+                              style: TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(
+                                      alpha: 0.5,
+                                    ),
+                              ),
+                            ),
+                            // const SizedBox(height: 20),
+                            CircleAvatar(
+                              radius: 50,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.secondary,
+                              child: user!.imageUrl != null &&
+                                      user!.imageUrl!.isNotEmpty
+                                  ? CircleAvatar(
+                                      // Inner circle for the Icon
+                                      radius:
+                                          49, // Slightly smaller to create the border
+                                      backgroundImage: CachedNetworkImageProvider(
+                                          user!.imageUrl!),
+                                    )
+                                  : const Icon(
+                                      Icons.person,
+                                      size: 50,
+                                      // color: Color(0xFF62BDBD),
+                                    ),
+                            ),
+                            // const SizedBox(height: 20),
+                            Shimmer.fromColors(
+                              baseColor: Theme.of(context)
+                                  .colorScheme
+                                  .tertiary
+                                  .withValues(alpha: 1),
+                              highlightColor: Colors.red,
+                              child: Text(
+                                user!.lastName != null && user!.lastName!.isNotEmpty
+                                    ? user!.lastName!
+                                    : user!.firstName,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 22),
+                              ),
+                            ),
+                            Text(
+                              user!.phoneNumber!,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            Text(
+                              user!.email!,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
                         ),
-                        // const SizedBox(height: 20),
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
-                          child: user.imageUrl != null &&
-                                  user.imageUrl!.isNotEmpty
-                              ? CircleAvatar(
-                                  // Inner circle for the Icon
-                                  radius:
-                                      49, // Slightly smaller to create the border
-                                  backgroundImage: CachedNetworkImageProvider(
-                                      user.imageUrl!),
-                                )
-                              : const Icon(
-                                  Icons.person,
-                                  size: 50,
-                                  // color: Color(0xFF62BDBD),
-                                ),
-                        ),
-                        // const SizedBox(height: 20),
-                        Shimmer.fromColors(
-                          baseColor: Theme.of(context)
-                              .colorScheme
-                              .tertiary
-                              .withValues(alpha: 1),
-                          highlightColor: Colors.red,
-                          child: Text(
-                            user.lastName != null && user.lastName!.isNotEmpty
-                                ? user.lastName!
-                                : user.firstName,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 22),
-                          ),
-                        ),
-                        Text(
-                          user.phoneNumber!,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        Text(
-                          user.email!,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
             ),
           ),
           ListTile(
@@ -172,6 +175,8 @@ class _ProfileScreenState extends State<ProfileScreen>
             trailing: const Icon(Icons.arrow_forward_ios),
             title: const Text('Edit Profile'),
             onTap: () {
+              if (user == null) return;
+              
               final updatedData = showModalBottomSheet(
                 barrierColor: Theme.of(context).colorScheme.primary.withValues(
                       alpha: .3,
@@ -185,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   curve: Curves.easeInOutBack,
                 ),
                 builder: (context) {
-                  return EditProfileBottomSheet(user: user);
+                  return EditProfileBottomSheet(user: user!);
                 },
               );
               updatedData.then((value) {
@@ -213,6 +218,21 @@ class _ProfileScreenState extends State<ProfileScreen>
                   .toggleTheme();
             },
           ),
+          if (user != null && user!.role != null && user!.role!.toLowerCase() == 'admin') ...[
+            ListTile(
+              leading: const Icon(Icons.settings),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              title: const Text('Admin Settings'),
+              onTap: () {
+                // Navigate to admin settings screen
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminSettingsScreen()));
+              },
+            ),
+          ],
+
+
+          
+
           ListTile(
             iconColor: Colors.red,
             textColor: Colors.red,

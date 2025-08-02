@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:revtrack/models/business_model.dart';
+import 'package:revtrack/services/user_stats_service.dart';
 import 'dart:io';
 
 class BusinessService {
@@ -9,7 +10,8 @@ class BusinessService {
   //Add business
   Future<void> addBusiness(String userId, String name, String? logoUrl) async {
     try {
-      await firestore.collection('Business').doc().set({
+      final businessRef = await firestore.collection('Business').doc();
+      await businessRef.set({
         'name': name,
         'logoUrl': logoUrl ?? '',
         'userId': userId,
@@ -19,6 +21,21 @@ class BusinessService {
         'expenses': 0.0,
         'transactionsCount': 0,
       });
+      
+      // Update user stats
+      final business = Business(
+        id: businessRef.id,
+        name: name,
+        logoUrl: logoUrl,
+        userId: userId,
+        dateCreated: Timestamp.fromDate(DateTime.now()),
+        isDeleted: false,
+        incomes: 0.0,
+        expenses: 0.0,
+        transactionsCount: 0,
+      );
+      
+      await UserStatsService.onBusinessAdded(userId, business);
     } catch (e) {
       rethrow;
     }
@@ -42,9 +59,19 @@ class BusinessService {
   //Delete business
   Future<void> deleteBusiness(String businessId) async {
     try {
+      // Get business data before deleting for user stats update
+      final businessDoc = await firestore.collection('Business').doc(businessId).get();
+      
       await firestore.collection('Business').doc(businessId).update({
         'isDeleted': true,
       });
+      
+      // Update user stats if business existed
+      if (businessDoc.exists) {
+        final businessData = businessDoc.data() as Map<String, dynamic>;
+        final userId = businessData['userId'] as String;
+        await UserStatsService.onBusinessDeleted(userId);
+      }
     } catch (e) {
       rethrow;
     }

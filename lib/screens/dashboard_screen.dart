@@ -11,6 +11,7 @@ import 'package:revtrack/models/chart_data_model.dart';
 import 'package:revtrack/services/business_service.dart';
 import 'package:revtrack/services/transaction_service.dart';
 import 'package:revtrack/services/user_provider.dart';
+import 'package:revtrack/services/user_stats_service.dart';
 import 'package:provider/provider.dart';
 import 'package:revtrack/widgets/revenue_prediction_chart.dart';
 import 'package:revtrack/widgets/skeleton.dart';
@@ -38,7 +39,14 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   double totalMonthlyRevenue = 0.0;
   double totalYearlyRevenue = 0.0;
-  bool isLoading = true;
+  double totalRevenue = 0.0;
+  double totalIncomes = 0.0;
+  double totalExpenses = 0.0;
+  int totalTransactions = 0;
+  
+  bool isInitialLoading = true;
+  bool isChartsLoading = false;
+  bool areChartsLoaded = false;
   bool _disposed = false;
   String? errorMessage;
 
@@ -67,7 +75,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
 
     // Load data
-    _loadDashboardData();
+    _loadInitialData();
   }
 
   @override
@@ -79,68 +87,98 @@ class _DashboardScreenState extends State<DashboardScreen>
     super.dispose();
   }
 
-  Future<void> _loadDashboardData() async {
+  // Load only essential summary data (lightweight)
+  Future<void> _loadInitialData() async {
     try {
       if (_disposed) return;
 
       setState(() {
-        isLoading = true;
+        isInitialLoading = true;
         errorMessage = null;
       });
 
       final userId = Provider.of<UserProvider>(context, listen: false).userId;
 
-      // 1. Fetch businesses
-      final fetchedBusinesses =
-          await BusinessService().getBusinessesByUser(userId);
+      // Get user stats (single document read!)
+      final userStats = await UserStatsService.getUserStats(userId);
+      
+      // Fetch businesses for business cards display
+      final fetchedBusinesses = await BusinessService().getBusinessesByUser(userId);
 
       if (_disposed) return;
 
-      // 2. Fetch transactions for all businesses in parallel
-      final allTransactions = await Future.wait(fetchedBusinesses
+      setState(() {
+        businesses = fetchedBusinesses;
+        totalRevenue = userStats['totalRevenue'] ?? 0.0;
+        totalIncomes = userStats['totalIncomes'] ?? 0.0;
+        totalExpenses = userStats['totalExpenses'] ?? 0.0;
+        totalTransactions = userStats['totalTransactions'] ?? 0;
+        isInitialLoading = false;
+      });
+    } catch (e) {
+      if (_disposed) return;
+
+      setState(() {
+        errorMessage = 'Failed to load dashboard: ${e.toString()}';
+        isInitialLoading = false;
+      });
+      debugPrint('Dashboard initial loading error: $e');
+    }
+  }
+
+  // Load detailed analytics data (expensive, only when requested)
+  Future<void> _loadAnalyticsData() async {
+    try {
+      if (_disposed) return;
+
+      setState(() {
+        isChartsLoading = true;
+        errorMessage = null;
+      });
+
+      // Fetch all transactions for charts (expensive operation)
+      final allTransactions = await Future.wait(businesses
               .map((business) => fetchTransactions(business.id)))
           .then((listOfLists) => listOfLists.expand((list) => list).toList());
 
       if (_disposed) return;
 
-      // 3. Calculate metrics
-      final yearlyRevenue =
-          calculateRevenue(allTransactions, selectedDateRange);
-      final monthlyRevenue =
-          calculateRevenue(allTransactions, currentMonthRange);
-      final distributionData = getRevenueDistributionByBusinesses(
-          fetchedBusinesses, allTransactions);
+      // Calculate detailed metrics for charts
+      final yearlyRevenue = calculateRevenue(allTransactions, selectedDateRange);
+      final monthlyRevenue = calculateRevenue(allTransactions, currentMonthRange);
+      final distributionData = getRevenueDistributionByBusinesses(businesses, allTransactions);
       final trendData = getRevenueTrendData(allTransactions);
       final predictions = predictFutureRevenue(trendData);
 
       if (_disposed) return;
 
-      // Single state update with all new data
       setState(() {
-        businesses = fetchedBusinesses;
         transactions = allTransactions;
         totalYearlyRevenue = yearlyRevenue;
         totalMonthlyRevenue = monthlyRevenue;
         revenueDistributionData = distributionData;
         revenueTrendData = trendData;
         predictedRevenueData = predictions;
-        isLoading = false;
+        isChartsLoading = false;
+        areChartsLoaded = true;
       });
     } catch (e) {
       if (_disposed) return;
 
       setState(() {
-        errorMessage = 'Failed to load dashboard data: ${e.toString()}';
-        isLoading = false;
+        errorMessage = 'Failed to load analytics: ${e.toString()}';
+        isChartsLoading = false;
       });
-      // Consider logging the error to your error tracking service
-      debugPrint('Dashboard loading error: $e');
+      debugPrint('Analytics loading error: $e');
     }
   }
 
-  // Helper method to refresh data
+  // Helper method to refresh initial data
   Future<void> _refreshData() async {
-    await _loadDashboardData();
+    await _loadInitialData();
+    if (areChartsLoaded) {
+      await _loadAnalyticsData();
+    }
   }
 
   // This method can be used to fetch transactions from the database
@@ -329,74 +367,160 @@ class _DashboardScreenState extends State<DashboardScreen>
               constraints: BoxConstraints(
                 minHeight: MediaQuery.of(context).size.height,
               ),
-              // child: IntrinsicHeight(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 spacing: 16.0,
                 children: <Widget>[
-                  // const Text(
-                  //   'Welcome to RevTrack',
-                  //   style: TextStyle(
-                  //     fontSize: 30,
-                  //     fontWeight: FontWeight.bold,
-                  //     color: Colors.white,
-                  //   ),
-                  // ),
+                  // Quick Summary (loaded immediately)
                   MultiSummaryCard(
-                    title: 'Revenue Overview',
-                    isLoading: isLoading,
+                    title: 'Business Overview',
+                    isLoading: isInitialLoading,
                     items: [
                       SummaryItem(
-                        label: 'Monthly Revenue',
-                        value: totalMonthlyRevenue,
-                        icon: Icons.calendar_month,
-                        color: Colors.lightBlue,
+                        label: 'Total Revenue',
+                        value: totalRevenue,
+                        icon: Icons.account_balance_wallet,
+                        color: Colors.green,
                       ),
                       SummaryItem(
-                        label: 'Yearly Revenue',
-                        value: totalYearlyRevenue,
-                        icon: Icons.calendar_today,
-                        color: Colors.amber,
+                        label: 'Total Incomes',
+                        value: totalIncomes,
+                        icon: Icons.trending_up,
+                        color: Colors.blue,
+                      ),
+                      SummaryItem(
+                        label: 'Total Expenses',
+                        value: totalExpenses,
+                        icon: Icons.trending_down,
+                        color: Colors.red,
+                      ),
+                      SummaryItem(
+                        label: 'Total Transactions',
+                        value: totalTransactions.toDouble(),
+                        icon: Icons.receipt_long,
+                        color: Colors.purple,
+                      ),
+                      SummaryItem(
+                        label: 'Active Businesses',
+                        value: businesses.length.toDouble(),
+                        icon: Icons.business,
+                        color: Colors.orange,
                       ),
                     ],
                   ),
-                  SafeChartContainer(
-                    isLoading: isLoading,
-                    loadingWidget: const CartesianChartSkeleton(),
-                    child: revenueTrendData.isNotEmpty
-                        ? CartesianChart(
-                            data: revenueTrendData, title: 'Revenue Trend')
-                        : const SizedBox.shrink(),
-                  ),
-                  SafeChartContainer(
-                    isLoading: isLoading,
-                    loadingWidget: const PieChartSkeleton(),
-                    child: revenueDistributionData.length > 1
-                        ? PieChart(
-                            data: revenueDistributionData,
-                            title: 'Revenue Distribution',
-                          )
-                        : Center(
-                            child: Text(
-                                'Add transactions under businesses to see revenue distribution',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 18,
-                                  textBaseline: TextBaseline.alphabetic,
-                                ),
-                                textAlign: TextAlign.center),
+                  
+                  // Analytics Section (loaded on demand)
+                  if (!areChartsLoaded && !isChartsLoading)
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.analytics_outlined,
+                            size: 48,
+                            color: Colors.white70,
                           ),
-                  ),
-                  SafeChartContainer(
-                    isLoading: isLoading,
-                    loadingWidget: const CartesianChartSkeleton(),
-                    child: predictedRevenueData.isNotEmpty
-                        ? RevenuePredictionChart(
-                            title: 'Revenue Prediction',
-                            historicalData: revenueTrendData,
-                            predictions: predictedRevenueData)
-                        : const SizedBox.shrink(),
-                  ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Revenue Analytics',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Load detailed charts and predictions to analyze your business performance',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton.icon(
+                            onPressed: _loadAnalyticsData,
+                            icon: const Icon(Icons.show_chart),
+                            label: const Text('Load Analytics'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  
+                  // Charts (shown only after loading)
+                  if (areChartsLoaded) ...[
+                    MultiSummaryCard(
+                      title: 'Detailed Revenue',
+                      isLoading: isChartsLoading,
+                      items: [
+                        SummaryItem(
+                          label: 'Monthly Revenue',
+                          value: totalMonthlyRevenue,
+                          icon: Icons.calendar_month,
+                          color: Colors.lightBlue,
+                        ),
+                        SummaryItem(
+                          label: 'Yearly Revenue',
+                          value: totalYearlyRevenue,
+                          icon: Icons.calendar_today,
+                          color: Colors.amber,
+                        ),
+                      ],
+                    ),
+                    SafeChartContainer(
+                      isLoading: isChartsLoading,
+                      loadingWidget: const CartesianChartSkeleton(),
+                      child: revenueTrendData.isNotEmpty
+                          ? CartesianChart(
+                              data: revenueTrendData, title: 'Revenue Trend')
+                          : const SizedBox.shrink(),
+                    ),
+                    SafeChartContainer(
+                      isLoading: isChartsLoading,
+                      loadingWidget: const PieChartSkeleton(),
+                      child: revenueDistributionData.length > 1
+                          ? PieChart(
+                              data: revenueDistributionData,
+                              title: 'Revenue Distribution',
+                            )
+                          : Center(
+                              child: Text(
+                                  'Add transactions under businesses to see revenue distribution',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontSize: 18,
+                                    textBaseline: TextBaseline.alphabetic,
+                                  ),
+                                  textAlign: TextAlign.center),
+                            ),
+                    ),
+                    SafeChartContainer(
+                      isLoading: isChartsLoading,
+                      loadingWidget: const CartesianChartSkeleton(),
+                      child: predictedRevenueData.isNotEmpty
+                          ? RevenuePredictionChart(
+                              title: 'Revenue Prediction',
+                              historicalData: revenueTrendData,
+                              predictions: predictedRevenueData)
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
                 ],
               ),
             ),

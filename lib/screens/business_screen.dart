@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/business_service.dart';
 import 'package:revtrack/services/user_provider.dart';
-import 'package:revtrack/services/business_stats_migration_service.dart';
 import 'package:revtrack/screens/business_overview_screen.dart';
 import 'package:revtrack/widgets/skeleton.dart';
 import 'package:revtrack/widgets/business_card.dart';
@@ -81,42 +80,6 @@ class _BusinessScreenState extends State<BusinessScreen>
     }
   }
 
-  // Initialize business stats for all businesses (run once for migration)
-  Future<void> _initializeAllBusinessStats() async {
-    try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Initializing business statistics...'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      
-      await BusinessStatsMigrationService().initializeAllBusinessStats(userId);
-      
-      // Refresh the business list to show updated stats
-      await fetchData();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Business statistics initialized successfully!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error initializing stats: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
 
   void _showDeleteDialog(BuildContext context, Business business) {
     showDialog(
@@ -169,47 +132,23 @@ class _BusinessScreenState extends State<BusinessScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    super.build(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Businesses'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          // Temporary migration button - remove after running once
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'migrate') {
-                _initializeAllBusinessStats();
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'migrate',
-                child: Row(
-                  children: [
-                    Icon(Icons.analytics_outlined),
-                    SizedBox(width: 8),
-                    Text('Initialize Stats'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
       // backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(
-              child: Text(
-                'All Your Businesses',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
+          // const Padding(
+          //   padding: EdgeInsets.all(0),
+          //   child: Center(
+          //     child: Text(
+          //       'All Your Businesses',
+          //       style: TextStyle(
+          //         fontSize: 24,
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     ),
+          //   ),
+          // ),
           Expanded(
             child: userId == null
                 ? const Text("User is not loged in")
@@ -229,12 +168,48 @@ class _BusinessScreenState extends State<BusinessScreen>
                       }
 
                       if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
+                        return Center(child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.error, color: Colors.red, size: 48),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Error: ${snapshot.error}',
+                              style: TextStyle(color: Theme.of(context).colorScheme.error),
+                            ),
+                          ],
+                        ));
                       }
 
                       if (businesses.isEmpty) {
                         return const Center(
-                            child: Text('No businesses found.'));
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.business, size: 60, color: Colors.grey),
+                              SizedBox(height: 8),
+                              Text('No businesses found',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(height: 32),
+                              Text('Tap the "+" button to add a new business and get started tracking your revenue.',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                          ),
+                        );
                       }
 
                       return ListView.builder(
