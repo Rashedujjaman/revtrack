@@ -15,6 +15,9 @@ class BusinessService {
         'userId': userId,
         'dateCreated': DateTime.now(),
         'isDeleted': false,
+        'incomes': 0.0,
+        'expenses': 0.0,
+        'transactionsCount': 0,
       });
     } catch (e) {
       rethrow;
@@ -53,7 +56,6 @@ class BusinessService {
       final snapshot = await firestore
           .collection('Business')
           .where('isDeleted', isEqualTo: false)
-          .orderBy('name')
           .get();
       return snapshot.docs
           .map((doc) => Business.fromDocumentSnapshot(doc))

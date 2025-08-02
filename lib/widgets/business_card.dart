@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:revtrack/models/business_model.dart';
+import 'package:intl/intl.dart';
 
 class BusinessCard extends StatelessWidget {
   final Business business;
@@ -18,8 +19,9 @@ class BusinessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    final reveneue = (business.incomes ?? 0.0) - (business.expenses ?? 0.0);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Material(
         elevation: 8,
         borderRadius: BorderRadius.circular(20),
@@ -31,8 +33,8 @@ class BusinessCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                Theme.of(context).colorScheme.surfaceDim.withValues(alpha: 0.3),
+                Theme.of(context).colorScheme.surfaceDim.withValues(alpha: 0.6),
               ],
             ),
             border: Border.all(
@@ -45,7 +47,7 @@ class BusinessCard extends StatelessWidget {
             onTap: onTap,
             borderRadius: BorderRadius.circular(20),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -54,8 +56,8 @@ class BusinessCard extends StatelessWidget {
                     children: [
                       // Business Logo
                       Container(
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
                           color: Theme.of(context).colorScheme.primaryContainer,
@@ -133,30 +135,29 @@ class BusinessCard extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer
-                                    .withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'B.ID: ${business.id.substring(0, 10)}...',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                              ),
-                            ),
+                            // const SizedBox(height: 4),
+                            // Container(
+                            //   padding: const EdgeInsets.symmetric(
+                            //       horizontal: 8, vertical: 0),
+                            //   decoration: BoxDecoration(
+                            //     color: Theme.of(context)
+                            //         .colorScheme
+                            //         .primaryContainer
+                            //         .withValues(alpha: 0.5),
+                            //     borderRadius: BorderRadius.circular(8),
+                            //   ),
+                            //   child: Text(
+                            //     'B.ID: ${business.id.substring(0, 10)}...',
+                            //     style: Theme.of(context)
+                            //         .textTheme
+                            //         .bodySmall
+                            //         ?.copyWith(
+                            //           color: Theme.of(context)
+                            //               .colorScheme
+                            //               .onPrimaryContainer,
+                            //         ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -212,11 +213,11 @@ class BusinessCard extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
 
                   // Business Stats Row
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Theme.of(context)
                           .colorScheme
@@ -235,10 +236,17 @@ class BusinessCard extends StatelessWidget {
                         Expanded(
                           child: _buildStatItem(
                             context,
-                            Icons.trending_up,
+                            reveneue >= 0
+                                ? Icons.trending_up
+                                : Icons.trending_down,
                             'Revenue',
-                            '৳ 0.00', // TODO: Add real revenue calculation
-                            Colors.green,
+                            NumberFormat.currency(symbol: '৳').format(reveneue.abs()),
+                            reveneue >= 0
+                                ? Colors.green
+                                : Colors.red,
+                            reveneue >= 0
+                                ? Colors.green
+                                : Colors.red,
                           ),
                         ),
                         Container(
@@ -254,8 +262,9 @@ class BusinessCard extends StatelessWidget {
                             context,
                             Icons.receipt_long,
                             'Transactions',
-                            '0', // TODO: Add real transaction count
+                            '${business.transactionsCount ?? 0}',
                             Colors.blue,
+                            Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         Container(
@@ -273,13 +282,14 @@ class BusinessCard extends StatelessWidget {
                             'Created',
                             _formatDate(business.dateCreated.toDate()),
                             Colors.orange,
+                            Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
 
                   // Action Buttons
                   Row(
@@ -297,7 +307,7 @@ class BusinessCard extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 0),
                           ),
                         ),
                       ),
@@ -337,13 +347,14 @@ class BusinessCard extends StatelessWidget {
     IconData icon,
     String label,
     String value,
-    Color color,
+    Color iconColor,
+    Color? textColor
   ) {
     return Column(
       children: [
         Icon(
           icon,
-          color: color,
+          color: iconColor,
           size: 20,
         ),
         const SizedBox(height: 4),
@@ -351,7 +362,8 @@ class BusinessCard extends StatelessWidget {
           value,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: textColor ??Theme.of(context).colorScheme.onSurface,
+                fontSize: 12,
               ),
           textAlign: TextAlign.center,
         ),

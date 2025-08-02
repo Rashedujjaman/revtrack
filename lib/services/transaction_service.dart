@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:revtrack/models/transaction_model.dart';
+import 'package:revtrack/services/business_stats_service.dart';
 // import 'package:revtrack/services/bank_account_service.dart';
 import 'package:flutter/material.dart';
 
 class TransactionService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final BusinessStatsService _businessStatsService = BusinessStatsService();
 
   // Add transaction
   Future<void> addTransaction(String businessId, String type, String category,
@@ -49,6 +51,13 @@ class TransactionService {
       }
       
       await batch.commit();
+      
+      // Update business statistics after successful transaction creation
+      await _businessStatsService.onTransactionAdded(
+        businessId: businessId,
+        transactionType: type,
+        amount: amount,
+      );
     } catch (e) {
       rethrow;
     }
@@ -135,6 +144,17 @@ class TransactionService {
       }
       
       await batch.commit();
+      
+      // Update business statistics after successful transaction update
+      if (existingTransaction != null) {
+        await _businessStatsService.onTransactionUpdated(
+          businessId: businessId,
+          oldTransactionType: existingTransaction.type,
+          oldAmount: existingTransaction.amount,
+          newTransactionType: type,
+          newAmount: amount,
+        );
+      }
     } catch (e) {
       rethrow;
     }
@@ -143,7 +163,22 @@ class TransactionService {
   // Delete transaction
   Future<void> deleteTransaction(String uid) async {
     try {
+      // Get the existing transaction before deleting to update business stats
+      final existingTransactionDoc = await firestore.collection('Transaction').doc(uid).get();
+      final existingTransaction = existingTransactionDoc.exists 
+          ? Transaction1.fromDocumentSnapshot(existingTransactionDoc)
+          : null;
+      
       await firestore.collection('Transaction').doc(uid).delete();
+      
+      // Update business statistics after successful transaction deletion
+      if (existingTransaction != null) {
+        await _businessStatsService.onTransactionDeleted(
+          businessId: existingTransaction.businessId,
+          transactionType: existingTransaction.type,
+          amount: existingTransaction.amount,
+        );
+      }
     } catch (e) {
       rethrow;
     }

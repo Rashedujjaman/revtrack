@@ -36,7 +36,7 @@ class BankAccountCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Container(
-        height: 185, 
+        height: 200, 
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(
@@ -72,31 +72,33 @@ class BankAccountCard extends StatelessWidget {
             ),
             
             // Glassmorphism overlay
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.1),
-                      Colors.white.withValues(alpha: 0.05),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            // Positioned.fill(
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       borderRadius: BorderRadius.circular(20),
+            //       gradient: LinearGradient(
+            //         begin: Alignment.topLeft,
+            //         end: Alignment.bottomRight,
+            //         colors: [
+            //           Colors.white.withValues(alpha: 0.1),
+            //           Colors.white.withValues(alpha: 0.05),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
             
             // Content
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   // Header Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Account Type Badge
                       Container(
@@ -188,7 +190,7 @@ class BankAccountCard extends StatelessWidget {
                             ),
                         ],
                         child: Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
@@ -203,31 +205,23 @@ class BankAccountCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                                    
+
+                  // Account Name and Number             
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                     decoration: BoxDecoration(
-                      // color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
-                      // border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                      // color: Colors.white.withValues(alpha: 0.2),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 0,
                       children: [
-                        // Text(
-                        //   'ACCOUNT',
-                        //   style: TextStyle(
-                        //     color: Colors.white.withValues(alpha: 0.8),
-                        //     fontSize: 10,
-                        //     fontWeight: FontWeight.bold,
-                        //     letterSpacing: 1,
-                        //   ),
-                        // ),
                         Text(
                           account.accountName,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 22,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             shadows: [
                               Shadow(
@@ -262,7 +256,6 @@ class BankAccountCard extends StatelessWidget {
                     ),
                   ),
 
-                  const Spacer(flex: 1),
 
                   // Bottom Row: Account Number and Balance
                   Container(                           
@@ -277,15 +270,15 @@ class BankAccountCard extends StatelessWidget {
                     child:  Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Text(
-                          //   isCreditCard ? 'AVAILABLE' : 'BALANCE',
-                          //   style: TextStyle(
-                          //     color: Colors.white.withValues(alpha: 0.8),
-                          //     fontSize: 10,
-                          //     fontWeight: FontWeight.bold,
-                          //     letterSpacing: 1,
-                          //   ),
-                          // ),
+                          Text(
+                            isCreditCard ? 'AVAILABLE' : 'BALANCE',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
                           // const SizedBox(height: 4),
                           Text(
                             NumberFormat.currency(symbol: '৳').format(
@@ -295,7 +288,7 @@ class BankAccountCard extends StatelessWidget {
                             ),
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 20,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               shadows: [
                                 Shadow(
@@ -316,12 +309,12 @@ class BankAccountCard extends StatelessWidget {
             // Quick Transfer Floating Button
             if (userId != null)
               Positioned(
-                bottom: 20,
-                right: 20,
+                bottom: 12,
+                right: 12,
                 child: GestureDetector(
                   onTap: () => _showTransferDialog(context),
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(25),
