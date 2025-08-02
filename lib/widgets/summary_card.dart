@@ -2,6 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:animated_number/animated_number.dart';
 import 'package:shimmer/shimmer.dart';
 
+/// Summary card widget for displaying key metrics with animations
+/// 
+/// Features:
+/// - Animated number transitions for value changes
+/// - Gradient background with customizable colors
+/// - Loading state with shimmer animation
+/// - Optional tap callback for navigation
+/// - Icon and subtitle support for context
+/// - Material elevation and theming integration
 class SummaryCard extends StatelessWidget {
   final String title;
   final double value;
@@ -179,6 +188,15 @@ class SummaryCard extends StatelessWidget {
   }
 }
 
+/// Multi-item summary card widget for displaying grouped statistics
+/// 
+/// Features:
+/// - Multiple summary items in a single card
+/// - Consistent theming with Material Design 3
+/// - Individual item styling with icons and colors
+/// - Loading state with shimmer animations
+/// - Card-level tap interaction
+/// - Gradient background with elevation shadow
 class MultiSummaryCard extends StatelessWidget {
   final String title;
   final List<SummaryItem> items;
@@ -251,6 +269,13 @@ class MultiSummaryCard extends StatelessWidget {
     );
   }
 
+  /// Builds individual summary item with icon, label and animated value
+  /// 
+  /// Parameters:
+  /// - [context]: Build context for theming
+  /// - [item]: Summary item data with label, value, icon and color
+  /// 
+  /// Returns: Container with formatted summary item display
   Widget _buildSummaryItem(BuildContext context, SummaryItem item) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -334,12 +359,26 @@ class MultiSummaryCard extends StatelessWidget {
   }
 }
 
+/// Data model for individual summary items in MultiSummaryCard
+/// 
+/// Properties:
+/// - [label]: Display text for the item
+/// - [value]: Numeric value to display with animation
+/// - [icon]: Icon to show alongside the label
+/// - [color]: Theme color for icon and value text
 class SummaryItem {
   final String label;
   final double value;
   final IconData icon;
   final Color color;
 
+  /// Creates a summary item with required display properties
+  /// 
+  /// All parameters are required for proper item display:
+  /// - [label]: Text description of the metric
+  /// - [value]: Numeric value with 2 decimal places
+  /// - [icon]: Material icon for visual context
+  /// - [color]: Color theme for styling consistency
   const SummaryItem({
     required this.label,
     required this.value,

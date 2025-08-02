@@ -3,10 +3,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:revtrack/models/bank_account_model.dart';
 import 'package:revtrack/services/bank_account_service.dart';
 
+/// Screen for adding new bank accounts or editing existing ones
+/// 
+/// Features:
+/// - Dynamic form for creating and editing bank account details
+/// - Account type selection (savings, current, credit)
+/// - Balance input with proper handling for credit cards
+/// - Form validation with comprehensive error messages
+/// - Loading states during save operations
+/// - Special handling for credit card debt vs available balance
+/// - Integration with BankAccountService for CRUD operations
 class AddBankAccountScreen extends StatefulWidget {
   final String userId;
   final BankAccount? accountToEdit;
 
+  /// Creates a bank account form screen
+  /// 
+  /// Parameters:
+  /// - [userId]: Current user ID for account association
+  /// - [accountToEdit]: Existing account data when editing (null for new account)
   const AddBankAccountScreen({
     super.key,
     required this.userId,
@@ -17,6 +32,7 @@ class AddBankAccountScreen extends StatefulWidget {
   State<AddBankAccountScreen> createState() => _AddBankAccountScreenState();
 }
 
+/// Stateful widget implementation with form state management
 class _AddBankAccountScreenState extends State<AddBankAccountScreen> {
   final _formKey = GlobalKey<FormState>();
   final _accountNameController = TextEditingController();
@@ -35,6 +51,10 @@ class _AddBankAccountScreenState extends State<AddBankAccountScreen> {
     }
   }
 
+  /// Populates form fields with existing account data when editing
+  /// 
+  /// Handles special cases for credit card balances where debt is stored
+  /// as negative values but displayed as positive amounts owed.
   void _populateFields() {
     final account = widget.accountToEdit!;
     _accountNameController.text = account.accountName;

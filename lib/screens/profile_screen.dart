@@ -2,18 +2,27 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
+
 import 'package:revtrack/screens/login_screen.dart';
+import 'package:revtrack/screens/admin_settings_screen.dart';
 import 'package:revtrack/services/firebase_service.dart';
 import 'package:revtrack/services/snackbar_service.dart';
-// import 'package:revtrack/services/firebase_service.dart';
-import 'package:revtrack/theme/theme_provider.dart';
 import 'package:revtrack/services/authentication_service.dart';
 import 'package:revtrack/services/user_provider.dart';
+import 'package:revtrack/theme/theme_provider.dart';
 import 'package:revtrack/models/user_model.dart';
 import 'package:revtrack/widgets/edit_profile_bottom_sheet.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:revtrack/screens/admin_settings_screen.dart';
 
+/// Profile screen displaying user information and settings
+/// 
+/// Features:
+/// - User profile display with image, name, and contact info
+/// - Theme switching between dark and light modes
+/// - Edit profile functionality via bottom sheet
+/// - Admin settings access for admin users
+/// - Logout functionality with proper navigation
+/// - Loading states and error handling
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -23,26 +32,26 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen>
     with AutomaticKeepAliveClientMixin {
-  //*************************************************************************************************************************** */
-  get userId => Provider.of<UserProvider>(context, listen: false).userId;
-  UserModel? user; // Changed from late to nullable
-
+  
+  String? get userId => Provider.of<UserProvider>(context, listen: false).userId;
+  UserModel? user;
   bool isLoading = true;
 
   @override
   bool get wantKeepAlive => true;
-  //*************************************************************************************************************************** */
 
   @override
   void initState() {
     super.initState();
-    // Fetch user data when the screen is initialized
     _fetchUserData();
   }
 
+  /// Fetches user data from Firestore and updates UI state
   Future<void> _fetchUserData() async {
     try {
-      user = await FirebaseService().getUserData(userId);
+      if (userId != null) {
+        user = await FirebaseService().getUserData(userId!);
+      }
       if (mounted) {
         setState(() {
           isLoading = false;

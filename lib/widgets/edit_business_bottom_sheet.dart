@@ -5,10 +5,25 @@ import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/business_service.dart';
 import 'package:revtrack/services/snackbar_service.dart';
 
+/// Bottom sheet widget for adding new businesses or editing existing ones
+/// 
+/// Features:
+/// - Dynamic form for both creating and editing business entities
+/// - Image picker integration for business logo upload
+/// - Firebase Storage integration for image hosting
+/// - Form validation with user-friendly error messages
+/// - Loading states during upload and save operations
+/// - Responsive design with keyboard-aware scrolling
+/// - Material Design 3 compliance with proper theming
 class BusinessBottomSheet extends StatefulWidget {
   final Business? business;
   final String userId;
 
+  /// Creates a business form bottom sheet
+  /// 
+  /// Parameters:
+  /// - [business]: Existing business data when editing (null for new business)
+  /// - [userId]: Current user ID for business association and file upload
   const BusinessBottomSheet({Key? key, this.business, required this.userId})
       : super(key: key);
 
@@ -16,6 +31,7 @@ class BusinessBottomSheet extends StatefulWidget {
   State<BusinessBottomSheet> createState() => _BusinessBottomSheetState();
 }
 
+/// Stateful widget implementation with form state management and image handling
 class _BusinessBottomSheetState extends State<BusinessBottomSheet> {
   final TextEditingController _businessNameController = TextEditingController();
   File? _imageFile;
@@ -26,12 +42,16 @@ class _BusinessBottomSheetState extends State<BusinessBottomSheet> {
   void initState() {
     super.initState();
     if (widget.business != null) {
-      // If businessId is provided, fetch the business details
+      // Populate form with existing business data when editing
       imageUrl = widget.business!.logoUrl ?? '';
       _businessNameController.text = widget.business!.name;
     }
   }
 
+  /// Handles image selection from device gallery
+  /// 
+  /// Uses ImagePicker to allow user to select business logo from gallery.
+  /// Updates UI state and shows error messages if selection fails.
   Future<void> _pickImage() async {
     try {
       final pickedFile =
@@ -51,6 +71,11 @@ class _BusinessBottomSheetState extends State<BusinessBottomSheet> {
     }
   }
 
+  /// Handles business creation and editing operations
+  /// 
+  /// Validates form input, uploads image to Firebase Storage if selected,
+  /// and saves business data using BusinessService. Shows appropriate
+  /// success/error messages and handles loading states.
   Future<void> _saveBusiness() async {
     final businessName = _businessNameController.text.trim();
 

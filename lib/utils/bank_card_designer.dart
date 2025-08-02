@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+/// Utility class for designing bank card UI with realistic styling
+/// 
+/// Features:
+/// - Bank-specific color schemes for Bangladeshi and international banks
+/// - Pattern generation for card backgrounds
+/// - Gradient creation for realistic card appearance
+/// - Bank name normalization and color mapping
+/// - Default fallback colors for unknown banks
+/// - Mathematical pattern generation for card security aesthetics
 class BankCardDesigner {
+  /// Color schemes mapped to bank names (normalized lowercase)
+  /// Each scheme contains [primary, secondary, accent] colors
   static const Map<String, List<Color>> _bankColorSchemes = {
     // Popular Bangladeshi Banks
     'dbbl': [Color(0xFF1E3A8A), Color(0xFF60A5FA), Color(0xFF1D4ED8)],
@@ -29,6 +40,8 @@ class BankCardDesigner {
     'default': [Color(0xFF6B7280), Color(0xFF9CA3AF), Color(0xFFD1D5DB)],
   };
 
+  /// Pattern mapping for generating unique card background designs
+  /// Each bank gets a specific pattern index for consistent visual identity
   static const Map<String, int> _bankPatterns = {
     'dutch-bangla': 0,
     'ibbl': 1,

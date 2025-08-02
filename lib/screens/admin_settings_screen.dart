@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:revtrack/widgets/user_stats_migration_widget.dart';
 import 'package:revtrack/services/business_stats_migration_service.dart';
 
+/// Admin settings screen for system management and data migration
+/// 
+/// Features:
+/// - Business stats migration controls
+/// - User stats migration controls
+/// - System information and status
+/// - Only accessible by admin users with proper role verification
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({Key? key}) : super(key: key);
 
@@ -10,10 +17,13 @@ class AdminSettingsScreen extends StatefulWidget {
 }
 
 class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
+  // Business migration state
   bool _isRunningBusinessMigration = false;
   String _businessMigrationStatus = 'Ready to migrate business stats';
   final BusinessStatsMigrationService _businessMigrationService = BusinessStatsMigrationService();
 
+  /// Runs migration for all business statistics
+  /// Updates business documents with incomes, expenses, and transaction counts
   Future<void> _runBusinessStatsMigration() async {
     setState(() {
       _isRunningBusinessMigration = true;

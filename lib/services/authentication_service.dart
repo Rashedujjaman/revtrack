@@ -1,7 +1,20 @@
-import 'package:revtrack/services/firebase_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:revtrack/services/firebase_service.dart';
 
+/// Authentication service for managing user authentication with Firebase Auth
+/// 
+/// Handles user registration, login, logout, and authentication state management
+/// Provides comprehensive error handling with user-friendly messages
 class AuthenticationService {
+  
+  /// Creates a new user account with email and password
+  /// 
+  /// Parameters:
+  /// - [userEmail]: User's email address
+  /// - [userPassword]: User's password
+  /// 
+  /// Returns the user's UID on successful creation
+  /// Throws formatted error messages on failure
   Future<String> createUser(String userEmail, String userPassword) async {
     try {
       UserCredential userCredential = await FirebaseService()
@@ -16,6 +29,14 @@ class AuthenticationService {
     }
   }
 
+  /// Signs in an existing user with email and password
+  /// 
+  /// Parameters:
+  /// - [userEmail]: User's email address
+  /// - [userPassword]: User's password
+  /// 
+  /// Returns the user's UID on successful authentication
+  /// Returns error message string on failure
   Future<String> signIn(String userEmail, String userPassword) async {
     try {
       UserCredential userCredential = await FirebaseService()
@@ -29,7 +50,10 @@ class AuthenticationService {
     }
   }
 
-  // Sign out user
+  /// Signs out the current user
+  /// 
+  /// Returns true on successful sign out
+  /// Throws formatted error messages on failure
   Future<bool> signOut() async {
     try {
       await FirebaseService().auth.signOut();
@@ -41,12 +65,20 @@ class AuthenticationService {
     }
   }
 
-  // Check if user is signed in
+  /// Checks if a user is currently signed in
+  /// 
+  /// Returns the current user's UID if signed in, null otherwise
   Future<String?> isUserSignedIn() async {
     User? currentUser = FirebaseService().auth.currentUser;
-    return currentUser!.uid;
+    return currentUser?.uid;
   }
 
+  /// Handles Firebase Auth errors and returns user-friendly messages
+  /// 
+  /// Parameters:
+  /// - [e]: FirebaseAuthException to handle
+  /// 
+  /// Returns a user-friendly error message string
   static String _handleAuthError(FirebaseAuthException e) {
     switch (e.code) {
       case 'invalid-credential':

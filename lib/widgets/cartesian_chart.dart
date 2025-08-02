@@ -2,20 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:revtrack/models/chart_data_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+/// Cartesian line chart widget for revenue data visualization
+/// 
+/// Features:
+/// - Syncfusion charts integration for smooth rendering
+/// - Automatic keep-alive for performance optimization
+/// - Lifecycle-aware widget disposal and cleanup
+/// - Tooltip behavior for interactive data exploration
+/// - Rotated category axis labels for better readability
+/// - Data point markers and labels for clarity
+/// - Empty state handling with graceful degradation
 class CartesianChart extends StatefulWidget {
   final List<ChartData> data;
   final String title;
+  
+  /// Creates a cartesian chart with revenue data
+  /// 
+  /// Parameters:
+  /// - [data]: List of chart data points with key-value pairs
+  /// - [title]: Chart title displayed at the top
   const CartesianChart({super.key, required this.data, required this.title});
 
   @override
   State<CartesianChart> createState() => _CartesianChartState();
 }
 
+/// Stateful implementation with lifecycle management and performance optimization
 class _CartesianChartState extends State<CartesianChart>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   bool _isDisposed = false;
   TooltipBehavior? _tooltipBehavior;
 
+  /// Keeps widget alive during parent rebuilds for better performance
   @override
   bool get wantKeepAlive => true;
 
@@ -34,10 +52,11 @@ class _CartesianChartState extends State<CartesianChart>
     super.dispose();
   }
 
+  /// Handles app lifecycle changes for memory management
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused && mounted) {
-      // Handle app lifecycle changes
+      // Chart can be paused to save resources when app is backgrounded
     }
   }
 
@@ -45,6 +64,7 @@ class _CartesianChartState extends State<CartesianChart>
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
 
+    // Early return for invalid states to prevent rendering errors
     if (_isDisposed || !mounted || widget.data.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -55,7 +75,7 @@ class _CartesianChartState extends State<CartesianChart>
         title: ChartTitle(text: widget.title),
         legend: const Legend(isVisible: true),
         primaryXAxis: const CategoryAxis(
-          labelRotation: -90,
+          labelRotation: -90, // Rotate labels for better readability
         ),
         tooltipBehavior: _tooltipBehavior,
         series: <CartesianSeries<ChartData, String>>[

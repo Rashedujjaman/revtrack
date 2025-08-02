@@ -1,15 +1,42 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:revtrack/models/user_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
+import 'package:revtrack/models/user_model.dart';
 
+/// Firebase service for centralized Firebase operations
+/// 
+/// Provides unified access to Firebase Auth, Firestore, and Storage
+/// with user management operations. Centralizes Firebase interactions
+/// to maintain consistency across the app.
+/// 
+/// Features:
+/// - User registration and profile management
+/// - Firestore user document operations
+/// - Profile image upload to Firebase Storage
+/// - Unified error handling for Firebase operations
 class FirebaseService {
+  /// Firebase Auth instance getter
   FirebaseAuth get auth => FirebaseAuth.instance;
+  
+  /// Firestore instance getter
   FirebaseFirestore get firestore => FirebaseFirestore.instance;
 
-  Future<void> registerEntry(String firstName, String lastName, String email,
-      String phoneNumber, uid) async {
+  /// Registers a new user entry in Firestore after authentication
+  /// 
+  /// Parameters:
+  /// - [firstName]: User's first name
+  /// - [lastName]: User's last name  
+  /// - [email]: User's email address
+  /// - [phoneNumber]: User's phone number
+  /// - [uid]: Firebase Auth UID
+  Future<void> registerEntry(
+    String firstName, 
+    String lastName, 
+    String email,
+    String phoneNumber, 
+    String uid
+  ) async {
     try {
       await firestore.collection('ApplicationUsers').doc(uid).set({
         'firstName': firstName,
@@ -18,13 +45,26 @@ class FirebaseService {
         'phoneNumber': phoneNumber,
         'imageUrl': '',
         'isActive': true,
+        // Initialize user stats for dashboard
+        'totalBusinesses': 0,
+        'totalRevenue': 0.0,
+        'totalTransactions': 0,
+        'totalIncomes': 0.0,
+        'totalExpenses': 0.0,
+        'role': 'user', // Default role
       });
     } catch (e) {
       rethrow;
     }
   }
 
-  // Get User by UID
+  /// Retrieves user data from Firestore by UID
+  /// 
+  /// Parameters:
+  /// - [uid]: Firebase user UID
+  /// 
+  /// Returns UserModel object with user data
+  /// Throws exception if user not found
   Future<UserModel> getUserData(String uid) async {
     DocumentSnapshot snapshot =
         await firestore.collection('ApplicationUsers').doc(uid).get();
@@ -35,7 +75,10 @@ class FirebaseService {
     }
   }
 
-  // Update User Profile
+  /// Updates user profile information in Firestore
+  /// 
+  /// Parameters:
+  /// - [user]: UserModel object with updated information
   Future<void> updateUserProfile(UserModel user) async {
     try {
       await firestore.collection('ApplicationUsers').doc(user.uid).update({

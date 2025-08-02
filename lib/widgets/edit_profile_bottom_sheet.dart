@@ -5,9 +5,25 @@ import 'package:revtrack/models/user_model.dart';
 import 'package:revtrack/services/firebase_service.dart';
 import 'package:revtrack/services/snackbar_service.dart';
 
+/// Profile editing bottom sheet with image upload functionality
+/// 
+/// Features:
+/// - User profile photo upload with size validation (max 2MB)
+/// - Form validation for required fields (first name, phone number)
+/// - Bangladeshi phone number format validation (01XXXXXXXXX)
+/// - Read-only email field (cannot be changed)
+/// - Image picker integration with gallery selection
+/// - Loading states during profile update operations
+/// - Firebase Storage integration for profile image upload
+/// - Responsive design with keyboard-aware scrolling
+/// - Material Design 3 compliance with proper theming
 class EditProfileBottomSheet extends StatefulWidget {
   final UserModel user;
 
+  /// Creates a profile editing bottom sheet
+  /// 
+  /// Parameters:
+  /// - [user]: UserModel containing current user profile data
   const EditProfileBottomSheet({Key? key, required this.user})
       : super(key: key);
 
@@ -15,6 +31,7 @@ class EditProfileBottomSheet extends StatefulWidget {
   State<EditProfileBottomSheet> createState() => _EditProfileBottomSheetState();
 }
 
+/// Stateful widget implementation with form state and image management
 class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -22,16 +39,18 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  /// Convenience getter for accessing user data
   get user => widget.user;
 
-  // File to hold the selected image
-  File? _imageFile;
-  String imageUrl = '';
-  bool isLoading = false;
+  // Image handling state
+  File? _imageFile;           // Selected image file from gallery
+  String imageUrl = '';       // Current profile image URL
+  bool isLoading = false;     // Loading state for save operation
 
   @override
   void initState() {
     super.initState();
+    // Populate form fields with existing user data
     _firstNameController.text = widget.user.firstName;
     _lastNameController.text = widget.user.lastName ?? '';
     _emailController.text = widget.user.email ?? '';
@@ -39,11 +58,26 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
     imageUrl = widget.user.imageUrl ?? '';
   }
 
+  /// Validates Bangladeshi phone number format (01XXXXXXXXX)
+  /// 
+  /// Parameters:
+  /// - [value]: Phone number string to validate
+  /// 
+  /// Returns: true if format matches 01 followed by 8-9 digits
   bool isValidPhoneNumber(String value) {
     final RegExp regex = RegExp(r"^01[0-9]{8,9}$");
     return regex.hasMatch(value);
   }
 
+  /// Handles profile image selection from device gallery
+  /// 
+  /// Features:
+  /// - Image size validation (max 2MB)
+  /// - Error dialog for oversized images
+  /// - Gallery source selection via ImagePicker
+  /// - Comprehensive error handling with user feedback
+  /// 
+  /// Shows error dialog if selected image exceeds 2MB limit.
   Future<void> _pickImage() async {
     try {
       final pickedFile =
@@ -89,6 +123,16 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
     }
   }
 
+  /// Saves profile changes to Firebase with image upload
+  /// 
+  /// Process:
+  /// 1. Validates form fields using form key
+  /// 2. Uploads new image to Firebase Storage if selected
+  /// 3. Updates user profile through FirebaseService
+  /// 4. Returns updated user data to parent widget
+  /// 5. Shows success/error feedback to user
+  /// 
+  /// Handles loading states and comprehensive error management.
   Future<void> _saveProfile() async {
     if (_formKey.currentState!.validate()) {
       setState(() => isLoading = true);

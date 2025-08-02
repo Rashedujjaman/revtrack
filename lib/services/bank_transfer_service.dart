@@ -1,6 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:revtrack/models/bank_account_model.dart';
 
+/// Service class for managing bank-to-bank transfers with atomic operations
+/// 
+/// Features:
+/// - Atomic transfer operations using Firestore batch writes
+/// - Balance validation before transfer execution
+/// - Account ownership verification for security
+/// - Transfer history tracking with detailed metadata
+/// - Comprehensive error handling with descriptive messages
+/// - Support for transfer notes and timestamps
+/// - Prevents self-transfers and invalid amounts
 class BankTransferService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 

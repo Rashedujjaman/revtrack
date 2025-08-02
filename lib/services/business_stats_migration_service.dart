@@ -2,6 +2,16 @@ import 'package:revtrack/services/business_stats_service.dart';
 import 'package:revtrack/services/business_service.dart';
 import 'package:flutter/foundation.dart';
 
+/// Migration service for initializing business statistics in existing data
+/// 
+/// Features:
+/// - Batch processing of existing businesses for stats initialization
+/// - User-specific migration for targeted updates
+/// - System-wide migration for administrative operations
+/// - Progress tracking with detailed logging
+/// - Error handling with continuation on individual failures
+/// - Rate limiting to prevent Firestore quotas exceeded
+/// - Individual business stats initialization support
 class BusinessStatsMigrationService {
   final BusinessStatsService _statsService = BusinessStatsService();
   final BusinessService _businessService = BusinessService();

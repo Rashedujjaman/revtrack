@@ -6,6 +6,16 @@ import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/models/transaction_model.dart';
 import 'package:revtrack/models/bank_account_model.dart';
 
+/// Screen for adding new transactions or editing existing ones
+/// 
+/// Features:
+/// - Dynamic form for both creating and editing transactions
+/// - Category selection based on transaction type (income/expense)
+/// - Bank account selection from user's linked accounts
+/// - Date picker with default to current date
+/// - Form validation with comprehensive error handling
+/// - Real-time loading states during submission
+/// - Integration with TransactionService for CRUD operations
 class AddEditTransactionScreen extends StatefulWidget {
   final String _businessId;
   final String _businessName;
@@ -13,36 +23,51 @@ class AddEditTransactionScreen extends StatefulWidget {
   final bool _isEdit;
   final Transaction1? transaction; // Optional transaction for editing
 
+  /// Creates a transaction form screen
+  /// 
+  /// Parameters:
+  /// - [_businessId]: Business ID for transaction association
+  /// - [_businessName]: Business name for display context
+  /// - [_type]: Transaction type ('income' or 'expense')
+  /// - [_isEdit]: Whether this is editing an existing transaction
+  /// - [transaction]: Existing transaction data when editing
   const AddEditTransactionScreen(
-      this._businessId, this._businessName, this._type, this._isEdit,
-      {this.transaction, super.key});
+    this._businessId,
+    this._businessName,
+    this._type,
+    this._isEdit, {
+    this.transaction,
+    super.key,
+  });
 
   @override
   State<AddEditTransactionScreen> createState() =>
       _AddEditTransactionScreenState();
 }
 
+/// Stateful widget implementation with form state management
 class _AddEditTransactionScreenState extends State<AddEditTransactionScreen> {
-  //*************************************************************************************************************************** */
+  // Form controllers for user input
   final TextEditingController amountController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
 
-  // Global key for the form
-  // This key will be used to validate the form
+  // Form validation key
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  // Form state variables
   String type = '';
   DateTime selectedDate = DateTime.now();
   String selectedCategory = '';
   String? selectedBankAccountId;
-
   bool _isLoading = false;
 
+  // Data collections
   List<String> _categories = [];
   List<BankAccount> _bankAccounts = [];
+  
+  /// Gets current user ID from UserProvider
   String? get userId => Provider.of<UserProvider>(context, listen: false).userId;
-  //*************************************************************************************************************************** */
 
   @override
   void initState() {

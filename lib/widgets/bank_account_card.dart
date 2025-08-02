@@ -4,6 +4,17 @@ import 'package:revtrack/models/bank_account_model.dart';
 import 'package:revtrack/utils/bank_card_designer.dart';
 import 'package:revtrack/screens/bank_transfer_screen.dart';
 
+/// Bank account card widget with realistic bank card design
+/// 
+/// Features:
+/// - Bank-specific color schemes and patterns using BankCardDesigner
+/// - Credit card vs bank account balance display logic
+/// - Interactive actions: transfer, edit, delete, refresh
+/// - Gradient backgrounds with geometric pattern overlays
+/// - Material elevation and shadow effects
+/// - Navigation to bank transfer screen
+/// - Responsive design with proper aspect ratio
+/// - Support for different account types (savings, current, credit)
 class BankAccountCard extends StatelessWidget {
   final BankAccount account;
   final VoidCallback? onTap;
@@ -12,6 +23,15 @@ class BankAccountCard extends StatelessWidget {
   final VoidCallback? onRefresh;
   final String? userId;
 
+  /// Creates a bank account card with interactive features
+  /// 
+  /// Parameters:
+  /// - [account]: BankAccount model with account details and balance
+  /// - [onTap]: Optional callback for card tap interactions
+  /// - [onEdit]: Optional callback for editing account details
+  /// - [onDelete]: Optional callback for deleting the account
+  /// - [onRefresh]: Optional callback for refreshing account data
+  /// - [userId]: User ID required for transfer operations
   const BankAccountCard({
     super.key,
     required this.account,
@@ -341,6 +361,13 @@ class BankAccountCard extends StatelessWidget {
     );
   }
 
+  /// Displays transfer dialog and navigates to BankTransferScreen
+  /// 
+  /// Parameters:
+  /// - [context]: BuildContext for navigation
+  /// 
+  /// Requires userId to be provided for transfer operations.
+  /// Refreshes account data when transfer is completed successfully.
   void _showTransferDialog(BuildContext context) {
     if (userId == null) return;
     

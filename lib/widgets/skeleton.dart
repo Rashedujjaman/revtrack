@@ -1,6 +1,15 @@
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter/material.dart';
 
+/// Skeleton loading widget for business card placeholder
+/// 
+/// Features:
+/// - Shimmer animation effect during data loading
+/// - Theme-aware colors with transparency
+/// - Card layout matching actual BusinessCard widget
+/// - Leading icon placeholder with shimmer
+/// - Title text placeholder with proper sizing
+/// - Trailing arrow icon for consistency
 class BusinessCardSkeleton extends StatelessWidget {
   const BusinessCardSkeleton({super.key});
 
@@ -37,6 +46,14 @@ class BusinessCardSkeleton extends StatelessWidget {
   }
 }
 
+/// Skeleton loading widget for transaction card placeholder
+/// 
+/// Features:
+/// - Shimmer animation for smooth loading experience
+/// - Theme-aware color scheme matching transaction cards
+/// - Leading circular icon placeholder
+/// - Multiple text placeholders for transaction details
+/// - Trailing amount placeholder with proper alignment
 class TransactionCardSkeleton extends StatelessWidget {
   const TransactionCardSkeleton({super.key});
 

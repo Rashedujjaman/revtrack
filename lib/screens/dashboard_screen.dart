@@ -1,23 +1,31 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:ml_algo/ml_algo.dart';
+import 'package:ml_dataframe/ml_dataframe.dart';
+
 import 'package:revtrack/models/transaction_model.dart';
-import 'package:revtrack/theme/gradient_provider.dart';
-import 'package:revtrack/widgets/cartesian_chart.dart';
-import 'package:revtrack/widgets/pie_chart.dart';
-import 'package:revtrack/widgets/summary_card.dart';
-import 'package:revtrack/widgets/safe_chart_container.dart';
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/models/chart_data_model.dart';
 import 'package:revtrack/services/business_service.dart';
 import 'package:revtrack/services/transaction_service.dart';
 import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/services/user_stats_service.dart';
-import 'package:provider/provider.dart';
+import 'package:revtrack/theme/gradient_provider.dart';
+import 'package:revtrack/widgets/cartesian_chart.dart';
+import 'package:revtrack/widgets/pie_chart.dart';
+import 'package:revtrack/widgets/summary_card.dart';
+import 'package:revtrack/widgets/safe_chart_container.dart';
 import 'package:revtrack/widgets/revenue_prediction_chart.dart';
 import 'package:revtrack/widgets/skeleton.dart';
-import 'package:ml_algo/ml_algo.dart';
-import 'package:ml_dataframe/ml_dataframe.dart';
 
+/// Dashboard screen displaying user's financial overview and analytics
+/// 
+/// Features:
+/// - Instant summary from user-level aggregated stats
+/// - Lazy-loading detailed analytics with "Load Analytics" button
+/// - Revenue trends, distribution charts, and ML-based predictions
+/// - Optimized for cost efficiency by avoiding expensive real-time queries
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -27,16 +35,15 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen>
     with AutomaticKeepAliveClientMixin {
-  //*************************************************************************************************************************** */
-  // get userId => Provider.of<UserProvider>(context, listen: false).userId;
-
-  // State variables
+  
+  // Core data
   List<Business> businesses = [];
   List<Transaction1> transactions = [];
   List<ChartData> revenueTrendData = [];
   List<ChartData> revenueDistributionData = [];
   List<ChartData> predictedRevenueData = [];
 
+  // Aggregated stats (loaded instantly from user document)
   double totalMonthlyRevenue = 0.0;
   double totalYearlyRevenue = 0.0;
   double totalRevenue = 0.0;
@@ -44,37 +51,21 @@ class _DashboardScreenState extends State<DashboardScreen>
   double totalExpenses = 0.0;
   int totalTransactions = 0;
   
+  // Loading states for different sections
   bool isInitialLoading = true;
   bool isChartsLoading = false;
   bool areChartsLoaded = false;
   bool _disposed = false;
   String? errorMessage;
 
-  // Date ranges
+  // Date ranges for data filtering
   late DateTimeRange selectedDateRange;
   late DateTimeRange currentMonthRange;
 
-  // int currentMonth = int.parse(DateFormat('MM').format(DateTime.now()));
-  // int currentYear = int.parse(DateFormat('yyyy').format(DateTime.now()));
-
-  //*************************************************************************************************************************** */
-
   @override
-  // Initialize the state of the widget
   void initState() {
     super.initState();
-    // Initialize date ranges
-    final now = DateTime.now();
-    selectedDateRange = DateTimeRange(
-      start: DateTime(now.year, 1, 1),
-      end: DateTime(now.year, now.month, now.day, 23, 59, 59, 999),
-    );
-    currentMonthRange = DateTimeRange(
-      start: DateTime(now.year, now.month, 1),
-      end: DateTime(now.year, now.month, now.day, 23, 59, 59, 999),
-    );
-
-    // Load data
+    _initializeDateRanges();
     _loadInitialData();
   }
 
@@ -87,7 +78,21 @@ class _DashboardScreenState extends State<DashboardScreen>
     super.dispose();
   }
 
-  // Load only essential summary data (lightweight)
+  /// Initializes date ranges for current year and month
+  void _initializeDateRanges() {
+    final now = DateTime.now();
+    selectedDateRange = DateTimeRange(
+      start: DateTime(now.year, 1, 1),
+      end: DateTime(now.year, now.month, now.day, 23, 59, 59, 999),
+    );
+    currentMonthRange = DateTimeRange(
+      start: DateTime(now.year, now.month, 1),
+      end: DateTime(now.year, now.month, now.day, 23, 59, 59, 999),
+    );
+  }
+
+  /// Loads essential summary data from user stats (single document read)
+  /// This provides instant dashboard summary without expensive queries
   Future<void> _loadInitialData() async {
     try {
       if (_disposed) return;
@@ -126,7 +131,9 @@ class _DashboardScreenState extends State<DashboardScreen>
     }
   }
 
-  // Load detailed analytics data (expensive, only when requested)
+  /// Loads detailed analytics data including charts and predictions
+  /// This is an expensive operation that fetches all transactions for comprehensive analysis
+  /// Only called when user explicitly requests analytics via "Load Analytics" button
   Future<void> _loadAnalyticsData() async {
     try {
       if (_disposed) return;
@@ -215,12 +222,19 @@ class _DashboardScreenState extends State<DashboardScreen>
     return totalExpense;
   }
 
-  double calculateRevenue(
-      List<Transaction1> transactions, DateTimeRange range) {
+  /// Calculates net revenue (income - expenses) for given date range
+  /// 
+  /// Parameters:
+  /// - [transactions]: List of transactions to calculate from
+  /// - [range]: Date range to filter transactions
+  double calculateRevenue(List<Transaction1> transactions, DateTimeRange range) {
     return calculateTotalIncome(transactions, range) -
         calculateTotalExpense(transactions, range);
   }
 
+  /// Generates revenue trend data grouped by month for charts
+  /// 
+  /// Returns a list of ChartData objects with month labels and revenue values
   List<ChartData> getRevenueTrendData(List<Transaction1> transactions) {
     final Map<String, double> monthlyMap = {};
 
@@ -248,20 +262,13 @@ class _DashboardScreenState extends State<DashboardScreen>
     return sortedData;
   }
 
-  // List<ChartData> getRevenueDistributionByCategory() {
-  //   final Map<String, double> revenueMap = {};
-  //   for (var transaction in transactions) {
-  //     if (transaction.type == 'Income') {
-  //       revenueMap.update(
-  //         transaction.category,
-  //         (val) => val + transaction.amount,
-  //         ifAbsent: () => transaction.amount,
-  //       );
-  //     }
-  //   }
-  //   return revenueMap.entries.map((e) => ChartData(e.key, e.value)).toList();
-  // }
-
+  /// Generates revenue distribution data by business for pie charts
+  /// 
+  /// Parameters:
+  /// - [businesses]: List of businesses to analyze
+  /// - [transactions]: All transactions to calculate distribution from
+  /// 
+  /// Returns ChartData objects with business names and net revenue values
   List<ChartData> getRevenueDistributionByBusinesses(
       List<Business> businesses, List<Transaction1> transactions) {
     final Map<String, double> revenueMap = {};
@@ -282,6 +289,13 @@ class _DashboardScreenState extends State<DashboardScreen>
     return data;
   }
 
+  /// Predicts future revenue using machine learning linear regression
+  /// 
+  /// Parameters:
+  /// - [historicalData]: Historical revenue trend data for training
+  /// - [monthsToPredict]: Number of months to predict (default: 6)
+  /// 
+  /// Returns ChartData objects with predicted revenue values for future months
   List<ChartData> predictFutureRevenue(
     List<ChartData> historicalData, {
     int monthsToPredict = 6,

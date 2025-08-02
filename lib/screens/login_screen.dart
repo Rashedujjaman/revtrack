@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:revtrack/screens/main_navigation_screen.dart';
 import 'package:revtrack/screens/register_screen.dart';
 import 'package:revtrack/screens/reset_password_screen.dart';
@@ -9,6 +10,14 @@ import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/theme/gradient_provider.dart';
 import 'package:revtrack/widgets/custom_text_form_field.dart';
 
+/// Login screen for user authentication
+/// 
+/// Features:
+/// - Email/password authentication with Firebase
+/// - Form validation with user-friendly error messages
+/// - Loading states and error handling
+/// - Navigation to registration and password reset
+/// - Integration with UserProvider for state management
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -17,13 +26,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  //*************************************************************************************************************************** */
-  final _usernameController = TextEditingController();
+  // Form controllers and validation
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
   bool _isLoading = false;
-  //*************************************************************************************************************************** */
+
+  /// Validates email format using RegExp
   bool isValidEmail(String value) {
     final RegExp regex =
         RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
@@ -32,11 +41,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  /// Handles user login authentication
   void login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();

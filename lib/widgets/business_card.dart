@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:revtrack/models/business_model.dart';
 import 'package:intl/intl.dart';
+import 'package:revtrack/models/business_model.dart';
 
+/// Business card widget displaying business information and statistics
+/// 
+/// Features:
+/// - Business logo with fallback icon
+/// - Revenue calculation (incomes - expenses)
+/// - Transaction count display
+/// - Interactive card with tap, edit, and delete actions
+/// - Gradient background with theme integration
+/// - Skeleton loading support
 class BusinessCard extends StatelessWidget {
   final Business business;
   final VoidCallback? onTap;
@@ -19,7 +28,8 @@ class BusinessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reveneue = (business.incomes ?? 0.0) - (business.expenses ?? 0.0);
+    // Calculate net revenue from business stats
+    final revenue = (business.incomes ?? 0.0) - (business.expenses ?? 0.0);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Material(
@@ -236,15 +246,15 @@ class BusinessCard extends StatelessWidget {
                         Expanded(
                           child: _buildStatItem(
                             context,
-                            reveneue >= 0
+                            revenue >= 0
                                 ? Icons.trending_up
                                 : Icons.trending_down,
                             'Revenue',
-                            NumberFormat.currency(symbol: '৳').format(reveneue.abs()),
-                            reveneue >= 0
+                            NumberFormat.currency(symbol: '৳').format(revenue.abs()),
+                            revenue >= 0
                                 ? Colors.green
                                 : Colors.red,
-                            reveneue >= 0
+                            revenue >= 0
                                 ? Colors.green
                                 : Colors.red,
                           ),

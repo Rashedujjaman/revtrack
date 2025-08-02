@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import '../services/user_stats_migration_service.dart';
 
-/// A simple widget to run user stats migration
-/// This can be placed in a debug/admin screen or run once during app initialization
+/// Administrative widget for running user statistics migration
+/// 
+/// Features:
+/// - One-time migration execution for user-level statistics
+/// - Progress tracking with real-time status updates
+/// - Error handling with detailed error messages
+/// - Success confirmation with completion status
+/// - Disabled button state during migration execution
+/// - Comprehensive UI with instructions and warnings
+/// - Material Design 3 compliant interface
+/// - Admin/debug screen integration support
 class UserStatsMigrationWidget extends StatefulWidget {
   const UserStatsMigrationWidget({Key? key}) : super(key: key);
 
@@ -10,10 +19,15 @@ class UserStatsMigrationWidget extends StatefulWidget {
   State<UserStatsMigrationWidget> createState() => _UserStatsMigrationWidgetState();
 }
 
+/// Stateful widget implementation with migration state management
 class _UserStatsMigrationWidgetState extends State<UserStatsMigrationWidget> {
   bool _isRunning = false;
   String _status = 'Ready to migrate user stats';
 
+  /// Executes the user statistics migration process
+  /// 
+  /// Updates UI state during migration, handles errors gracefully,
+  /// and provides detailed status feedback to the user.
   Future<void> _runMigration() async {
     setState(() {
       _isRunning = true;

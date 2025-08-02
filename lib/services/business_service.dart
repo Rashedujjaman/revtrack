@@ -4,10 +4,17 @@ import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/user_stats_service.dart';
 import 'dart:io';
 
+/// Service class for managing business operations with Firestore
+/// Handles CRUD operations for businesses and integrates with user stats
 class BusinessService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  //Add business
+  /// Adds a new business to Firestore with automatic user stats updates
+  /// 
+  /// Parameters:
+  /// - [userId]: ID of the user who owns this business
+  /// - [name]: Business name
+  /// - [logoUrl]: Optional business logo URL
   Future<void> addBusiness(String userId, String name, String? logoUrl) async {
     try {
       final businessRef = await firestore.collection('Business').doc();
@@ -41,9 +48,13 @@ class BusinessService {
     }
   }
 
-//Update business
-  Future<void> updateBusiness(
-      String businessId, String name, String logoUrl) async {
+  /// Updates an existing business's information
+  /// 
+  /// Parameters:
+  /// - [businessId]: ID of the business to update
+  /// - [name]: New business name
+  /// - [logoUrl]: New business logo URL
+  Future<void> updateBusiness(String businessId, String name, String logoUrl) async {
     try {
       final docRef =
           FirebaseFirestore.instance.collection('Business').doc(businessId);
@@ -56,7 +67,10 @@ class BusinessService {
     }
   }
 
-  //Delete business
+  /// Soft deletes a business (marks as deleted) with automatic user stats updates
+  /// 
+  /// Parameters:
+  /// - [businessId]: ID of the business to delete
   Future<void> deleteBusiness(String businessId) async {
     try {
       // Get business data before deleting for user stats update
@@ -77,7 +91,9 @@ class BusinessService {
     }
   }
 
-  //Get all businesses
+  /// Retrieves all active businesses from Firestore
+  /// 
+  /// Returns a list of Business objects where isDeleted is false
   Future<List<Business>> getAllBusinesses() async {
     try {
       final snapshot = await firestore
@@ -92,9 +108,13 @@ class BusinessService {
     }
   }
 
-  //Get business by name
-  Future<QueryDocumentSnapshot<Map<String, dynamic>>> getBusinessByName(
-      String businessName) async {
+  /// Finds a business by its name
+  /// 
+  /// Parameters:
+  /// - [businessName]: Name of the business to search for
+  /// 
+  /// Returns the first matching business document
+  Future<QueryDocumentSnapshot<Map<String, dynamic>>> getBusinessByName(String businessName) async {
     try {
       QuerySnapshot<Map<String, dynamic>> snapshot = await firestore
           .collection('Business')
@@ -106,7 +126,12 @@ class BusinessService {
     }
   }
 
-  // Fetch businesses by user ID
+  /// Retrieves all businesses owned by a specific user
+  /// 
+  /// Parameters:
+  /// - [userId]: User ID to filter businesses by
+  /// 
+  /// Returns a list of Business objects sorted by name
   Future<List<Business>> getBusinessesByUser(String userId) async {
     final snapshot = await firestore
         .collection('Business')
@@ -120,9 +145,14 @@ class BusinessService {
         .toList();
   }
 
-  //Upload image to Firebase Storage
-  Future<String> uploadImageToFirebase(
-      File imageFile, String businessId) async {
+  /// Uploads an image file to Firebase Storage for business logos
+  /// 
+  /// Parameters:
+  /// - [imageFile]: Image file to upload
+  /// - [businessId]: Business ID for organizing storage path
+  /// 
+  /// Returns the download URL of the uploaded image
+  Future<String> uploadImageToFirebase(File imageFile, String businessId) async {
     final storageRef = FirebaseStorage.instance.ref().child(
         'business_logos/$businessId/${DateTime.now().millisecondsSinceEpoch}.jpg');
     final uploadTask = await storageRef.putFile(imageFile);

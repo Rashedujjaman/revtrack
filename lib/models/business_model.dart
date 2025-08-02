@@ -1,5 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Business model representing business entities and their aggregated statistics
+/// 
+/// Contains business information and real-time aggregated financial data:
+/// - Basic business details (name, logo, owner, creation date)
+/// - Aggregated statistics (incomes, expenses, transaction count)
+/// - Soft delete support with isDeleted flag
+/// 
+/// Used for business management and instant dashboard statistics display
 class Business {
   final String id;
   final String name;
@@ -7,6 +15,8 @@ class Business {
   final String userId;
   final Timestamp dateCreated;
   final bool? isDeleted;
+  
+  // Aggregated financial statistics
   final double? incomes;
   final double? expenses;
   final int? transactionsCount;
@@ -23,7 +33,12 @@ class Business {
     this.transactionsCount,
   });
 
-  // Factory method to create a Business object from JSON
+  /// Creates Business object from JSON/Map data
+  /// 
+  /// Parameters:
+  /// - [json]: Map containing business data
+  /// 
+  /// Returns Business with default values for missing fields
   factory Business.fromJson(Map<String, dynamic> json) {
     return Business(
       id: json['id'],
@@ -38,7 +53,7 @@ class Business {
     );
   }
 
-  // Method to convert a Business object to JSON
+  /// Converts Business object to JSON/Map for Firestore storage
   Map<String, dynamic> toJson() {
     return {
       'id': id,

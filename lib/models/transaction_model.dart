@@ -1,16 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Transaction model representing financial transactions
+/// 
+/// Supports both income and expense transactions with:
+/// - Business association and categorization
+/// - Bank account integration for balance tracking
+/// - Audit trail with creation and modification timestamps
+/// - Soft delete support with isDeleted flag
+/// - Optional notes for transaction details
+/// 
+/// Used for financial tracking and business statistics calculation
 class Transaction1 {
   final String? id;
   final String businessId;
-  final String type;
+  final String type; // 'Income' or 'Expense'
   final double amount;
   final String category;
   final Timestamp dateCreated;
   final Timestamp? dateModified;
   final bool? isDeleted;
   final String? note;
-  final String? bankAccountId;
+  final String? bankAccountId; // Optional bank account association
 
   Transaction1({
     this.id,
@@ -25,7 +35,12 @@ class Transaction1 {
     this.bankAccountId,
   });
 
-  // Factory method to create a Record object from JSON
+  /// Creates Transaction1 object from JSON/Map data
+  /// 
+  /// Parameters:
+  /// - [json]: Map containing transaction data
+  /// 
+  /// Returns Transaction1 with default values for missing fields
   factory Transaction1.fromJson(Map<String, dynamic> json) {
     return Transaction1(
       id: json['id'],
@@ -41,7 +56,7 @@ class Transaction1 {
     );
   }
 
-  // Method to convert a Record object to JSON
+  /// Converts Transaction1 object to JSON/Map for Firestore storage
   Map<String, dynamic> toJson() {
     return {
       'id': id,

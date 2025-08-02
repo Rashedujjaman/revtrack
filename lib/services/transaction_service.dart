@@ -1,17 +1,34 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:revtrack/models/transaction_model.dart';
 import 'package:revtrack/services/business_stats_service.dart';
 import 'package:revtrack/services/user_stats_service.dart';
-// import 'package:revtrack/services/bank_account_service.dart';
-import 'package:flutter/material.dart';
 
+/// Service class for managing transaction operations with Firestore
+/// Handles CRUD operations for transactions and integrates with business/user stats
 class TransactionService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final BusinessStatsService _businessStatsService = BusinessStatsService();
 
-  // Add transaction
-  Future<void> addTransaction(String businessId, String type, String category,
-      double amount, DateTime? selectedDate, String? note, [String? bankAccountId]) async {
+  /// Adds a new transaction to Firestore with automatic stats updates
+  /// 
+  /// Parameters:
+  /// - [businessId]: ID of the business this transaction belongs to
+  /// - [type]: Transaction type ('Income' or 'Expense')
+  /// - [category]: Transaction category
+  /// - [amount]: Transaction amount
+  /// - [selectedDate]: Transaction date (defaults to now if null)
+  /// - [note]: Optional transaction note
+  /// - [bankAccountId]: Optional bank account ID for balance tracking
+  Future<void> addTransaction(
+    String businessId, 
+    String type, 
+    String category,
+    double amount, 
+    DateTime? selectedDate, 
+    String? note, 
+    [String? bankAccountId]
+  ) async {
     try {
       final batch = firestore.batch();
       
@@ -81,16 +98,19 @@ class TransactionService {
     }
   }
 
-  // Update transaction
+  /// Updates an existing transaction with automatic stats adjustments
+  /// 
+  /// Handles bank account balance reversals and applications for proper accounting
   Future<void> updateTransaction(
-      String transactionId,
-      String businessId,
-      String type,
-      String category,
-      double amount,
-      DateTime selectedDate,
-      String note,
-      [String? bankAccountId]) async {
+    String transactionId,
+    String businessId,
+    String type,
+    String category,
+    double amount,
+    DateTime selectedDate,
+    String note,
+    [String? bankAccountId]
+  ) async {
     try {
       // Get the existing transaction to check for bank account changes
       final existingTransactionDoc = await firestore.collection('Transaction').doc(transactionId).get();
@@ -195,7 +215,10 @@ class TransactionService {
     }
   }
 
-  // Delete transaction
+  /// Soft deletes a transaction (marks as deleted) with automatic stats updates
+  /// 
+  /// Parameters:
+  /// - [uid]: Transaction ID to delete
   Future<void> deleteTransaction(String uid) async {
     try {
       // Get the existing transaction before deleting to update business stats
@@ -230,7 +253,9 @@ class TransactionService {
     }
   }
 
-  // Get all transactions
+  /// Retrieves all transactions from Firestore
+  /// 
+  /// Returns a list of all Transaction1 objects
   Future<List<Transaction1>> getAllTransactions() async {
     try {
       QuerySnapshot<Map<String, dynamic>> snapshot =
@@ -243,9 +268,15 @@ class TransactionService {
     }
   }
 
-  // Get transactions by business ID & date range
+  /// Retrieves transactions for a specific business within a date range
+  /// 
+  /// Parameters:
+  /// - [businessId]: Business ID to filter by
+  /// - [dateRange]: Date range to filter transactions
   Future<List<Transaction1>> getTransactionsByBusiness(
-      String businessId, DateTimeRange dateRange) async {
+    String businessId, 
+    DateTimeRange dateRange
+  ) async {
     final snapshot = await firestore
         .collection('Transaction')
         .where('businessId', isEqualTo: businessId)
@@ -260,7 +291,9 @@ class TransactionService {
         .toList();
   }
 
-  //Fetch income categories
+  /// Retrieves all available income categories from Firestore
+  /// 
+  /// Returns a list of income category names sorted alphabetically
   Future<List<String>> fetchIncomeCategories() async {
     try {
       final snapshot =
@@ -275,7 +308,9 @@ class TransactionService {
     }
   }
 
-  //Fetch income categories
+  /// Retrieves all available expense categories from Firestore
+  /// 
+  /// Returns a list of expense category names sorted alphabetically
   Future<List<String>> fetchExpenseCategories() async {
     try {
       final snapshot =
@@ -289,69 +324,4 @@ class TransactionService {
       rethrow;
     }
   }
-
-  // Future<void> createIncomeAndExpenseCategories() async {
-  //   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-  //   // Suggested categories
-  //   final List<String> incomeCategories = [
-  //     'Sales',
-  //     'Service',
-  //     'Consulting',
-  //     'Investment',
-  //     'Interest',
-  //     'Rental',
-  //     'Grants',
-  //     'Commission',
-  //     'Refunds',
-  //     'Donations',
-  //   ];
-
-  //   final List<String> expenseCategories = [
-  //     'Rent',
-  //     'Utilities',
-  //     'Salaries',
-  //     'Marketing',
-  //     'Travel',
-  //     'Meals',
-  //     'Entertainment',
-  //     'Supplies',
-  //     'Software',
-  //     'Internet',
-  //     'Phone',
-  //     'Insurance',
-  //     'Taxes',
-  //     'Maintenance',
-  //     'Bank Fees',
-  //     'Loan',
-  //     'Training',
-  //     'Charity',
-  //     'Licenses',
-  //     'Medical',
-  //     'Transportation',
-  //     'Fuel',
-  //     'Education',
-  //   ];
-
-  //   try {
-  //     // Batch write for efficiency
-  //     WriteBatch batch = firestore.batch();
-
-  //     for (String category in incomeCategories) {
-  //       final docRef = firestore.collection('IncomeCategory').doc();
-  //       batch.set(docRef, {'name': category});
-  //     }
-
-  //     for (String category in expenseCategories) {
-  //       final docRef = firestore.collection('ExpenseCategory').doc();
-  //       batch.set(docRef, {'name': category});
-  //     }
-
-  //     await batch.commit();
-  //     print('Income and Expense categories created successfully.');
-  //   } catch (e) {
-  //     print('Error creating categories: $e');
-  //     rethrow;
-  //   }
-  // }
 }

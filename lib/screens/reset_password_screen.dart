@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+/// Password reset screen for user account recovery
+/// 
+/// Features:
+/// - Email input with validation for password reset
+/// - Firebase Auth integration for sending reset emails
+/// - Comprehensive error handling with user-friendly messages
+/// - Loading states during reset email dispatch
+/// - Success feedback with automatic navigation back to login
+/// - Support for Firebase Auth error codes and custom messages
+/// - Rate limiting protection with appropriate error handling
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key});
 
@@ -8,10 +18,10 @@ class ResetPasswordPage extends StatefulWidget {
   State<ResetPasswordPage> createState() => _ResetPasswordPageState();
 }
 
+/// Stateful widget implementation with email validation and reset handling
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-
   bool _isLoading = false;
 
   @override
@@ -20,6 +30,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     super.dispose();
   }
 
+  /// Sends password reset email using Firebase Auth
+  /// 
+  /// Validates email format, sends reset email through Firebase,
+  /// handles various error conditions, and provides user feedback.
+  /// Navigates back to login on successful email dispatch.
   void _resetPassword() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoading = true);

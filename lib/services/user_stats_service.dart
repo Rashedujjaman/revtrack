@@ -2,10 +2,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/business_model.dart';
 import '../models/transaction_model.dart';
 
+/// Service for managing user-level aggregated statistics
+/// 
+/// Maintains real-time user stats in ApplicationUsers collection for:
+/// - Total businesses count
+/// - Total revenue across all businesses
+/// - Total transactions count
+/// - Total incomes and expenses
+/// 
+/// Provides instant dashboard loading by avoiding expensive cross-collection queries
 class UserStatsService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Update user stats when a business is added
+  /// Updates user stats when a business is added
+  /// 
+  /// Parameters:
+  /// - [userId]: User ID to update stats for
+  /// - [business]: Business object that was added
   static Future<void> onBusinessAdded(String userId, Business business) async {
     try {
       final userRef = _firestore.collection('ApplicationUsers').doc(userId);
@@ -28,7 +41,10 @@ class UserStatsService {
     }
   }
 
-  /// Update user stats when a business is deleted
+  /// Updates user stats when a business is deleted
+  /// 
+  /// Parameters:
+  /// - [userId]: User ID to update stats for
   static Future<void> onBusinessDeleted(String userId) async {
     try {
       final userRef = _firestore.collection('ApplicationUsers').doc(userId);

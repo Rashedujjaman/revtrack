@@ -1,34 +1,19 @@
-// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+/// Navigation drawer widget for the main application
+/// 
+/// Provides navigation menu with user profile display and menu items
+/// Currently implemented as a basic drawer with placeholder functionality
+/// TODO: Implement proper navigation and user authentication integration
 class MenuDrawer extends StatefulWidget {
   const MenuDrawer({Key? key}) : super(key: key);
+  
   @override
   State<MenuDrawer> createState() => _MenuDrawerState();
 }
 
 class _MenuDrawerState extends State<MenuDrawer> {
   bool userLoggedIn = true;
-  // final FirebaseAuth _auth = FirebaseAuth.instance;
-  // User? _user;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _user = _auth.currentUser; // Geting the current user
-  // }
-
-  // Perform logout operations here (e.g., clearing user data, resetting authentication status)
-  // Example: Clear user session, navigate to login screen
-  // Replace the logic below with your actual logout logic
-  // void logoutUser(BuildContext context) {
-  //   _auth.signOut();
-  //   Navigator.pushAndRemoveUntil(
-  //     context,
-  //     MaterialPageRoute(builder: (context) => const LoginScreen()),
-  //     (route) => false, // Clear all previous routes from the stack
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {

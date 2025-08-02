@@ -1,25 +1,47 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:revtrack/models/chart_data_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+/// Circular pie chart widget for data distribution visualization
+/// 
+/// Features:
+/// - Syncfusion circular chart integration
+/// - Automatic keep-alive for performance optimization
+/// - Lifecycle-aware widget management
+/// - Interactive tooltips and exploded segments
+/// - Bottom legend with overflow wrapping
+/// - Data label connectors with curved lines
+/// - Custom border color support
+/// - Empty state handling with graceful degradation
 class PieChart extends StatefulWidget {
   final List<ChartData> data;
   final String title;
   final Color? borderColor;
 
-  const PieChart(
-      {super.key, required this.data, required this.title, this.borderColor});
+  /// Creates a pie chart for data distribution display
+  /// 
+  /// Parameters:
+  /// - [data]: List of chart data points for pie segments
+  /// - [title]: Chart title displayed at the top
+  /// - [borderColor]: Optional border color for the chart
+  const PieChart({
+    super.key,
+    required this.data,
+    required this.title,
+    this.borderColor,
+  });
 
   @override
   State<PieChart> createState() => _PieChartState();
 }
 
+/// Stateful implementation with lifecycle management and performance optimization
 class _PieChartState extends State<PieChart>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   bool _isDisposed = false;
   TooltipBehavior? _tooltipBehavior;
 
+  /// Keeps widget alive during parent rebuilds for better performance
   @override
   bool get wantKeepAlive => true;
 
@@ -38,10 +60,11 @@ class _PieChartState extends State<PieChart>
     super.dispose();
   }
 
+  /// Handles app lifecycle changes for memory management
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused && mounted) {
-      // Handle app lifecycle changes
+      // Chart can be paused to save resources when app is backgrounded
     }
   }
 
@@ -49,6 +72,7 @@ class _PieChartState extends State<PieChart>
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
 
+    // Early return for invalid states to prevent rendering errors
     if (_isDisposed || !mounted || widget.data.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -64,7 +88,6 @@ class _PieChartState extends State<PieChart>
           isVisible: true,
           overflowMode: LegendItemOverflowMode.wrap,
           position: LegendPosition.bottom,
-          // alignment: ChartAlignment.far,
         ),
         series: <PieSeries<ChartData, String>>[
           PieSeries<ChartData, String>(
@@ -78,17 +101,7 @@ class _PieChartState extends State<PieChart>
                 length: '15%',
               ),
             ),
-            explode: true,
-            // pointColorMapper: (ChartData data, _) {
-            //   // You can customize the color mapping here
-            //   int total = data.value.toInt();
-            //   if (total < 0) {
-            //     return Colors.red; // Negative values in red
-            //   }
-            //   // Use the index to assign unique colors for each company
-            //   return Colors
-            //       .primaries[data.key.hashCode % Colors.primaries.length];
-            // },
+            explode: true, // Creates visual separation between segments
           ),
         ],
       ),

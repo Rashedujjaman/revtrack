@@ -2,10 +2,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:revtrack/models/bank_account_model.dart';
 
+/// Service class for managing bank account operations with Firestore
+/// 
+/// Features:
+/// - CRUD operations for bank accounts with automatic timestamping
+/// - User-specific account filtering and retrieval
+/// - Balance calculation and update operations
+/// - Credit card debt vs bank balance differentiation
+/// - Soft delete functionality for data integrity
+/// - Transaction impact processing for real-time balance updates
+/// - Stream support for real-time UI updates
+/// - Net balance calculation across all account types
 class BankAccountService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Add a new bank account
+  /// Adds a new bank account to Firestore
+  /// 
+  /// Parameters:
+  /// - [account]: BankAccount model with all required fields
+  /// 
+  /// Automatically sets creation and modification timestamps.
   Future<void> addBankAccount(BankAccount account) async {
     try {
       await _firestore.collection('BankAccounts').doc().set({
@@ -26,7 +42,13 @@ class BankAccountService {
     }
   }
 
-  // Get all bank accounts for a user
+  /// Retrieves all bank accounts for a specific user
+  /// 
+  /// Parameters:
+  /// - [userId]: User ID to filter accounts
+  /// 
+  /// Returns: List of BankAccount objects belonging to the user
+  /// Filters out soft-deleted accounts (isDeleted = true)
   Future<List<BankAccount>> getBankAccountsByUser(String userId) async {
     try {
       final snapshot = await _firestore

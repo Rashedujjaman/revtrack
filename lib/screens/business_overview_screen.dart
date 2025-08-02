@@ -20,41 +20,61 @@ import 'package:revtrack/widgets/cartesian_chart.dart';
 import 'package:revtrack/widgets/date_range_selector.dart';
 import 'package:provider/provider.dart';
 
+/// Comprehensive business overview screen with analytics and management
+/// 
+/// Features:
+/// - Business header with logo, name, and total statistics
+/// - Interactive date range selector for data filtering
+/// - Real-time transaction list with edit/delete operations
+/// - Dynamic chart visualization (pie charts and line charts)
+/// - Revenue trend analysis with monthly/daily breakdowns
+/// - Category-wise expense and income breakdowns
+/// - Business deletion with confirmation dialog
+/// - Floating action button for quick transaction creation
+/// - Skeleton loading states for better UX
+/// - AutomaticKeepAliveClientMixin for performance optimization
 class BusinessOverviewScreen extends StatefulWidget {
   final Business _business;
 
+  /// Creates a business overview screen
+  /// 
+  /// Parameters:
+  /// - [_business]: Business entity containing id, name, logo, and metadata
   const BusinessOverviewScreen(this._business, {super.key});
 
   @override
   State<BusinessOverviewScreen> createState() => _BusinessOverviewScreenState();
 }
 
+/// Stateful implementation with comprehensive business analytics and management
 class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
     with AutomaticKeepAliveClientMixin {
-  //*************************************************************************************************************************** */
-  // Variables for managing business overview state
+  // Core state variables for business overview management
   get userId => Provider.of<UserProvider>(context, listen: false).userId;
   List<Transaction1> transactions = [];
   bool isLoading = false;
   bool _disposed = false;
 
+  /// Keeps widget alive during parent rebuilds for better performance
   @override
   bool get wantKeepAlive => true;
 
+  // Business display variables
   String businessLogo = '';
   String businessName = '';
-
   bool expanded = false;
+
+  // Date range for filtering transactions (default: current month)
   DateTimeRange _selectedDateRange = DateTimeRange(
     start: DateTime(DateTime.now().year, DateTime.now().month, 1),
     end: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day,
         23, 59, 59, 999, 999),
   );
 
+  // Financial calculation cache variables
   double totalIncome = 0.00;
   double totalExpense = 0.00;
   double revenue = 0.00;
-  //*************************************************************************************************************************** */
 
   @override
   void initState() {

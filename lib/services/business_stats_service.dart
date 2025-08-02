@@ -1,6 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
+/// Service class for managing business-level aggregated statistics
+/// 
+/// Features:
+/// - Real-time business statistics updates using Firestore transactions
+/// - Transaction event handlers for maintaining accurate aggregations
+/// - Atomic operations to prevent data inconsistency
+/// - Business revenue calculation (incomes - expenses)
+/// - Transaction count tracking for analytics
+/// - One-time initialization for existing businesses (migration support)
+/// - Comprehensive error handling with debug logging
+/// - Statistics summary retrieval for dashboard displays
 class BusinessStatsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 

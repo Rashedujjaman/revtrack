@@ -1,6 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'user_stats_service.dart';
 
+/// Migration service for initializing user-level aggregated statistics
+/// 
+/// Features:
+/// - Batch migration of all users for system-wide stats initialization
+/// - Individual user stats initialization and verification
+/// - Progress tracking with detailed console logging
+/// - Error handling with continuation on individual failures
+/// - Rate limiting to prevent Firestore quota exhaustion
+/// - Stats existence checking to avoid duplicate initialization
+/// - Support for both manual and automated migration workflows
 class UserStatsMigrationService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 

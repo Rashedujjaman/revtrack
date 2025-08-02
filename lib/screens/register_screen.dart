@@ -6,37 +6,49 @@ import 'package:revtrack/services/snackbar_service.dart';
 import 'package:revtrack/theme/gradient_provider.dart';
 import 'package:revtrack/widgets/custom_text_form_field.dart';
 
+/// User registration screen for new account creation
+/// 
+/// Features:
+/// - Multi-field form validation (name, email, phone, password)
+/// - Email and phone number format validation with RegEx
+/// - Password confirmation matching
+/// - Firebase user creation with Firestore profile setup
+/// - Loading states and comprehensive error handling
+/// - Navigation to login screen after successful registration
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
+  
   @override
   State<RegisterScreen> createState() => _RegistrationScreenState();
 }
 
 class _RegistrationScreenState extends State<RegisterScreen> {
-  //*************************************************************************************************************************** */
+  // Form controllers for user input
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
-  //*************************************************************************************************************************** */
 
+  /// Validates Bangladesh phone number format (01XXXXXXXXX)
   bool isValidPhoneNumber(String value) {
     final RegExp regex = RegExp(r"^01[0-9]{8,9}$");
     return regex.hasMatch(value);
   }
 
+  /// Validates email format using RegExp
   bool isValidEmail(String value) {
     final RegExp regex =
         RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return regex.hasMatch(value);
   }
 
+  /// Handles user registration process
+  /// Creates Firebase Auth account and Firestore user profile
   Future<void> register() async {
     final String firstName = _firstNameController.text;
     final String lastName = _lastNameController.text;

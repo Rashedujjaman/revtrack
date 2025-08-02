@@ -4,10 +4,25 @@ import 'package:revtrack/services/bank_account_service.dart';
 import 'package:revtrack/services/bank_transfer_service.dart';
 import 'package:intl/intl.dart';
 
+/// Screen for transferring money between user's bank accounts
+/// 
+/// Features:
+/// - Source account display with current balance
+/// - Destination account selection from user's accounts
+/// - Transfer amount validation with balance checks
+/// - Optional transfer notes for record keeping
+/// - Real-time loading states during operations
+/// - Form validation with comprehensive error handling
+/// - Integration with BankTransferService for atomic operations
 class BankTransferScreen extends StatefulWidget {
   final String fromAccountId;
   final String userId;
 
+  /// Creates a bank transfer screen
+  /// 
+  /// Parameters:
+  /// - [fromAccountId]: Source account ID for the transfer
+  /// - [userId]: Current user ID for account ownership validation
   const BankTransferScreen({
     super.key,
     required this.fromAccountId,
@@ -18,6 +33,7 @@ class BankTransferScreen extends StatefulWidget {
   State<BankTransferScreen> createState() => _BankTransferScreenState();
 }
 
+/// Stateful widget implementation with transfer form management
 class _BankTransferScreenState extends State<BankTransferScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
@@ -35,6 +51,10 @@ class _BankTransferScreenState extends State<BankTransferScreen> {
     _loadAccounts();
   }
 
+  /// Loads user's bank accounts and filters out the source account
+  /// 
+  /// Fetches all accounts belonging to the user, identifies the source
+  /// account, and creates a list of available destination accounts.
   Future<void> _loadAccounts() async {
     setState(() => _isLoading = true);
     try {
@@ -52,6 +72,11 @@ class _BankTransferScreenState extends State<BankTransferScreen> {
     }
   }
 
+  /// Processes the money transfer between selected accounts
+  /// 
+  /// Validates form data, executes transfer through BankTransferService,
+  /// and handles success/error states with appropriate user feedback.
+  /// Returns to previous screen on successful completion.
   Future<void> _transferMoney() async {
     if (!_formKey.currentState!.validate() || _selectedToAccountId == null) return;
 

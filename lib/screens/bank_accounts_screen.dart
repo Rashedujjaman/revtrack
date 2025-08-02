@@ -8,6 +8,18 @@ import 'package:revtrack/screens/add_bank_account_screen.dart';
 import 'package:revtrack/widgets/skeleton.dart';
 import 'package:intl/intl.dart';
 
+/// Bank accounts management screen with comprehensive financial overview
+/// 
+/// Features:
+/// - Financial overview cards showing net balance, bank balance, and credit debt
+/// - Real-time balance calculations across all account types
+/// - Interactive bank account cards with transfer, edit, and delete actions
+/// - Account creation and editing through dedicated forms
+/// - Skeleton loading states for smooth user experience
+/// - Empty state with guided call-to-action for first account
+/// - Automatic keep-alive for performance optimization
+/// - Comprehensive error handling with user-friendly messages
+/// - Integration with BankAccountService for all CRUD operations
 class BankAccountsScreen extends StatefulWidget {
   const BankAccountsScreen({super.key});
 
@@ -15,19 +27,24 @@ class BankAccountsScreen extends StatefulWidget {
   State<BankAccountsScreen> createState() => _BankAccountsScreenState();
 }
 
+/// Stateful widget implementation with financial data management
 class _BankAccountsScreenState extends State<BankAccountsScreen>
     with AutomaticKeepAliveClientMixin {
   
+  /// Gets current user ID from UserProvider for account operations
   String? get userId => Provider.of<UserProvider>(context, listen: false).userId;
   
+  // State management variables
   List<BankAccount> bankAccounts = [];
   bool isLoading = false;
   bool _disposed = false;
   
-  double netBalance = 0.0;
-  double totalBankBalance = 0.0;
-  double totalCreditDebt = 0.0;
+  // Financial overview calculations
+  double netBalance = 0.0;        // Total balance minus credit debt
+  double totalBankBalance = 0.0;   // Sum of savings and current accounts
+  double totalCreditDebt = 0.0;    // Total outstanding credit card debt
 
+  /// Keeps widget alive during parent rebuilds for better performance
   @override
   bool get wantKeepAlive => true;
 
@@ -43,6 +60,11 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
     super.dispose();
   }
 
+  /// Loads all bank accounts and calculates financial overview
+  /// 
+  /// Fetches user's bank accounts and calculates net balance, total bank
+  /// balance, and credit debt. Updates UI state and handles errors gracefully.
+  /// Includes disposal check to prevent state updates after widget disposal.
   Future<void> _loadBankAccounts() async {
     if (_disposed || userId == null) return;
 
@@ -80,6 +102,10 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
     }
   }
 
+  /// Shows the add account dialog and refreshes list on success
+  /// 
+  /// Navigates to AddBankAccountScreen for new account creation.
+  /// Refreshes the account list if a new account was successfully added.
   Future<void> _showAddAccountDialog() async {
     final result = await Navigator.push<bool>(
       context,
@@ -93,6 +119,13 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
     }
   }
 
+  /// Shows the edit account dialog for the specified account
+  /// 
+  /// Parameters:
+  /// - [account]: BankAccount to edit
+  /// 
+  /// Navigates to AddBankAccountScreen with existing account data.
+  /// Refreshes the account list if account was successfully updated.
   Future<void> _showEditAccountDialog(BankAccount account) async {
     final result = await Navigator.push<bool>(
       context,
@@ -109,6 +142,14 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
     }
   }
 
+  /// Deletes the specified account with confirmation dialog
+  /// 
+  /// Parameters:
+  /// - [account]: BankAccount to delete
+  /// 
+  /// Shows confirmation dialog before deletion. Performs soft delete
+  /// through BankAccountService and refreshes the list on success.
+  /// Provides user feedback for both success and error cases.
   Future<void> _deleteAccount(BankAccount account) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -297,6 +338,15 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
     );
   }
 
+  /// Builds overview card for main financial metrics
+  /// 
+  /// Parameters:
+  /// - [title]: Card title (e.g., "Net Balance")
+  /// - [amount]: Financial amount to display
+  /// - [color]: Theme color for icon and text
+  /// - [icon]: Icon to display in the card
+  /// 
+  /// Returns: Container with formatted financial overview card
   Widget _buildOverviewCard(String title, double amount, Color color, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -345,6 +395,15 @@ class _BankAccountsScreenState extends State<BankAccountsScreen>
     );
   }
 
+  /// Builds compact balance card for secondary metrics
+  /// 
+  /// Parameters:
+  /// - [title]: Card title (e.g., "Bank Balance", "Credit Debt")
+  /// - [amount]: Financial amount to display
+  /// - [color]: Theme color for icon and text
+  /// - [icon]: Icon to display in the card
+  /// 
+  /// Returns: Container with formatted balance card for side-by-side display
   Widget _buildBalanceCard(String title, double amount, Color color, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(8),

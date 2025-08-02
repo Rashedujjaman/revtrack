@@ -1,36 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:revtrack/models/business_model.dart';
 import 'package:revtrack/services/business_service.dart';
 import 'package:revtrack/services/user_provider.dart';
 import 'package:revtrack/screens/business_overview_screen.dart';
 import 'package:revtrack/widgets/skeleton.dart';
 import 'package:revtrack/widgets/business_card.dart';
-import 'package:provider/provider.dart';
 import 'package:revtrack/widgets/edit_business_bottom_sheet.dart';
 
+/// Business Screen - Displays and manages user's businesses
+/// Features: View all businesses, add/edit/delete businesses, navigate to business details
 class BusinessScreen extends StatefulWidget {
   const BusinessScreen({super.key});
+  
   @override
   State<BusinessScreen> createState() => _BusinessScreenState();
 }
 
 class _BusinessScreenState extends State<BusinessScreen>
     with AutomaticKeepAliveClientMixin {
-  //*************************************************************************************************************************** */
-  get userId => Provider.of<UserProvider>(context, listen: false).userId;
+  
+  // State variables
   List<Business> businesses = [];
   bool isLoading = false;
   bool _disposed = false;
 
+  // Get current user ID from provider
+  String? get userId => Provider.of<UserProvider>(context, listen: false).userId;
+
   @override
   bool get wantKeepAlive => true;
-  //*************************************************************************************************************************** */
 
   @override
   void initState() {
     super.initState();
-    // Optionally, you can fetch businesses when the screen is initialized
-    fetchData();
+    _fetchBusinesses();
   }
 
   @override
@@ -39,39 +43,24 @@ class _BusinessScreenState extends State<BusinessScreen>
     super.dispose();
   }
 
-  Future<void> fetchData() async {
-    if (_disposed) return;
+  /// Fetches businesses for the current user
+  Future<void> _fetchBusinesses() async {
+    if (_disposed || userId == null) return;
 
     setState(() {
       isLoading = true;
     });
-    // Fetch businesses for the user
-    await getBusinessesByUser(userId);
-  }
-
-  Future<void> addBusiness(String userId, String name, String logoUrl) async {
+    
     try {
-      // Call the addBusiness method from BusinessService
-      await BusinessService().addBusiness(userId, name, logoUrl);
-    } catch (e) {
-      // Handle any errors that occur during the process
-      // print('Error adding business: $e');
-    }
-  }
-
-  Future<void> getBusinessesByUser(String userId) async {
-    try {
-      // Call the getBusinessesByUser method from BusinessService
-      businesses = await BusinessService().getBusinessesByUser(userId);
-
+      final fetchedBusinesses = await BusinessService().getBusinessesByUser(userId!);
+      
       if (_disposed) return;
-
+      
       setState(() {
-        isLoading = false; // Update loading state
+        businesses = fetchedBusinesses;
+        isLoading = false;
       });
     } catch (e) {
-      // Handle any errors that occur during the process
-      // print('Error getting businesses: $e');
       if (!_disposed) {
         setState(() {
           isLoading = false;
@@ -80,7 +69,7 @@ class _BusinessScreenState extends State<BusinessScreen>
     }
   }
 
-
+  /// Shows confirmation dialog before deleting a business
   void _showDeleteDialog(BuildContext context, Business business) {
     showDialog(
       context: context,
@@ -88,46 +77,51 @@ class _BusinessScreenState extends State<BusinessScreen>
         return AlertDialog(
           title: const Text('Delete Business'),
           content: Text(
-              'Are you sure you want to delete "${business.name}"? This action cannot be undone.'),
+            'Are you sure you want to delete "${business.name}"? This action cannot be undone.',
+          ),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
               child: const Text('Delete'),
-              onPressed: () async {
-                Navigator.of(context).pop();
-                final messenger = ScaffoldMessenger.of(context);
-                try {
-                  await BusinessService().deleteBusiness(business.id);
-                  if (mounted) {
-                    fetchData(); // Refresh the list
-                    messenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('Business deleted successfully'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to delete business: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
+              onPressed: () => _deleteBusiness(context, business),
             ),
           ],
         );
       },
     );
+  }
+
+  /// Deletes a business and refreshes the list
+  Future<void> _deleteBusiness(BuildContext context, Business business) async {
+    Navigator.of(context).pop();
+    
+    final messenger = ScaffoldMessenger.of(context);
+    
+    try {
+      await BusinessService().deleteBusiness(business.id);
+      
+      if (mounted) {
+        _fetchBusinesses(); // Refresh the list
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Business deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete business: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -153,7 +147,7 @@ class _BusinessScreenState extends State<BusinessScreen>
             child: userId == null
                 ? const Text("User is not loged in")
                 : FutureBuilder<void>(
-                    future: getBusinessesByUser(userId),
+                    future: _fetchBusinesses(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting &&
                           isLoading) {
@@ -246,14 +240,14 @@ class _BusinessScreenState extends State<BusinessScreen>
                                 ),
                                 builder: (context) {
                                   return BusinessBottomSheet(
-                                    userId: userId,
+                                    userId: userId!,
                                     business: business,
                                   );
                                 },
                               );
                               updatedData.then((value) {
                                 if (value != null) {
-                                  fetchData();
+                                  _fetchBusinesses();
                                 }
                               });
                             },
@@ -287,13 +281,13 @@ class _BusinessScreenState extends State<BusinessScreen>
             ),
             builder: (context) {
               return BusinessBottomSheet(
-                userId: userId,
+                userId: userId!,
               );
             },
           );
           updatedData.then((value) {
             if (value != null && value is Business) {
-              fetchData();
+              _fetchBusinesses();
             }
           });
         },
