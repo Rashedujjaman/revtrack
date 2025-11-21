@@ -174,13 +174,13 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
   }
 
   double calculateTotalIncome() {
-    return transactions
+    return filteredTransactions
         .where((transaction) => transaction.type == 'Income')
         .fold(0.00, (sum, transaction) => sum + transaction.amount);
   }
 
   double calculateTotalExpense() {
-    return transactions
+    return filteredTransactions
         .where((transaction) => transaction.type == 'Expense')
         .fold(0.00, (sum, transaction) => sum + transaction.amount);
   }
@@ -190,7 +190,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
   }
 
   List<ChartData> getCategoryBreakdownData(String type) {
-    final filtered = transactions.where((t) => t.type == type);
+    final filtered = filteredTransactions.where((t) => t.type == type);
     final Map<String, double> dataMap = {};
 
     for (var transaction in filtered) {
@@ -230,7 +230,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
   List<ChartData> getMonthlyTotals(String type) {
     final Map<String, double> monthlyMap = {};
 
-    for (var transaction in transactions.where((t) => t.type == type)) {
+    for (var transaction in filteredTransactions.where((t) => t.type == type)) {
       final key =
           DateFormat('MMM yyyy').format(transaction.dateCreated.toDate());
       monthlyMap.update(key, (val) => val + transaction.amount,
@@ -243,7 +243,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
   List<ChartData> getDailyTotals(String type) {
     final Map<String, double> dailyMap = {};
 
-    for (var transaction in transactions.where((t) => t.type == type)) {
+    for (var transaction in filteredTransactions.where((t) => t.type == type)) {
       final key = DateFormat('MMM dd').format(transaction.dateCreated.toDate());
       dailyMap.update(key, (val) => val + transaction.amount,
           ifAbsent: () => transaction.amount);
@@ -255,7 +255,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
   List<ChartData> getRevenueTrendData() {
     final Map<String, double> monthlyMap = {};
 
-    for (var transaction in transactions) {
+    for (var transaction in filteredTransactions) {
       final key =
           DateFormat('MMM yyyy').format(transaction.dateCreated.toDate());
       monthlyMap.update(
@@ -281,7 +281,7 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
       // Use daily data for short periods
       final Map<String, double> dailyMap = {};
 
-      for (var transaction in transactions) {
+      for (var transaction in filteredTransactions) {
         final key =
             DateFormat('MMM dd').format(transaction.dateCreated.toDate());
         dailyMap.update(
@@ -319,7 +319,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
       // Use daily data for short periods
       final Map<String, double> dailyMap = {};
 
-      for (var transaction in transactions.where((t) => t.type == 'Income')) {
+      for (var transaction
+          in filteredTransactions.where((t) => t.type == 'Income')) {
         final key =
             DateFormat('MMM dd').format(transaction.dateCreated.toDate());
         dailyMap.update(
@@ -345,7 +346,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
       // Use daily data for short periods
       final Map<String, double> dailyMap = {};
 
-      for (var transaction in transactions.where((t) => t.type == 'Expense')) {
+      for (var transaction
+          in filteredTransactions.where((t) => t.type == 'Expense')) {
         final key =
             DateFormat('MMM dd').format(transaction.dateCreated.toDate());
         dailyMap.update(
@@ -380,10 +382,14 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
   ///
   /// Called whenever the search text field content changes.
   /// Converts input to lowercase for case-insensitive searching
-  /// and triggers UI update to filter displayed transactions.
+  /// and triggers UI update to filter displayed transactions and recalculate totals.
   void _onSearchChanged() {
     setState(() {
       _searchQuery = _searchController.text.toLowerCase();
+      // Recalculate totals based on filtered transactions
+      totalIncome = calculateTotalIncome();
+      totalExpense = calculateTotalExpense();
+      revenue = calculateRevenue();
     });
   }
 
@@ -555,6 +561,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                                           children: [
                                             !isLoading
                                                 ? AnimatedNumber(
+                                                    key: ValueKey(
+                                                        'income_$_searchQuery'),
                                                     prefixText: '৳ ',
                                                     startValue: 0.00,
                                                     endValue: totalIncome > 0
@@ -588,6 +596,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                                                   ),
                                             !isLoading
                                                 ? AnimatedNumber(
+                                                    key: ValueKey(
+                                                        'expense_$_searchQuery'),
                                                     prefixText: '৳ ',
                                                     startValue: 0,
                                                     endValue: totalExpense > 0
@@ -621,6 +631,8 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                                                   ),
                                             !isLoading
                                                 ? AnimatedNumber(
+                                                    key: ValueKey(
+                                                        'revenue_$_searchQuery'),
                                                     prefixText: '৳ ',
                                                     startValue: 0,
                                                     endValue: revenue,
@@ -682,8 +694,12 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                               itemBuilder: (context, index) {
                                 return const TransactionCardSkeleton(); //Show skeleton for loading state
                               })
-                          : transactions.isEmpty
-                              ? const Text('No transactions found.')
+                          : filteredTransactions.isEmpty
+                              ? Text(
+                                  _searchQuery.isNotEmpty
+                                      ? 'No transactions match your search.'
+                                      : 'No transactions found.',
+                                )
                               : StatefulBuilder(
                                   builder: (context, setState) {
                                     int visibleCount = 5;
@@ -1378,6 +1394,10 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                 onChanged: (value) {
                   setState(() {
                     _searchQuery = value.toLowerCase();
+                    // Recalculate totals based on filtered transactions
+                    totalIncome = calculateTotalIncome();
+                    totalExpense = calculateTotalExpense();
+                    revenue = calculateRevenue();
                   });
                 },
               ),
@@ -1390,13 +1410,17 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
   ///
   /// Shows/hides the animated search bar and manages search state.
   /// When hiding search, clears the search query and controller
-  /// to reset the transaction list to unfiltered state.
+  /// to reset the transaction list to unfiltered state and recalculate totals.
   void _toggleSearch() {
     setState(() {
       _isSearchVisible = !_isSearchVisible;
       if (!_isSearchVisible) {
         _searchController.clear();
         _searchQuery = '';
+        // Recalculate totals when clearing search
+        totalIncome = calculateTotalIncome();
+        totalExpense = calculateTotalExpense();
+        revenue = calculateRevenue();
       }
     });
   }
