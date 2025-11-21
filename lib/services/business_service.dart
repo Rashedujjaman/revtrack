@@ -17,7 +17,7 @@ class BusinessService {
   /// - [logoUrl]: Optional business logo URL
   Future<void> addBusiness(String userId, String name, String? logoUrl) async {
     try {
-      final businessRef = await firestore.collection('Business').doc();
+      final businessRef = firestore.collection('Business').doc();
       await businessRef.set({
         'name': name,
         'logoUrl': logoUrl ?? '',

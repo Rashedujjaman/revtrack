@@ -38,8 +38,8 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         // versionCode flutterVersionCode.toInteger()
         // versionName flutterVersionName
-        versionCode 9
-        versionName "9.0.1"
+        versionCode 10
+        versionName "10.0.1"
         multiDexEnabled true
         ndkVersion "27.0.12077973"
     }
