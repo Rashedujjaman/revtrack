@@ -431,25 +431,22 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
         actions: [
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              backgroundColor: Theme.of(context).colorScheme.onPrimary,
+              foregroundColor: Theme.of(context).colorScheme.primary,
             ),
             icon: Icon(
               _isSearchVisible ? Icons.search_off : Icons.search,
-              // color: Theme.of(context).colorScheme.onSurface,
             ),
             onPressed: _toggleSearch,
             tooltip: _isSearchVisible ? 'Hide search' : 'Search transactions',
           ),
+          const SizedBox(width: 16),
         ],
       ),
       body: Column(
         children: [
           // Fixed Search Bar at the top
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _buildSearchBar(),
-          ),
+          _buildSearchBar(),
           // Scrollable content with RefreshIndicator
           Expanded(
             child: RefreshIndicator(
@@ -1346,10 +1343,12 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       height: _isSearchVisible ? 60 : 0,
+      curve: Curves.easeInOut,
       child: _isSearchVisible
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
                 border: Border(
                   bottom: BorderSide(
                     color: Theme.of(context).colorScheme.outlineVariant,
@@ -1359,9 +1358,9 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
               ),
               child: TextField(
                 controller: _searchController,
-                // autofocus: true,
+                autofocus: true,
                 decoration: InputDecoration(
-                  hintText: 'Search By (category, amount, client, note...)',
+                  hintText: 'Search By (category, amount, note...)',
                   hintStyle: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 12,
@@ -1385,7 +1384,25 @@ class _BusinessOverviewScreenState extends State<BusinessOverviewScreen>
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
-                  filled: false,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 1.5,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surface,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 8,
